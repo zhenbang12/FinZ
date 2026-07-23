@@ -35,18 +35,10 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        // Auto-login default user for local demonstration if unauthenticated and not explicitly logged out
-        if (!$request->user() && !$request->is('login') && !$request->session()->get('explicit_logout')) {
-            $demoUser = \App\Models\User::first();
-            if ($demoUser) {
-                auth()->login($demoUser);
-            }
-        }
-
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user() ?: auth()->user(),
+                'user' => $request->user(),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
