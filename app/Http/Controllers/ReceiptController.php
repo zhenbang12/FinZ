@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Receipt;
+use App\Models\ReceiptSessionClaim;
 use App\Services\LedgerService;
 use App\Services\ReceiptOcrService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,7 +29,7 @@ class ReceiptController extends Controller
         $user = $request->user();
 
         $receipts = Receipt::where('user_id', $user->id)
-            ->with('items')
+            ->with(['items', 'sessionClaims'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -60,17 +62,117 @@ class ReceiptController extends Controller
             abort(403, 'Unauthorized receipt access.');
         }
 
-        $receipt->load('items');
+        $receipt->load(['items.sessionClaims', 'sessionClaims']);
         $accounts = Account::where('user_id', $request->user()->id)->get();
         $categories = Category::where(function ($q) use ($request) {
             $q->whereNull('user_id')->orWhere('user_id', $request->user()->id);
         })->get();
 
+        $shareUrl = $receipt->share_token ? url("/receipts/session/{$receipt->share_token}") : null;
+
         return Inertia::render('Receipts/Show', [
             'receipt' => $receipt,
             'accounts' => $accounts,
             'categories' => $categories,
+            'shareUrl' => $shareUrl,
         ]);
+    }
+
+    /**
+     * Generate or fetch the live group session share link for a receipt.
+     */
+    public function createSession(Request $request, Receipt $receipt)
+    {
+        if ($receipt->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if (!$receipt->share_token) {
+            $receipt->update([
+                'share_token' => Str::random(12),
+            ]);
+        }
+
+        $shareUrl = url("/receipts/session/{$receipt->share_token}");
+
+        return redirect()->back()->with('success', "Group session created! Share URL: {$shareUrl}");
+    }
+
+    /**
+     * Public Guest Route: Interactive Group Session Splitting view.
+     */
+    public function showGroupSession(string $token): Response
+    {
+        $receipt = Receipt::where('share_token', $token)
+            ->with(['items.sessionClaims', 'sessionClaims', 'user'])
+            ->firstOrFail();
+
+        $sessionUrl = url("/receipts/session/{$token}");
+
+        return Inertia::render('Receipts/GroupSession', [
+            'receipt' => $receipt,
+            'sessionUrl' => $sessionUrl,
+        ]);
+    }
+
+    /**
+     * Public Guest Route: Claim items and mark as paid.
+     */
+    public function claimGroupSessionItems(string $token, Request $request)
+    {
+        $receipt = Receipt::where('share_token', $token)->with('items')->firstOrFail();
+
+        $validated = $request->validate([
+            'guest_name' => 'required|string|max:100',
+            'item_ids' => 'required|array|min:1',
+            'item_ids.*' => 'integer|exists:receipt_items,id',
+        ]);
+
+        $guestName = trim($validated['guest_name']);
+        $itemIds = $validated['item_ids'];
+
+        // Calculate pro-rata split for these items
+        $splitResult = $this->ocrService->calculateProRataSplit($receipt, $itemIds);
+        $totalForGuest = $splitResult['final_total'];
+
+        // Record session claim for each item
+        foreach ($itemIds as $itemId) {
+            // Delete any existing claim for this item if guest re-claims it
+            ReceiptSessionClaim::where('receipt_item_id', $itemId)->delete();
+
+            $itemObj = $receipt->items->firstWhere('id', $itemId);
+            $itemSubtotal = $itemObj ? (float) $itemObj->total_price : 0;
+            $itemProRataShare = ($splitResult['claimed_subtotal'] > 0)
+                ? ($itemSubtotal / $splitResult['claimed_subtotal']) * $totalForGuest
+                : $itemSubtotal;
+
+            ReceiptSessionClaim::create([
+                'receipt_id' => $receipt->id,
+                'receipt_item_id' => $itemId,
+                'guest_name' => $guestName,
+                'amount_paid' => round($itemProRataShare, 2),
+                'is_paid' => true,
+            ]);
+        }
+
+        return redirect()->back()->with('success', "{$guestName} successfully claimed " . count($itemIds) . " items (Total: RM " . number_format($totalForGuest, 2) . ")!");
+    }
+
+    /**
+     * Public Guest Route: Remove/Undo a claim.
+     */
+    public function deleteGroupSessionClaim(string $token, ReceiptSessionClaim $claim)
+    {
+        $receipt = Receipt::where('share_token', $token)->firstOrFail();
+
+        if ($claim->receipt_id !== $receipt->id) {
+            abort(403);
+        }
+
+        $guestName = $claim->guest_name;
+        $claim->delete();
+
+        return redirect()->back()->with('success', "Item claim for {$guestName} removed.");
     }
 
     /**

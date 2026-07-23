@@ -22,6 +22,7 @@ class Receipt extends Model
         'total_amount',
         'raw_ocr_data',
         'status',
+        'share_token',
     ];
 
     protected $casts = [
@@ -41,5 +42,10 @@ class Receipt extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ReceiptItem::class);
+    }
+
+    public function sessionClaims(): HasMany
+    {
+        return $this->hasMany(ReceiptSessionClaim::class);
     }
 }

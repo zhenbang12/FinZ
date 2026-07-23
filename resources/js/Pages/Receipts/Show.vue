@@ -12,6 +12,45 @@
         </span>
       </div>
 
+      <!-- Live Group Session Share Banner -->
+      <div class="minimal-card p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-2">
+            <UsersIcon class="w-5 h-5 text-amber-400" />
+            <h3 class="font-bold text-base">Live Group Session Splitting</h3>
+          </div>
+          <p class="text-xs text-slate-300">
+            Generate a guest link so anyone can join without an account, tick what they ate, and pay their share!
+          </p>
+        </div>
+
+        <div v-if="!shareUrl">
+          <button
+            @click="createSession"
+            class="px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition-all flex items-center gap-2"
+          >
+            <Share2Icon class="w-4 h-4" />
+            <span>Create Live Group Session</span>
+          </button>
+        </div>
+
+        <div v-else class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            readonly
+            :value="shareUrl"
+            class="px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700 text-amber-300 text-xs font-mono w-full sm:w-64 focus:outline-none"
+          />
+          <button
+            @click="copyShareUrl"
+            class="px-4 py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition-all shrink-0 flex items-center justify-center gap-1.5"
+          >
+            <CopyIcon class="w-3.5 h-3.5" />
+            <span>{{ copied ? 'Copied Link!' : 'Copy Guest Link' }}</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Receipt Summary Header -->
       <div class="minimal-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -51,16 +90,19 @@
             <div
               v-for="item in receipt.items"
               :key="item.id"
-              @click="toggleItemClaim(item.id)"
+              @click="getItemClaimStatus(item) ? null : toggleItemClaim(item.id)"
               :class="[
-                claimedItemIds.includes(item.id)
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                  : 'bg-slate-50 text-slate-900 border-slate-200 hover:border-slate-300',
-                'p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all'
+                getItemClaimStatus(item)
+                  ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-60 cursor-not-allowed'
+                  : (claimedItemIds.includes(item.id)
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm cursor-pointer'
+                      : 'bg-slate-50 text-slate-900 border-slate-200 hover:border-slate-300 cursor-pointer'),
+                'p-4 rounded-xl border flex items-center justify-between transition-all'
               ]"
             >
               <div class="flex items-center space-x-3.5 min-w-0">
                 <div
+                  v-if="!getItemClaimStatus(item)"
                   :class="[
                     claimedItemIds.includes(item.id)
                       ? 'bg-white text-slate-900 border-white'
@@ -71,16 +113,31 @@
                   <CheckIcon class="w-3.5 h-3.5 stroke-[3]" />
                 </div>
 
+                <div v-else class="w-5 h-5 rounded bg-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+                  <CheckIcon class="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+
                 <div class="min-w-0">
-                  <span :class="[claimedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900', 'font-bold text-sm block truncate']">{{ item.name }}</span>
+                  <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (claimedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'font-bold text-sm block truncate']">
+                    {{ item.name }}
+                  </span>
                   <span :class="[claimedItemIds.includes(item.id) ? 'text-slate-300' : 'text-slate-500', 'text-xs block font-medium']">
                     Qty: {{ item.quantity }} × {{ formatCurrency(item.unit_price) }}
                   </span>
                 </div>
               </div>
 
-              <div class="text-right shrink-0">
-                <span :class="[claimedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900', 'text-base font-extrabold block']">{{ formatCurrency(item.total_price) }}</span>
+              <div class="text-right shrink-0 flex flex-col items-end">
+                <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (claimedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'text-base font-extrabold block']">
+                  {{ formatCurrency(item.total_price) }}
+                </span>
+
+                <span
+                  v-if="getItemClaimStatus(item)"
+                  class="mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1"
+                >
+                  ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
+                </span>
               </div>
             </div>
           </div>
@@ -134,7 +191,7 @@
             </div>
           </div>
 
-          <!-- REQ-3.5: Log Expense Action Form -->
+          <!-- Log Expense Action Form -->
           <form @submit.prevent="submitClaimedExpense" class="space-y-4 border-t border-slate-100 pt-4">
             <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Log Calculated Total as Expense
@@ -194,7 +251,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
@@ -203,26 +260,45 @@ import {
   Calculator as CalculatorIcon,
   Info as InfoIcon,
   Sparkles as SparklesIcon,
+  Users as UsersIcon,
+  Share2 as Share2Icon,
+  Copy as CopyIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
   receipt: { type: Object, required: true },
   accounts: { type: Array, default: () => [] },
   categories: { type: Array, default: () => [] },
+  shareUrl: { type: String, default: null },
 });
 
-// Initially claim all items by default
-const claimedItemIds = ref(props.receipt.items ? props.receipt.items.map(i => i.id) : []);
+const copied = ref(false);
+
+const getItemClaimStatus = (item) => {
+  if (item.session_claims && item.session_claims.length > 0) {
+    return item.session_claims[0];
+  }
+  return null;
+};
+
+// Initially claim unclaimed items
+const claimedItemIds = ref(
+  props.receipt.items
+    ? props.receipt.items.filter(i => !getItemClaimStatus(i)).map(i => i.id)
+    : []
+);
 
 const isAllSelected = computed(() => {
-  return claimedItemIds.value.length === (props.receipt.items?.length || 0);
+  const availableItems = (props.receipt.items || []).filter(i => !getItemClaimStatus(i));
+  return claimedItemIds.value.length === availableItems.length && availableItems.length > 0;
 });
 
 const toggleSelectAll = () => {
+  const availableItems = (props.receipt.items || []).filter(i => !getItemClaimStatus(i));
   if (isAllSelected.value) {
     claimedItemIds.value = [];
   } else {
-    claimedItemIds.value = props.receipt.items.map(i => i.id);
+    claimedItemIds.value = availableItems.map(i => i.id);
   }
 };
 
@@ -232,6 +308,20 @@ const toggleItemClaim = (id) => {
     claimedItemIds.value.splice(index, 1);
   } else {
     claimedItemIds.value.push(id);
+  }
+};
+
+const createSession = () => {
+  router.post(`/receipts/${props.receipt.id}/create-session`);
+};
+
+const copyShareUrl = () => {
+  if (props.shareUrl) {
+    navigator.clipboard.writeText(props.shareUrl);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2500);
   }
 };
 

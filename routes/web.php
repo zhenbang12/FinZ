@@ -14,6 +14,11 @@ Route::middleware(['web'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
+    // Public SmartSplit Live Group Session Routes (No Login Required)
+    Route::get('/receipts/session/{token}', [ReceiptController::class, 'showGroupSession'])->name('receipts.session.show');
+    Route::post('/receipts/session/{token}/claim', [ReceiptController::class, 'claimGroupSessionItems'])->name('receipts.session.claim');
+    Route::delete('/receipts/session/{token}/claim/{claim}', [ReceiptController::class, 'deleteGroupSessionClaim'])->name('receipts.session.delete');
+
     // Authenticated Application Routes
     Route::middleware(['auth'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -38,6 +43,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/receipts/{receipt}', [ReceiptController::class, 'show'])->name('receipts.show');
         Route::post('/receipts/{receipt}/split', [ReceiptController::class, 'calculateSplit'])->name('receipts.split');
         Route::post('/receipts/{receipt}/claim', [ReceiptController::class, 'saveClaimedExpense'])->name('receipts.claim');
+        Route::post('/receipts/{receipt}/create-session', [ReceiptController::class, 'createSession'])->name('receipts.create-session');
 
         // Analytics & Categorization
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
