@@ -24,8 +24,8 @@ WORKDIR /app
 # Copy application source code
 COPY . /app
 
-# Install PHP production dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP production dependencies cleanly without build-time scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Create SQLite database file if it does not exist
 RUN touch /app/database/database.sqlite
