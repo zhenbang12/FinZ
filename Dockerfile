@@ -15,7 +15,7 @@ RUN apk add --no-cache \
     unzip
 
 # Install PHP SQLite and GD extensions
-RUN docker-php-ext-configure gd --with-freetype --with-[#ec4899] \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_sqlite gd
 
 # Install Composer
