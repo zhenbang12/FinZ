@@ -2,7 +2,6 @@
 .env
 vendor
 node_modules
-public/build
 storage/*.key
 storage/logs/*
 !storage/logs/.gitkeep

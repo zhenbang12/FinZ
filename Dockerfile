@@ -2,8 +2,6 @@ FROM php:8.3-cli-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
-    nodejs \
-    npm \
     git \
     curl \
     sqlite \
@@ -26,9 +24,8 @@ WORKDIR /app
 # Copy application source code
 COPY . /app
 
-# Install dependencies and build assets
+# Install PHP production dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run build
 
 # Create SQLite database file if it does not exist
 RUN touch /app/database/database.sqlite
