@@ -44,6 +44,7 @@ Route::middleware(['web'])->group(function () {
         Route::post('/receipts/{receipt}/split', [ReceiptController::class, 'calculateSplit'])->name('receipts.split');
         Route::post('/receipts/{receipt}/claim', [ReceiptController::class, 'saveClaimedExpense'])->name('receipts.claim');
         Route::post('/receipts/{receipt}/create-session', [ReceiptController::class, 'createSession'])->name('receipts.create-session');
+        Route::delete('/receipts/{receipt}/claims/{claim}', [ReceiptController::class, 'undoOwnerClaim'])->name('receipts.undo-claim');
 
         // Analytics & Categorization
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

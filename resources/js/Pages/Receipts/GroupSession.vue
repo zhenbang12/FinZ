@@ -28,19 +28,41 @@
       </div>
     </div>
 
-    <!-- Receipt Header Card -->
-    <div class="minimal-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div>
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Restaurant</span>
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
-          {{ receipt.merchant_name || 'Receipt Session' }}
-        </h2>
-        <p class="text-xs text-slate-500 mt-1 font-medium">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
+    <!-- Receipt Header & Session Progress Card -->
+    <div class="minimal-card p-6 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Restaurant</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+            {{ receipt.merchant_name || 'Receipt Session' }}
+          </h2>
+          <p class="text-xs text-slate-500 mt-1 font-medium">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
+        </div>
+
+        <div class="text-right">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
+          <span class="text-3xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
+        </div>
       </div>
 
-      <div class="text-right">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
-        <span class="text-3xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
+      <!-- Live Group Session Progress Bar -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold">
+          <span class="text-slate-700 flex items-center gap-1.5">
+            <UsersIcon class="w-4 h-4 text-slate-900" />
+            Group Payment Progress: {{ formatCurrency(totalPaidByGroup) }} of {{ formatCurrency(receipt.total_amount) }} Paid
+          </span>
+          <span :class="[remainingUnpaid <= 0.05 ? 'text-emerald-600 font-extrabold' : 'text-amber-600', 'text-xs']">
+            {{ remainingUnpaid <= 0.05 ? '✓ Fully Paid!' : formatCurrency(remainingUnpaid) + ' Unpaid' }}
+          </span>
+        </div>
+
+        <div class="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
+          <div
+            class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            :style="{ width: `${Math.min(100, (totalPaidByGroup / (receipt.total_amount || 1)) * 100)}%` }"
+          ></div>
+        </div>
       </div>
     </div>
 
@@ -53,7 +75,7 @@
             <CheckSquareIcon class="w-5 h-5 text-slate-700" />
             <span>Select Items You Ate / Consumed</span>
           </h3>
-          <p class="text-xs text-slate-500 font-medium">Tick the items you consumed. Items paid by others are grayed out below.</p>
+          <p class="text-xs text-slate-500 font-medium">Tick the items you consumed. Items paid by others are grayed out below with an undo button if there was a mistake.</p>
         </div>
 
         <!-- Guest Name Input -->
@@ -78,7 +100,7 @@
             @click="getItemClaimStatus(item) ? null : toggleItemSelection(item.id)"
             :class="[
               getItemClaimStatus(item)
-                ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-60 cursor-not-allowed'
+                ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-80 cursor-default'
                 : (selectedItemIds.includes(item.id)
                     ? 'bg-slate-900 text-white border-slate-900 shadow-sm cursor-pointer'
                     : 'bg-slate-50 text-slate-900 border-slate-200 hover:border-slate-300 cursor-pointer'),
@@ -116,18 +138,25 @@
               </div>
             </div>
 
-            <div class="text-right shrink-0 flex flex-col items-end">
+            <div class="text-right shrink-0 flex flex-col items-end space-y-1">
               <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (selectedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'text-base font-extrabold block']">
                 {{ formatCurrency(item.total_price) }}
               </span>
 
-              <!-- Participant Paid Name Badge -->
-              <span
-                v-if="getItemClaimStatus(item)"
-                class="mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1"
-              >
-                ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
-              </span>
+              <!-- Participant Paid Name Badge & Undo Button -->
+              <div v-if="getItemClaimStatus(item)" class="flex items-center space-x-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1">
+                  ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
+                </span>
+                <button
+                  type="button"
+                  @click.stop="undoGuestClaim(getItemClaimStatus(item))"
+                  class="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  title="Undo / Reset this claim if there was a mistake"
+                >
+                  <RotateCcwIcon class="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -196,7 +225,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, router } from '@inertiajs/vue3';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
   Users as UsersIcon,
@@ -205,6 +234,7 @@ import {
   Calculator as CalculatorIcon,
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
+  RotateCcw as RotateCcwIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -225,12 +255,27 @@ const getItemClaimStatus = (item) => {
   return null;
 };
 
+const totalPaidByGroup = computed(() => {
+  if (!props.receipt.session_claims) return 0;
+  return props.receipt.session_claims.reduce((sum, c) => sum + parseFloat(c.amount_paid || 0), 0);
+});
+
+const remainingUnpaid = computed(() => {
+  return Math.max(0, parseFloat(props.receipt.total_amount || 0) - totalPaidByGroup.value);
+});
+
 const toggleItemSelection = (itemId) => {
   const idx = selectedItemIds.value.indexOf(itemId);
   if (idx > -1) {
     selectedItemIds.value.splice(idx, 1);
   } else {
     selectedItemIds.value.push(itemId);
+  }
+};
+
+const undoGuestClaim = (claim) => {
+  if (confirm(`Undo claim for ${claim.guest_name}? This will make the item available for selection again.`)) {
+    router.delete(`/receipts/session/${props.receipt.share_token}/claim/${claim.id}`);
   }
 };
 

@@ -176,6 +176,21 @@ class ReceiptController extends Controller
     }
 
     /**
+     * Receipt Owner Action: Undo/Reset any claim on a receipt item.
+     */
+    public function undoOwnerClaim(Request $request, Receipt $receipt, ReceiptSessionClaim $claim)
+    {
+        if ($receipt->user_id !== $request->user()->id || $claim->receipt_id !== $receipt->id) {
+            abort(403);
+        }
+
+        $guestName = $claim->guest_name;
+        $claim->delete();
+
+        return redirect()->back()->with('success', "Claim by {$guestName} was reset and is available again.");
+    }
+
+    /**
      * Calculate user's specific total using strict pro-rata calculation (REQ-3.4).
      */
     public function calculateSplit(Request $request, Receipt $receipt)

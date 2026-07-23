@@ -93,7 +93,7 @@
               @click="getItemClaimStatus(item) ? null : toggleItemClaim(item.id)"
               :class="[
                 getItemClaimStatus(item)
-                  ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-60 cursor-not-allowed'
+                  ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-80 cursor-default'
                   : (claimedItemIds.includes(item.id)
                       ? 'bg-slate-900 text-white border-slate-900 shadow-sm cursor-pointer'
                       : 'bg-slate-50 text-slate-900 border-slate-200 hover:border-slate-300 cursor-pointer'),
@@ -127,17 +127,25 @@
                 </div>
               </div>
 
-              <div class="text-right shrink-0 flex flex-col items-end">
+              <div class="text-right shrink-0 flex flex-col items-end space-y-1">
                 <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (claimedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'text-base font-extrabold block']">
                   {{ formatCurrency(item.total_price) }}
                 </span>
 
-                <span
-                  v-if="getItemClaimStatus(item)"
-                  class="mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1"
-                >
-                  ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
-                </span>
+                <!-- Participant Paid Badge & Undo Claim Button -->
+                <div v-if="getItemClaimStatus(item)" class="flex items-center space-x-1.5">
+                  <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1">
+                    ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
+                  </span>
+                  <button
+                    type="button"
+                    @click.stop="undoOwnerClaim(getItemClaimStatus(item))"
+                    class="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    title="Undo / Reset this claim if there was a mistake"
+                  >
+                    <RotateCcwIcon class="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -192,57 +200,73 @@
           </div>
 
           <!-- Log Expense Action Form -->
-          <form @submit.prevent="submitClaimedExpense" class="space-y-4 border-t border-slate-100 pt-4">
-            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Log Calculated Total as Expense
-            </h4>
+          <div class="space-y-4 border-t border-slate-100 pt-4">
+            <!-- Double-Logging Prevention Badge -->
+            <div v-if="receipt.status === 'claimed'" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2">
+              <div class="flex items-center space-x-2 font-bold">
+                <CheckCircleIcon class="w-4 h-4 text-emerald-600" />
+                <span>Expense Logged in Financial Ledger</span>
+              </div>
+              <p class="text-[11px] text-emerald-700">
+                This receipt total has already been formally logged into your financial ledger to prevent duplicate entries.
+              </p>
+              <Link href="/transactions" class="text-xs font-bold text-emerald-800 underline block">
+                View Ledger Transactions →
+              </Link>
+            </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Select Funding Account</label>
-              <select
-                v-model="claimForm.account_id"
-                required
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+            <form v-else @submit.prevent="submitClaimedExpense" class="space-y-4">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Log Calculated Total as Expense
+              </h4>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Select Funding Account</label>
+                <select
+                  v-model="claimForm.account_id"
+                  required
+                  class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+                >
+                  <option value="" disabled>Select account</option>
+                  <option v-for="acc in accounts" :key="acc.id" :value="acc.id">
+                    {{ acc.name }} ({{ formatCurrency(acc.balance) }})
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Expense Category</label>
+                <select
+                  v-model="claimForm.category_id"
+                  required
+                  class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+                >
+                  <option value="" disabled>Select category</option>
+                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                    {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+                <input
+                  v-model="claimForm.notes"
+                  type="text"
+                  :placeholder="`SmartSplit from ${receipt.merchant_name || 'Receipt'}`"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-900"
+                />
+              </div>
+
+              <button
+                type="submit"
+                :disabled="claimedItemIds.length === 0 || claimForm.processing"
+                class="minimal-btn-primary w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <option value="" disabled>Select account</option>
-                <option v-for="acc in accounts" :key="acc.id" :value="acc.id">
-                  {{ acc.name }} ({{ formatCurrency(acc.balance) }})
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Expense Category</label>
-              <select
-                v-model="claimForm.category_id"
-                required
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
-              >
-                <option value="" disabled>Select category</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.name }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
-              <input
-                v-model="claimForm.notes"
-                type="text"
-                :placeholder="`SmartSplit from ${receipt.merchant_name || 'Receipt'}`"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-900"
-              />
-            </div>
-
-            <button
-              type="submit"
-              :disabled="claimedItemIds.length === 0 || claimForm.processing"
-              class="minimal-btn-primary w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Log {{ formatCurrency(proRataData.final_total) }} Expense
-            </button>
-          </form>
+                Log {{ formatCurrency(proRataData.final_total) }} Expense
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -263,6 +287,8 @@ import {
   Users as UsersIcon,
   Share2 as Share2Icon,
   Copy as CopyIcon,
+  RotateCcw as RotateCcwIcon,
+  CheckCircle as CheckCircleIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -322,6 +348,12 @@ const copyShareUrl = () => {
     setTimeout(() => {
       copied.value = false;
     }, 2500);
+  }
+};
+
+const undoOwnerClaim = (claim) => {
+  if (confirm(`Reset claim by ${claim.guest_name}? This item will become available again.`)) {
+    router.delete(`/receipts/${props.receipt.id}/claims/${claim.id}`);
   }
 };
 
