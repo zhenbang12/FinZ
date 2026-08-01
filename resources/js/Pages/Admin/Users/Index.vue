@@ -195,7 +195,7 @@
               class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
             >
               <option :value="false">Regular User</option>
-              <option :value="true">⚡ Superuser (Admin)</option>
+              <option :value="true">Superuser (Admin)</option>
             </select>
           </div>
 

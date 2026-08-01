@@ -5,6 +5,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,17 @@ Route::middleware(['web'])->group(function () {
         Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store'])->name('categories.store');
         Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Subscriptions & Shared Bills Management
+        Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+        Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
+        Route::put('/subscriptions/{subscription}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
+        Route::delete('/subscriptions/{subscription}', [SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
+        Route::post('/subscriptions/{subscription}/members', [SubscriptionController::class, 'storeMember'])->name('subscriptions.members.store');
+        Route::delete('/subscription-members/{member}', [SubscriptionController::class, 'destroyMember'])->name('subscriptions.members.destroy');
+        Route::post('/subscriptions/{subscription}/log-expense', [SubscriptionController::class, 'logMasterExpense'])->name('subscriptions.log-expense');
+        Route::post('/subscriptions-log-payment', [SubscriptionController::class, 'logPayment'])->name('subscriptions.log-payment');
 
         // Settings & Device Security
         Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');

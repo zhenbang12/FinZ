@@ -13,13 +13,13 @@
       </div>
 
       <!-- Live Group Session Share Banner -->
-      <div class="rounded-2xl p-5 bg-slate-900 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="minimal-card-hero p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="space-y-1">
           <div class="flex items-center space-x-2">
-            <UsersIcon class="w-5 h-5 text-amber-400" />
-            <h3 class="font-bold text-base text-white">Live Group Session Splitting</h3>
+            <UsersIcon class="w-5 h-5 text-indigo-600" />
+            <h3 class="font-extrabold text-base text-slate-900">Live Group Session Splitting</h3>
           </div>
-          <p class="text-xs text-slate-200 font-medium">
+          <p class="text-xs text-slate-500 font-medium">
             Generate a guest link so anyone can join without an account, tick what they ate, and pay their share!
           </p>
         </div>
@@ -27,7 +27,7 @@
         <div v-if="!shareUrl">
           <button
             @click="createSession"
-            class="px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition-all flex items-center gap-2"
+            class="minimal-btn-primary px-5 py-2.5 text-xs font-bold flex items-center gap-2"
           >
             <Share2Icon class="w-4 h-4" />
             <span>Create Live Group Session</span>
@@ -39,11 +39,11 @@
             type="text"
             readonly
             :value="shareUrl"
-            class="px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700 text-amber-300 text-xs font-mono w-full sm:w-64 focus:outline-none"
+            class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-indigo-700 text-xs font-mono font-bold w-full sm:w-64 focus:outline-none"
           />
           <button
             @click="copyShareUrl"
-            class="px-4 py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition-all shrink-0 flex items-center justify-center gap-1.5"
+            class="minimal-btn-primary px-4 py-2 text-xs font-bold flex items-center justify-center gap-1.5 shrink-0"
           >
             <CopyIcon class="w-3.5 h-3.5" />
             <span>{{ copied ? 'Copied Link!' : 'Copy Guest Link' }}</span>
