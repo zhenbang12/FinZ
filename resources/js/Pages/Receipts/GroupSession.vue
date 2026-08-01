@@ -223,7 +223,7 @@
 
           <!-- Quick Pay via Banking / eWallet App Shortcuts -->
           <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">⚡ Quick Open eWallet / Banking App</span>
+            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
             <div class="grid grid-cols-3 gap-2">
               <a
                 href="tngd://"
