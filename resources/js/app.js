@@ -4,7 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 createInertiaApp({
-  title: (title) => (title ? `${title} - FinZ` : 'FinZ SmartSplit'),
+  title: (title) => (title ? `${title} - FinZ` : 'FinZ'),
   resolve: (name) =>
     resolvePageComponent(
       `./Pages/${name}.vue`,

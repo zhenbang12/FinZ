@@ -12,7 +12,6 @@
             <h1 class="text-xl font-bold tracking-tight text-slate-900">
               FinZ
             </h1>
-            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Minimalist MYR</p>
           </div>
         </Link>
 
