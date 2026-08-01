@@ -572,7 +572,7 @@ const openModal = (type) => {
   form.type = type;
   form.account_id = props.accounts[0]?.id || '';
   form.destination_account_id = props.accounts[1]?.id || '';
-  form.category_id = props.categories[0]?.id || '';
+  form.category_id = type === 'transfer' ? '' : (props.categories[0]?.id || '');
   form.amount = '';
   form.date = todayStr;
   form.notes = '';
@@ -585,7 +585,7 @@ const openEditModal = (tx) => {
   form.type = tx.type;
   form.account_id = tx.account_id || '';
   form.destination_account_id = tx.destination_account_id || '';
-  form.category_id = tx.category_id || '';
+  form.category_id = tx.type === 'transfer' ? '' : (tx.category_id || '');
   form.amount = tx.amount;
   form.date = tx.date ? tx.date.substring(0, 10) : todayStr;
   form.notes = tx.notes || '';
@@ -598,6 +598,9 @@ const closeModal = () => {
 };
 
 const submitTransaction = () => {
+  if (form.type === 'transfer') {
+    form.category_id = null;
+  }
   if (editingTransactionId.value) {
     form.put(`/transactions/${editingTransactionId.value}`, {
       onSuccess: () => closeModal(),

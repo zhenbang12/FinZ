@@ -88,6 +88,9 @@ class TransactionController extends Controller
         ]);
 
         $validated['user_id'] = $user->id;
+        if ($validated['type'] === 'transfer') {
+            $validated['category_id'] = null;
+        }
 
         $this->ledgerService->createTransaction($validated);
 
@@ -107,6 +110,10 @@ class TransactionController extends Controller
             'date' => 'required|date',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        if ($validated['type'] === 'transfer') {
+            $validated['category_id'] = null;
+        }
 
         $this->ledgerService->updateTransaction($transaction, $validated);
 
