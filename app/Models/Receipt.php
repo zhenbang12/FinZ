@@ -40,11 +40,19 @@ class Receipt extends Model
             return null;
         }
 
-        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, '/')) {
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
             return $value;
         }
 
-        return '/storage/' . $value;
+        if (str_starts_with($value, '/')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'receipts/')) {
+            return '/storage/' . $value;
+        }
+
+        return '/' . ltrim($value, '/');
     }
 
     public function user(): BelongsTo

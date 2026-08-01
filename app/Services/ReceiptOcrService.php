@@ -16,15 +16,24 @@ class ReceiptOcrService
      */
     public function parseReceipt(UploadedFile $file, int $userId): Receipt
     {
-        $path = $file->store('receipts', 'public');
-        $fullPath = storage_path("app/public/{$path}");
+        $destinationPath = public_path('receipts');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
+
+        $ext = $file->getClientOriginalExtension() ?: 'webp';
+        $filename = time() . '_' . uniqid() . '.' . $ext;
+        $file->move($destinationPath, $filename);
+
+        $imagePath = '/receipts/' . $filename;
+        $fullPath = public_path("receipts/{$filename}");
 
         $ocrData = $this->parseStrictlyWithGoogleGemini($fullPath);
 
         // Create formal Receipt Record
         $receipt = Receipt::create([
             'user_id' => $userId,
-            'image_path' => $path,
+            'image_path' => $imagePath,
             'merchant_name' => $ocrData['merchant_name'] ?? 'Unknown Merchant',
             'subtotal' => (float) ($ocrData['subtotal'] ?? 0.00),
             'tax_amount' => (float) ($ocrData['tax_amount'] ?? 0.00),
