@@ -145,8 +145,7 @@
                 <th class="py-3 px-4 w-40">Month / Cycle</th>
                 <th class="py-3 px-4 w-32">Billing Date</th>
                 <th class="py-3 px-4 w-28">Status</th>
-                <th class="py-3 px-4">Payment Notes / Description</th>
-                <th class="py-3 px-4 w-52">Reference No.</th>
+                <th class="py-3 px-4">Payment Notes & Receipt Proof</th>
                 <th class="py-3 px-4 w-32 text-right">Amount (MYR)</th>
                 <th class="py-3 px-4 w-28 text-center">Action</th>
               </tr>
@@ -186,18 +185,15 @@
                   </span>
                 </td>
 
-                <!-- Payment Notes / Description -->
-                <td class="py-3 px-4 text-slate-700 font-mono text-[11px] max-w-xs truncate">
-                  <span v-if="cycle.notes" title="Notes">{{ cycle.notes }}</span>
-                  <span v-else class="text-slate-300 italic">No description</span>
-                </td>
-
-                <!-- Reference No. -->
-                <td class="py-3 px-4 font-mono text-[11px] text-slate-600 whitespace-nowrap">
-                  <span v-if="cycle.reference_no" class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-bold text-slate-800">
-                    {{ cycle.reference_no }}
-                  </span>
-                  <span v-else class="text-slate-300">-</span>
+                <!-- Payment Notes & Proof -->
+                <td class="py-3 px-4 text-slate-700 text-xs">
+                  <div class="flex items-center space-x-2.5">
+                    <a v-if="cycle.proof_image_path" :href="cycle.proof_image_path" target="_blank" class="shrink-0 group" title="Click to view receipt image">
+                      <img :src="cycle.proof_image_path" class="w-9 h-9 rounded-lg object-cover border border-slate-300 group-hover:scale-105 transition-transform" />
+                    </a>
+                    <span v-if="cycle.notes" class="font-medium text-slate-800" :title="cycle.notes">{{ cycle.notes }}</span>
+                    <span v-else-if="!cycle.proof_image_path" class="text-slate-300 italic">No description</span>
+                  </div>
                 </td>
 
                 <!-- Amount -->
@@ -333,24 +329,25 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Payment Date</label>
-                <input
-                  v-model="logForm.payment_date"
-                  type="date"
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
-                />
-              </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Payment Date</label>
+              <input
+                v-model="logForm.payment_date"
+                type="date"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
+              />
+            </div>
 
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Reference No. / TNG Ref ID</label>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Optional Receipt / Proof Screenshot</label>
+              <div class="flex items-center space-x-2">
                 <input
-                  v-model="logForm.reference_no"
-                  type="text"
-                  placeholder="e.g. 20251030101100000100..."
-                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-[11px]"
+                  type="file"
+                  accept="image/*"
+                  @change="onProofFileChange"
+                  class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
                 />
+                <img v-if="proofPreview" :src="proofPreview" class="w-10 h-10 rounded-lg object-cover border border-slate-300 shrink-0" />
               </div>
             </div>
 
@@ -359,7 +356,7 @@
               <textarea
                 v-model="logForm.notes"
                 rows="2"
-                placeholder="e.g. Receive from Wallet202510301111 MELISSA ONG JING NING"
+                placeholder="e.g. Received via Touch 'n Go eWallet / DuitNow transfer"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
               ></textarea>
             </div>
