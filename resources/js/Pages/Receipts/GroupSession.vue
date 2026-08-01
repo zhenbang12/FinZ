@@ -31,28 +31,31 @@
     <!-- Receipt Header & Session Progress Card -->
     <div class="minimal-card p-6 space-y-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Restaurant</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
-            {{ receipt.merchant_name || 'Receipt Session' }}
-          </h2>
-          <p class="text-xs text-slate-500 mt-1 font-medium">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
-        </div>
-
-        <div class="flex items-center space-x-4 justify-between md:justify-end">
+        <div class="flex items-center space-x-3.5">
           <button
             v-if="receipt.image_path"
+            type="button"
             @click="showReceiptModal = true"
-            class="minimal-btn-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-2 rounded-xl shrink-0"
+            class="shrink-0 group focus:outline-none"
+            title="Click to view original scanned receipt image"
           >
-            <ImageIcon class="w-4 h-4 text-indigo-600" />
-            <span>View Receipt</span>
+            <img
+              :src="receipt.image_path"
+              class="w-14 h-14 rounded-2xl object-cover border border-slate-300 group-hover:scale-105 group-hover:border-indigo-500 transition-all shadow-xs"
+            />
           </button>
-
-          <div class="text-right">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
-            <span class="text-3xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Restaurant</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+              {{ receipt.merchant_name || 'Receipt Session' }}
+            </h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
           </div>
+        </div>
+
+        <div class="text-right">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
+          <span class="text-3xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
         </div>
       </div>
 

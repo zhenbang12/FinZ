@@ -34,6 +34,19 @@ class Receipt extends Model
         'raw_ocr_data' => 'array',
     ];
 
+    public function getImagePathAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, '/')) {
+            return $value;
+        }
+
+        return '/storage/' . $value;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
