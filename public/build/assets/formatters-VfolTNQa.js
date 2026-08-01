@@ -1,0 +1,1 @@
+function a(t,r="MYR"){const n=parseFloat(t)||0;return`RM ${new Intl.NumberFormat("en-MY",{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)}`}function m(t){if(!t)return"";const r=new Date(t);return new Intl.DateTimeFormat("en-MY",{day:"numeric",month:"short",year:"numeric"}).format(r)}export{m as a,a as f};

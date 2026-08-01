@@ -197,6 +197,7 @@ import {
   PieChart as PieChartIcon,
   Wallet as WalletIcon,
   Users as UsersIcon,
+  ShieldCheck as ShieldCheckIcon,
   LogOut as LogOutIcon,
   CheckCircle as CheckCircleIcon,
   XCircle as XCircleIcon,
@@ -227,6 +228,7 @@ const navItems = computed(() => {
     { name: 'SmartSplit OCR', href: '/receipts', icon: CameraIcon },
     { name: 'Analytics & Reports', href: '/analytics', icon: PieChartIcon },
     { name: 'Accounts', href: '/accounts', icon: WalletIcon },
+    { name: 'Device Security', href: '/security', icon: ShieldCheckIcon },
   ];
 
   if (user.value?.is_admin) {
