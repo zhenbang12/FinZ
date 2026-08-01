@@ -18,6 +18,7 @@ class Account extends Model
         'currency',
         'initial_balance',
         'balance',
+        'is_pinned',
         'color',
         'icon',
     ];
@@ -25,6 +26,7 @@ class Account extends Model
     protected $casts = [
         'initial_balance' => 'decimal:2',
         'balance' => 'decimal:2',
+        'is_pinned' => 'boolean',
     ];
 
     public function user(): BelongsTo

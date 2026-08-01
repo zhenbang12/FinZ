@@ -38,4 +38,4 @@ RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/database
 EXPOSE 10000
 
 # Start command: create .env if missing, inject GEMINI_API_KEY, generate APP_KEY, run migrations & start server
-CMD ["sh", "-c", "if [ ! -f .env ]; then cp .env.example .env; fi && if [ -n \"$GEMINI_API_KEY\" ]; then sed -i '/GEMINI_API_KEY=/d' .env && echo \"GEMINI_API_KEY=$GEMINI_API_KEY\" >> .env; fi && php artisan key:generate --force && php artisan migrate --force && php artisan db:seed --force && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+CMD ["sh", "-c", "if [ ! -f .env ]; then cp .env.example .env; fi && if [ -n \"$GEMINI_API_KEY\" ]; then sed -i '/GEMINI_API_KEY=/d' .env && echo \"GEMINI_API_KEY=$GEMINI_API_KEY\" >> .env; fi && php artisan key:generate --force && php artisan migrate --force && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]

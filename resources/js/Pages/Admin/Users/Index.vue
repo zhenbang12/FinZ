@@ -80,7 +80,7 @@
                       'px-2.5 py-0.5 rounded-full text-[10px] uppercase border tracking-wider'
                     ]"
                   >
-                    {{ u.is_admin ? '⚡ Superuser' : 'User' }}
+                    {{ u.is_admin ? 'Superuser' : 'User' }}
                   </span>
                 </td>
 

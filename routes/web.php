@@ -24,11 +24,13 @@ Route::middleware(['web'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/quick', [App\Http\Controllers\QuickViewController::class, 'index'])->name('quick.index');
 
         // Accounts Management
         Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
         Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
         Route::put('/accounts/{account}', [AccountController::class, 'update'])->name('accounts.update');
+        Route::post('/accounts/{account}/toggle-pin', [App\Http\Controllers\QuickViewController::class, 'togglePin'])->name('accounts.toggle-pin');
         Route::delete('/accounts/{account}', [AccountController::class, 'destroy'])->name('accounts.destroy');
 
         // Core Financial Ledger & Transactions

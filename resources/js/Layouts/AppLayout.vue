@@ -65,7 +65,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-xs font-bold text-slate-900 truncate">{{ user?.name || 'FinZ User' }}</p>
               <p :class="[user?.is_admin ? 'text-amber-600 font-bold' : 'text-slate-500 font-medium', 'text-[10px] truncate']">
-                {{ user?.is_admin ? '⚡ Superuser' : 'Regular User' }}
+                {{ user?.is_admin ? 'Superuser' : 'Regular User' }}
               </p>
             </div>
           </div>
@@ -139,20 +139,20 @@
     </main>
 
     <!-- Mobile Bottom Navigation Bar -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 flex items-center justify-around">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-2 flex items-center justify-around">
       <Link
-        href="/"
-        :class="[$page.url === '/' ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-3 text-[10px] tracking-tight']"
+        href="/quick"
+        :class="[$page.url.startsWith('/quick') ? 'text-indigo-600 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <HomeIcon class="w-5 h-5 mb-1" />
-        <span>Overview</span>
+        <ZapIcon class="w-5 h-5 mb-0.5" />
+        <span>Quick Hub</span>
       </Link>
 
       <Link
         href="/transactions"
-        :class="[$page.url.startsWith('/transactions') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-3 text-[10px] tracking-tight']"
+        :class="[$page.url.startsWith('/transactions') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <ReceiptTextIcon class="w-5 h-5 mb-1" />
+        <ReceiptTextIcon class="w-5 h-5 mb-0.5" />
         <span>Ledger</span>
       </Link>
 
@@ -161,7 +161,7 @@
         href="/receipts"
         class="flex flex-col items-center -mt-6 group"
       >
-        <div class="w-14 h-14 rounded-full bg-slate-900 text-white shadow-lg flex items-center justify-center group-active:scale-95 transition-transform">
+        <div class="w-13 h-13 rounded-full bg-slate-900 text-white shadow-lg flex items-center justify-center group-active:scale-95 transition-transform">
           <CameraIcon class="w-6 h-6 text-white" />
         </div>
         <span class="text-[10px] font-bold text-slate-900 mt-1">SmartSplit</span>
@@ -169,28 +169,18 @@
 
       <Link
         href="/analytics"
-        :class="[$page.url.startsWith('/analytics') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-3 text-[10px] tracking-tight']"
+        :class="[$page.url.startsWith('/analytics') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <PieChartIcon class="w-5 h-5 mb-1" />
+        <PieChartIcon class="w-5 h-5 mb-0.5" />
         <span>Analytics</span>
       </Link>
 
       <Link
-        v-if="user?.is_admin"
-        href="/admin/users"
-        :class="[$page.url.startsWith('/admin/users') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-3 text-[10px] tracking-tight']"
+        href="/"
+        :class="[$page.url === '/' ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <UsersIcon class="w-5 h-5 mb-1 text-amber-600" />
-        <span>Users</span>
-      </Link>
-
-      <Link
-        v-else
-        href="/accounts"
-        :class="[$page.url.startsWith('/accounts') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-3 text-[10px] tracking-tight']"
-      >
-        <WalletIcon class="w-5 h-5 mb-1" />
-        <span>Accounts</span>
+        <HomeIcon class="w-5 h-5 mb-0.5" />
+        <span>Overview</span>
       </Link>
     </nav>
   </div>
@@ -200,6 +190,7 @@
 import { computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import {
+  Zap as ZapIcon,
   LayoutDashboard as HomeIcon,
   ReceiptText as ReceiptTextIcon,
   Camera as CameraIcon,
@@ -230,6 +221,7 @@ const logout = () => {
 
 const navItems = computed(() => {
   const base = [
+    { name: 'Quick Hub', href: '/quick', icon: ZapIcon },
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Financial Ledger', href: '/transactions', icon: ReceiptTextIcon },
     { name: 'SmartSplit OCR', href: '/receipts', icon: CameraIcon },
