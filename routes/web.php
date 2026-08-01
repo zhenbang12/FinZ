@@ -48,6 +48,9 @@ Route::middleware(['web'])->group(function () {
 
         // Analytics & Categorization
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store'])->name('categories.store');
+        Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
 
         // Superuser Account Management
         Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');

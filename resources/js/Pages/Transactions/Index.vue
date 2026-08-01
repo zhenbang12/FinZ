@@ -278,9 +278,29 @@
             </div>
 
             <div v-else>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">
-                Category
-              </label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-semibold text-slate-600">
+                  Category
+                </label>
+                <div class="flex items-center space-x-2">
+                  <button
+                    v-if="form.category_id && selectedCategory?.user_id"
+                    type="button"
+                    @click="openEditCategoryModal(selectedCategory)"
+                    class="text-[11px] font-bold text-slate-600 hover:text-slate-900"
+                    title="Edit selected category"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    type="button"
+                    @click="openNewCategoryModal"
+                    class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700"
+                  >
+                    + Add Category
+                  </button>
+                </div>
+              </div>
               <select
                 v-model="form.category_id"
                 required
@@ -288,7 +308,7 @@
               >
                 <option value="" disabled>Select category</option>
                 <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.name }}
+                  {{ cat.name }} {{ cat.user_id ? '(Custom)' : '' }}
                 </option>
               </select>
             </div>
@@ -337,6 +357,91 @@
         </form>
       </div>
     </div>
+
+    <!-- Category Create / Edit Modal -->
+    <div v-if="showCategoryModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="minimal-card max-w-md w-full p-6 space-y-5 animate-scale-up">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-slate-900">
+            {{ editingCategory ? 'Edit Category' : 'Create New Category' }}
+          </h3>
+          <button @click="closeCategoryModal" class="text-slate-400 hover:text-slate-600 p-1">
+            <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+
+        <form @submit.prevent="submitCategory" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              Category Name
+            </label>
+            <input
+              v-model="categoryForm.name"
+              type="text"
+              required
+              placeholder="e.g. Subscriptions, Gaming, Medical"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">
+              Category Type
+            </label>
+            <select
+              v-model="categoryForm.type"
+              class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+            >
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">
+              Color Tag
+            </label>
+            <div class="flex items-center space-x-3">
+              <input
+                v-model="categoryForm.color"
+                type="color"
+                class="w-10 h-10 rounded-lg cursor-pointer border border-slate-200 p-1 bg-white"
+              />
+              <span class="text-xs font-mono text-slate-600">{{ categoryForm.color }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-3">
+            <button
+              v-if="editingCategory && editingCategory.user_id"
+              type="button"
+              @click="deleteCategory(editingCategory)"
+              class="text-xs font-bold text-rose-600 hover:text-rose-700"
+            >
+              Delete Category
+            </button>
+            <div v-else></div>
+
+            <div class="flex items-center space-x-3">
+              <button
+                type="button"
+                @click="closeCategoryModal"
+                class="px-4 py-2 rounded-full text-slate-600 hover:text-slate-900 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="categoryForm.processing"
+                class="minimal-btn-primary px-6 py-2.5 text-xs disabled:opacity-50"
+              >
+                {{ editingCategory ? 'Update Category' : 'Create Category' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </AppLayout>
 </template>
 
@@ -366,6 +471,61 @@ const props = defineProps({
 const showModal = ref(false);
 const modalType = ref('expense');
 const editingTransactionId = ref(null);
+
+const showCategoryModal = ref(false);
+const editingCategory = ref(null);
+
+const categoryForm = useForm({
+  name: '',
+  type: 'expense',
+  color: '#6366f1',
+});
+
+const selectedCategory = computed(() => {
+  return props.categories.find(c => c.id === form.category_id);
+});
+
+const openNewCategoryModal = () => {
+  editingCategory.value = null;
+  categoryForm.name = '';
+  categoryForm.type = 'expense';
+  categoryForm.color = '#6366f1';
+  showCategoryModal.value = true;
+};
+
+const openEditCategoryModal = (cat) => {
+  if (!cat) return;
+  editingCategory.value = cat;
+  categoryForm.name = cat.name;
+  categoryForm.type = cat.type || 'expense';
+  categoryForm.color = cat.color || '#6366f1';
+  showCategoryModal.value = true;
+};
+
+const closeCategoryModal = () => {
+  showCategoryModal.value = false;
+  editingCategory.value = null;
+};
+
+const submitCategory = () => {
+  if (editingCategory.value) {
+    categoryForm.put(`/categories/${editingCategory.value.id}`, {
+      onSuccess: () => closeCategoryModal(),
+    });
+  } else {
+    categoryForm.post('/categories', {
+      onSuccess: () => closeCategoryModal(),
+    });
+  }
+};
+
+const deleteCategory = (cat) => {
+  if (confirm(`Delete custom category "${cat.name}"?`)) {
+    router.delete(`/categories/${cat.id}`, {
+      onSuccess: () => closeCategoryModal(),
+    });
+  }
+};
 
 const filterForm = ref({
   search: props.filters.search || '',
