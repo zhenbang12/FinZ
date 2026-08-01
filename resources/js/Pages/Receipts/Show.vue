@@ -3,9 +3,19 @@
     <div class="space-y-6">
       <!-- Top Navigation Header -->
       <div class="flex items-center justify-between">
-        <Link href="/receipts" class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1">
-          ← Back to Receipts
-        </Link>
+        <div class="flex items-center space-x-3">
+          <Link href="/receipts" class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1">
+            ← Back to Receipts
+          </Link>
+          <span class="text-slate-300">|</span>
+          <button
+            @click="confirmDeleteReceipt"
+            class="text-xs font-bold text-slate-400 hover:text-rose-600 flex items-center gap-1 transition-colors"
+          >
+            <Trash2Icon class="w-3.5 h-3.5" />
+            <span>Delete Receipt</span>
+          </button>
+        </div>
         <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5">
           <SparklesIcon class="w-3.5 h-3.5 text-slate-700" />
           {{ receipt.raw_ocr_data?.ocr_engine || 'Google Gemini AI Vision' }}
@@ -330,6 +340,7 @@ import {
   Image as ImageIcon,
   Receipt as ReceiptIcon,
   X as XIcon,
+  Trash2 as Trash2Icon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -340,6 +351,12 @@ const props = defineProps({
   taxesAndFees: { type: Array, default: () => [] },
   discounts: { type: Array, default: () => [] },
 });
+
+const confirmDeleteReceipt = () => {
+  if (confirm(`Are you sure you want to delete this receipt from "${props.receipt.merchant_name || 'Receipt #' + props.receipt.id}"?`)) {
+    router.delete(`/receipts/${props.receipt.id}`);
+  }
+};
 
 const showOriginalReceiptModal = ref(false);
 

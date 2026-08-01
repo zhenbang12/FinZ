@@ -138,12 +138,21 @@
               </div>
             </div>
 
-            <Link
-              :href="`/receipts/${rcpt.id}`"
-              class="minimal-btn-secondary w-full py-2 font-bold text-xs text-center block transition-all"
-            >
-              Split Bill & Claim Items →
-            </Link>
+            <div class="flex items-center space-x-2 pt-1">
+              <Link
+                :href="`/receipts/${rcpt.id}`"
+                class="minimal-btn-secondary flex-1 py-2 font-bold text-xs text-center block transition-all"
+              >
+                Split Bill & Claim Items →
+              </Link>
+              <button
+                @click="confirmDeleteReceipt(rcpt)"
+                class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 border border-slate-200 transition-colors shrink-0"
+                title="Delete Receipt"
+              >
+                <Trash2Icon class="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -153,7 +162,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
@@ -161,11 +170,18 @@ import {
   Upload as UploadIcon,
   Sparkles as SparklesIcon,
   Receipt as ReceiptIcon,
+  Trash2 as Trash2Icon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
   receipts: { type: Array, default: () => [] },
 });
+
+const confirmDeleteReceipt = (receipt) => {
+  if (confirm(`Delete receipt from "${receipt.merchant_name || 'Receipt #' + receipt.id}"?`)) {
+    router.delete(`/receipts/${receipt.id}`);
+  }
+};
 
 const cameraInputRef = ref(null);
 const galleryInputRef = ref(null);

@@ -44,6 +44,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/receipts', [ReceiptController::class, 'index'])->name('receipts.index');
         Route::post('/receipts/upload', [ReceiptController::class, 'upload'])->name('receipts.upload');
         Route::get('/receipts/{receipt}', [ReceiptController::class, 'show'])->name('receipts.show');
+        Route::delete('/receipts/{receipt}', [ReceiptController::class, 'destroy'])->name('receipts.destroy');
         Route::post('/receipts/{receipt}/split', [ReceiptController::class, 'calculateSplit'])->name('receipts.split');
         Route::post('/receipts/{receipt}/claim', [ReceiptController::class, 'saveClaimedExpense'])->name('receipts.claim');
         Route::post('/receipts/{receipt}/create-session', [ReceiptController::class, 'createSession'])->name('receipts.create-session');

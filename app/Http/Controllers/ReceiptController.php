@@ -242,4 +242,23 @@ class ReceiptController extends Controller
 
         return redirect()->route('transactions.index')->with('success', 'SmartSplit expense of RM ' . number_format($splitResult['final_total'], 2) . ' logged successfully!');
     }
+
+    /**
+     * Delete a scanned receipt and its associated files & claims.
+     */
+    public function destroy(Request $request, Receipt $receipt)
+    {
+        if ($receipt->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($receipt->image_path) {
+            $relativePath = str_replace('/storage/', '', $receipt->image_path);
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($relativePath);
+        }
+
+        $receipt->delete();
+
+        return redirect()->route('receipts.index')->with('success', 'Receipt deleted successfully.');
+    }
 }
