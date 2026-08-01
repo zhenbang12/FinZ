@@ -53,26 +53,12 @@
 
       <!-- Receipt Summary Header -->
       <div class="minimal-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-center space-x-3.5">
-          <button
-            v-if="receipt.image_path"
-            type="button"
-            @click="showOriginalReceiptModal = true"
-            class="shrink-0 group focus:outline-none"
-            title="Click to view original scanned receipt image"
-          >
-            <img
-              :src="receipt.image_path"
-              class="w-14 h-14 rounded-2xl object-cover border border-slate-300 group-hover:scale-105 group-hover:border-indigo-500 transition-all shadow-xs"
-            />
-          </button>
-          <div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Vendor</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
-              {{ receipt.merchant_name || 'Extracted Receipt' }}
-            </h2>
-            <p class="text-xs text-slate-500 mt-1 font-medium">Receipt ID: #{{ receipt.id }} • {{ formatDate(receipt.created_at) }}</p>
-          </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Vendor</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+            {{ receipt.merchant_name || 'Extracted Receipt' }}
+          </h2>
+          <p class="text-xs text-slate-500 mt-1 font-medium">Receipt ID: #{{ receipt.id }} • {{ formatDate(receipt.created_at) }}</p>
         </div>
 
         <div class="flex items-center space-x-4 border-t md:border-t-0 border-slate-100 pt-3 md:pt-0 justify-between md:justify-end">
