@@ -188,9 +188,15 @@
                 <!-- Payment Notes & Proof -->
                 <td class="py-3 px-4 text-slate-700 text-xs">
                   <div class="flex items-center space-x-2.5">
-                    <a v-if="cycle.proof_image_path" :href="cycle.proof_image_path" target="_blank" class="shrink-0 group" title="Click to view receipt image">
-                      <img :src="cycle.proof_image_path" class="w-9 h-9 rounded-lg object-cover border border-slate-300 group-hover:scale-105 transition-transform" />
-                    </a>
+                    <button
+                      v-if="cycle.proof_image_path"
+                      type="button"
+                      @click="openProofModal(cycle.proof_image_path)"
+                      class="shrink-0 group focus:outline-none"
+                      title="Click to view receipt image modal"
+                    >
+                      <img :src="cycle.proof_image_path" class="w-9 h-9 rounded-lg object-cover border border-slate-300 group-hover:scale-105 group-hover:border-indigo-500 transition-all shadow-xs" />
+                    </button>
                     <span v-if="cycle.notes" class="font-medium text-slate-800" :title="cycle.notes">{{ cycle.notes }}</span>
                     <span v-else-if="!cycle.proof_image_path" class="text-slate-300 italic">No description</span>
                   </div>
@@ -490,6 +496,28 @@
           </form>
         </div>
       </div>
+
+      <!-- Proof Image Viewer Modal -->
+      <div
+        v-if="showProofModal"
+        class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+        @click.self="showProofModal = false"
+      >
+        <div class="minimal-card max-w-xl w-full p-4 sm:p-5 space-y-3 animate-scale-up">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <ImageIcon class="w-4 h-4 text-indigo-600" />
+              <span>Receipt Proof Screenshot</span>
+            </h4>
+            <button @click="showProofModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+              <XIcon class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center max-h-[75vh]">
+            <img :src="selectedProofUrl" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-xs" />
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -504,6 +532,7 @@ import {
   UserPlus as UserPlusIcon,
   CalendarCheck as CalendarCheckIcon,
   CreditCard as CreditCardIcon,
+  Image as ImageIcon,
   Plus as PlusIcon,
   CheckCircle as CheckCircleIcon,
   Clock as ClockIcon,
@@ -592,11 +621,74 @@ const logForm = useForm({
   auto_post_income: false,
 });
 
-const onProofFileChange = (e) => {
+// Proof Image Modal Viewer State
+const showProofModal = ref(false);
+const selectedProofUrl = ref(null);
+
+const openProofModal = (url) => {
+  if (url) {
+    selectedProofUrl.value = url;
+    showProofModal.value = true;
+  }
+};
+
+// Client-side Image Compression (Reduces phone screenshots to WebP ~150KB saving disk space & speed)
+const compressImage = (file, maxWidth = 1200, quality = 0.75) => {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/') || file.size < 150 * 1024) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+              type: 'image/webp',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/webp',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
+const onProofFileChange = async (e) => {
   const file = e.target.files[0];
   if (file) {
-    logForm.proof_image = file;
-    proofPreview.value = URL.createObjectURL(file);
+    const compressed = await compressImage(file);
+    logForm.proof_image = compressed;
+    proofPreview.value = URL.createObjectURL(compressed);
   }
 };
 
