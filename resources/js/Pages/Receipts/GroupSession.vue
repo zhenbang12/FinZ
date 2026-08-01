@@ -331,24 +331,20 @@ onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
 
-const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isDesktop = computed(() => !isAndroid && !isIOS);
+const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isDesktop = computed(() => !isMobile);
 
 const appLinks = {
   tng: {
-    android: 'intent://#Intent;scheme=tngd;package=my.com.tngdigital.ewallet;end',
-    ios: 'tngd://app',
+    app: 'tngd://app',
     web: 'https://www.touchngo.com.my',
   },
   mae: {
-    android: 'intent://#Intent;scheme=maybank2umae;package=com.maybank2u.life;end',
-    ios: 'maybank2umae://',
+    app: 'maybank2umae://',
     web: 'https://www.maybank2u.com.my',
   },
   cimb: {
-    android: 'intent://#Intent;scheme=cimbclicks;package=com.cimb.octo;end',
-    ios: 'cimbclicks://',
+    app: 'cimbclicks://',
     web: 'https://www.cimbclicks.com.my',
   },
 };
@@ -356,9 +352,7 @@ const appLinks = {
 const getAppHref = (appName) => {
   const target = appLinks[appName];
   if (!target) return '#';
-  if (isAndroid) return target.android;
-  if (isIOS) return target.ios;
-  return target.web;
+  return isDesktop.value ? target.web : target.app;
 };
 
 const page = usePage();
