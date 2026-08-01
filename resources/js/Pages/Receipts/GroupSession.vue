@@ -224,33 +224,20 @@
           <!-- Quick Pay via Banking / eWallet App Shortcuts -->
           <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
             <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <a
-                :href="getStoreHref('tng')"
+                v-for="(app, key) in appStoreLinks"
+                :key="key"
+                :href="getStoreHref(key)"
                 target="_blank"
-                @click="openEWalletApp($event, 'tng')"
-                class="px-2.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
-                title="Open Touch 'n Go eWallet"
+                @click="openEWalletApp($event, key)"
+                :class="[
+                  app.color,
+                  'px-2.5 py-2 rounded-xl font-extrabold text-[11px] sm:text-xs flex items-center justify-center gap-1 transition-colors shadow-xs'
+                ]"
+                :title="`Open ${app.name}`"
               >
-                <span>Touch 'n Go</span>
-              </a>
-              <a
-                :href="getStoreHref('mae')"
-                target="_blank"
-                @click="openEWalletApp($event, 'mae')"
-                class="px-2.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
-                title="Open Maybank MAE"
-              >
-                <span>MAE</span>
-              </a>
-              <a
-                :href="getStoreHref('cimb')"
-                target="_blank"
-                @click="openEWalletApp($event, 'cimb')"
-                class="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
-                title="Open CIMB OCTO"
-              >
-                <span>CIMB</span>
+                <span class="truncate">{{ app.name }}</span>
               </a>
             </div>
           </div>
@@ -339,19 +326,60 @@ const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navig
 
 const appStoreLinks = {
   tng: {
+    name: "Touch 'n Go",
     scheme: 'tngd://app',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
+    color: 'bg-blue-600 hover:bg-blue-700 text-white',
   },
   mae: {
+    name: 'Maybank MAE',
     scheme: 'maybank2umae://',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
+    color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
   },
   cimb: {
+    name: 'CIMB OCTO',
     scheme: 'cimbclicks://',
     playStore: 'https://play.google.com/store/apps/details?id=com.cimb.octo',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
+    color: 'bg-rose-600 hover:bg-rose-700 text-white',
+  },
+  rhb: {
+    name: 'RHB Mobile',
+    scheme: 'rhb://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.rhb.mobile.mb',
+    appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
+    color: 'bg-sky-600 hover:bg-sky-700 text-white',
+  },
+  pbe: {
+    name: 'PB engage',
+    scheme: 'pbengage://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.publicbank.pbengage',
+    appStore: 'https://apps.apple.com/app/pb-engage-MY/id1377543265',
+    color: 'bg-red-600 hover:bg-red-700 text-white',
+  },
+  gxbank: {
+    name: 'GXBank',
+    scheme: 'gxbank://',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank',
+    appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
+    color: 'bg-purple-600 hover:bg-purple-700 text-white',
+  },
+  boost: {
+    name: 'Boost eWallet',
+    scheme: 'myboost://',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.myboost',
+    appStore: 'https://apps.apple.com/app/boost-e-wallet/id1235193962',
+    color: 'bg-rose-500 hover:bg-rose-600 text-white',
+  },
+  grab: {
+    name: 'GrabPay',
+    scheme: 'grab://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.grabtaxi.passenger',
+    appStore: 'https://apps.apple.com/app/grab-taxi-ride-food-delivery/id647268330',
+    color: 'bg-emerald-600 hover:bg-emerald-700 text-white',
   },
 };
 
