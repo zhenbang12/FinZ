@@ -704,7 +704,7 @@ const openLogModal = (cycle) => {
   logForm.notes = cycle.notes || '';
   logForm.proof_image = null;
   proofPreview.value = cycle.proof_image_path || null;
-  logForm.auto_post_income = false;
+  logForm.auto_post_income = !!cycle.transaction_id;
 
   showLogModal.value = true;
 };

@@ -383,9 +383,6 @@ class SubscriptionController extends Controller
                 })->where('type', 'income')->first();
 
                 $txNotes = "[Shared Sub] {$member->name} - {$member->subscription->name} ({$payment->billing_cycle_label})";
-                if ($payment->reference_no) {
-                    $txNotes .= " | Ref: {$payment->reference_no}";
-                }
 
                 $txData = [
                     'user_id' => $request->user()->id,
@@ -408,6 +405,15 @@ class SubscriptionController extends Controller
                 } else {
                     $transaction = $this->ledgerService->createTransaction($txData);
                     $payment->transaction_id = $transaction->id;
+                }
+            } else {
+                // If auto_post_income is false or status is pending/waived, safely revert & delete any linked ledger transaction
+                if ($payment->transaction_id) {
+                    $transaction = Transaction::find($payment->transaction_id);
+                    if ($transaction) {
+                        $this->ledgerService->deleteTransaction($transaction);
+                    }
+                    $payment->transaction_id = null;
                 }
             }
 
