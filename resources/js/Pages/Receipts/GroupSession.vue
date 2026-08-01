@@ -225,30 +225,30 @@
           <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
             <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
             <div class="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                @click="launchAppOrWeb('tngd://', 'https://www.touchngo.com.my')"
-                class="px-2.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
-                title="Open Touch 'n Go eWallet"
+              <a
+                :href="getAppHref('tng')"
+                :target="isDesktop ? '_blank' : '_self'"
+                class="px-2.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open Touch 'n Go eWallet App"
               >
                 <span>Touch 'n Go</span>
-              </button>
-              <button
-                type="button"
-                @click="launchAppOrWeb('maybank2umae://', 'https://www.maybank2u.com.my')"
-                class="px-2.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
-                title="Open Maybank MAE"
+              </a>
+              <a
+                :href="getAppHref('mae')"
+                :target="isDesktop ? '_blank' : '_self'"
+                class="px-2.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open Maybank MAE App"
               >
                 <span>MAE</span>
-              </button>
-              <button
-                type="button"
-                @click="launchAppOrWeb('cimbclicks://', 'https://www.cimbclicks.com.my')"
-                class="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
-                title="Open CIMB Clicks"
+              </a>
+              <a
+                :href="getAppHref('cimb')"
+                :target="isDesktop ? '_blank' : '_self'"
+                class="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open CIMB OCTO App"
               >
                 <span>CIMB</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -331,16 +331,34 @@ onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
 
-const launchAppOrWeb = (appScheme, webUrl) => {
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) {
-    window.location.href = appScheme;
-    setTimeout(() => {
-      window.open(webUrl, '_blank');
-    }, 1500);
-  } else {
-    window.open(webUrl, '_blank');
-  }
+const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isDesktop = computed(() => !isAndroid && !isIOS);
+
+const appLinks = {
+  tng: {
+    android: 'intent://#Intent;scheme=tngd;package=my.com.tngdigital.ewallet;end',
+    ios: 'tngd://app',
+    web: 'https://www.touchngo.com.my',
+  },
+  mae: {
+    android: 'intent://#Intent;scheme=maybank2umae;package=com.maybank2u.life;end',
+    ios: 'maybank2umae://',
+    web: 'https://www.maybank2u.com.my',
+  },
+  cimb: {
+    android: 'intent://#Intent;scheme=cimbclicks;package=com.cimb.octo;end',
+    ios: 'cimbclicks://',
+    web: 'https://www.cimbclicks.com.my',
+  },
+};
+
+const getAppHref = (appName) => {
+  const target = appLinks[appName];
+  if (!target) return '#';
+  if (isAndroid) return target.android;
+  if (isIOS) return target.ios;
+  return target.web;
 };
 
 const page = usePage();
