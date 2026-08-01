@@ -158,7 +158,7 @@
               </div>
             </div>
 
-            <div class="flex items-center space-x-4 shrink-0">
+            <div class="flex items-center space-x-2 shrink-0">
               <div class="text-right">
                 <span
                   :class="[
@@ -172,6 +172,16 @@
                 </span>
               </div>
 
+              <!-- Edit Transaction Button -->
+              <button
+                @click="openEditModal(tx)"
+                class="p-2 rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors opacity-80 group-hover:opacity-100"
+                title="Edit transaction"
+              >
+                <PencilIcon class="w-4 h-4" />
+              </button>
+
+              <!-- Delete Transaction Button -->
               <button
                 @click="deleteTransaction(tx)"
                 class="p-2 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-80 group-hover:opacity-100"
@@ -205,7 +215,7 @@
       <div class="minimal-card max-w-lg w-full p-6 space-y-5 animate-scale-up">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-bold text-slate-900">
-            {{ modalType === 'expense' ? 'Log Expense' : (modalType === 'income' ? 'Log Income' : 'Cross-Account Transfer') }}
+            {{ editingTransactionId ? 'Edit Entry' : (modalType === 'expense' ? 'Log Expense' : (modalType === 'income' ? 'Log Income' : 'Cross-Account Transfer')) }}
           </h3>
           <button @click="closeModal" class="text-slate-400 hover:text-slate-600 p-1">
             <XIcon class="w-5 h-5" />
@@ -321,7 +331,7 @@
               :disabled="form.processing"
               class="minimal-btn-primary px-6 py-2.5 text-xs disabled:opacity-50"
             >
-              Save Entry
+              {{ editingTransactionId ? 'Update Entry' : 'Save Entry' }}
             </button>
           </div>
         </form>
@@ -339,6 +349,7 @@ import {
   Plus as PlusIcon,
   ArrowRightLeft as ArrowRightLeftIcon,
   Filter as FilterIcon,
+  Pencil as PencilIcon,
   Trash2 as Trash2Icon,
   ArrowUpRight as ArrowUpRightIcon,
   ArrowDownLeft as ArrowDownLeftIcon,
@@ -354,6 +365,7 @@ const props = defineProps({
 
 const showModal = ref(false);
 const modalType = ref('expense');
+const editingTransactionId = ref(null);
 
 const filterForm = ref({
   search: props.filters.search || '',
@@ -395,24 +407,46 @@ const form = useForm({
 });
 
 const openModal = (type) => {
+  editingTransactionId.value = null;
   modalType.value = type;
   form.type = type;
   form.account_id = props.accounts[0]?.id || '';
   form.destination_account_id = props.accounts[1]?.id || '';
   form.category_id = props.categories[0]?.id || '';
   form.amount = '';
+  form.date = todayStr;
   form.notes = '';
+  showModal.value = true;
+};
+
+const openEditModal = (tx) => {
+  editingTransactionId.value = tx.id;
+  modalType.value = tx.type;
+  form.type = tx.type;
+  form.account_id = tx.account_id || '';
+  form.destination_account_id = tx.destination_account_id || '';
+  form.category_id = tx.category_id || '';
+  form.amount = tx.amount;
+  form.date = tx.date ? tx.date.substring(0, 10) : todayStr;
+  form.notes = tx.notes || '';
   showModal.value = true;
 };
 
 const closeModal = () => {
   showModal.value = false;
+  editingTransactionId.value = null;
 };
 
 const submitTransaction = () => {
-  form.post('/transactions', {
-    onSuccess: () => closeModal(),
-  });
+  if (editingTransactionId.value) {
+    form.put(`/transactions/${editingTransactionId.value}`, {
+      onSuccess: () => closeModal(),
+    });
+  } else {
+    form.post('/transactions', {
+      onSuccess: () => closeModal(),
+    });
+  }
 };
 
 const deleteTransaction = (tx) => {

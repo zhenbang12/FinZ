@@ -13,38 +13,68 @@
       <div class="minimal-card p-6 sm:p-8 space-y-6">
         <form @submit.prevent="submitUpload" class="space-y-6">
           <div
-            @click="triggerFileInput"
             @dragover.prevent="isDragging = true"
             @dragenter.prevent="isDragging = true"
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
             :class="[
-              isDragging ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20' : 'border-slate-300 hover:border-slate-800 bg-slate-50 hover:bg-slate-100/80',
-              'border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all group'
+              isDragging ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20' : 'border-slate-300 bg-slate-50',
+              'border-2 border-dashed rounded-2xl p-6 sm:p-10 text-center transition-all'
             ]"
           >
-            <!-- Native File Input (Removed capture="environment" to allow both library selection & camera on mobile) -->
+            <!-- Camera Direct Input (forces mobile camera) -->
             <input
-              ref="fileInputRef"
+              ref="cameraInputRef"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="hidden"
+              @change="handleFileSelected"
+            />
+
+            <!-- Gallery/File Input (opens photo library/files) -->
+            <input
+              ref="galleryInputRef"
               type="file"
               accept="image/*"
               class="hidden"
               @change="handleFileSelected"
             />
 
-            <div class="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+            <div class="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto mb-4">
               <CameraIcon class="w-8 h-8 text-white" />
             </div>
 
             <h3 class="text-lg font-bold text-slate-900 mb-1">
-              {{ previewUrl ? 'Image Selected (Click or drop to replace)' : 'Take Photo, Upload, or Drag & Drop Receipt' }}
+              {{ previewUrl ? 'Image Selected (Replace below)' : 'Scan or Upload Receipt' }}
             </h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium">
-              Powered strictly by <span class="text-slate-900 font-bold">Google Gemini AI Vision</span>. Drag & drop image here or click to select from library!
+            <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium mb-6">
+              Powered strictly by <span class="text-slate-900 font-bold">Google Gemini AI Vision</span>. Take a photo directly or choose from gallery!
             </p>
 
+            <!-- Dual Action Selection Buttons for Mobile & Desktop -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+              <button
+                type="button"
+                @click="triggerCamera"
+                class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <CameraIcon class="w-4 h-4 text-white" />
+                <span>Take Photo (Camera)</span>
+              </button>
+
+              <button
+                type="button"
+                @click="triggerGallery"
+                class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <UploadIcon class="w-4 h-4 text-slate-700" />
+                <span>Upload from Gallery</span>
+              </button>
+            </div>
+
             <!-- Preview Image if selected -->
-            <div v-if="previewUrl" class="mt-4 max-w-xs mx-auto overflow-hidden rounded-xl border border-slate-300 shadow-md">
+            <div v-if="previewUrl" class="mt-6 max-w-xs mx-auto overflow-hidden rounded-xl border border-slate-300 shadow-md">
               <img :src="previewUrl" alt="Receipt preview" class="w-full max-h-48 object-cover" />
             </div>
           </div>
@@ -128,6 +158,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
   Camera as CameraIcon,
+  Upload as UploadIcon,
   Sparkles as SparklesIcon,
   Receipt as ReceiptIcon,
 } from 'lucide-vue-next';
@@ -136,7 +167,8 @@ const props = defineProps({
   receipts: { type: Array, default: () => [] },
 });
 
-const fileInputRef = ref(null);
+const cameraInputRef = ref(null);
+const galleryInputRef = ref(null);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
 const isProcessing = ref(false);
@@ -146,8 +178,16 @@ const form = useForm({
   image: null,
 });
 
-const triggerFileInput = () => {
-  fileInputRef.value.click();
+const triggerCamera = () => {
+  if (cameraInputRef.value) {
+    cameraInputRef.value.click();
+  }
+};
+
+const triggerGallery = () => {
+  if (galleryInputRef.value) {
+    galleryInputRef.value.click();
+  }
 };
 
 const setFile = (file) => {
