@@ -353,7 +353,17 @@
                   @change="onProofFileChange"
                   class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
                 />
-                <img v-if="proofPreview" :src="proofPreview" class="w-10 h-10 rounded-lg object-cover border border-slate-300 shrink-0" />
+                <div v-if="proofPreview" class="relative shrink-0 flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  <img :src="proofPreview" class="w-9 h-9 rounded-lg object-cover border border-slate-300" />
+                  <button
+                    type="button"
+                    @click="removeProofImage"
+                    class="text-rose-600 hover:bg-rose-100 p-1 rounded-md transition-colors"
+                    title="Remove Proof Image"
+                  >
+                    <Trash2Icon class="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -617,9 +627,16 @@ const logForm = useForm({
   reference_no: '',
   notes: '',
   proof_image: null,
+  remove_proof: false,
   account_id: props.accounts.length > 0 ? props.accounts[0].id : null,
   auto_post_income: false,
 });
+
+const removeProofImage = () => {
+  logForm.proof_image = null;
+  logForm.remove_proof = true;
+  proofPreview.value = null;
+};
 
 // Proof Image Modal Viewer State
 const showProofModal = ref(false);
@@ -688,6 +705,7 @@ const onProofFileChange = async (e) => {
   if (file) {
     const compressed = await compressImage(file);
     logForm.proof_image = compressed;
+    logForm.remove_proof = false;
     proofPreview.value = URL.createObjectURL(compressed);
   }
 };
@@ -703,6 +721,7 @@ const openLogModal = (cycle) => {
   logForm.reference_no = cycle.reference_no || '';
   logForm.notes = cycle.notes || '';
   logForm.proof_image = null;
+  logForm.remove_proof = false;
   proofPreview.value = cycle.proof_image_path || null;
   logForm.auto_post_income = !!cycle.transaction_id;
 

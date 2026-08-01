@@ -53,15 +53,38 @@
 
       <!-- Receipt Summary Header -->
       <div class="minimal-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Vendor</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
-            {{ receipt.merchant_name || 'Extracted Receipt' }}
-          </h2>
-          <p class="text-xs text-slate-500 mt-1 font-medium">Receipt ID: #{{ receipt.id }} • {{ formatDate(receipt.created_at) }}</p>
+        <div class="flex items-center space-x-3.5">
+          <button
+            v-if="receipt.image_path"
+            type="button"
+            @click="showOriginalReceiptModal = true"
+            class="shrink-0 group focus:outline-none"
+            title="Click to view original scanned receipt image"
+          >
+            <img
+              :src="receipt.image_path"
+              class="w-14 h-14 rounded-2xl object-cover border border-slate-300 group-hover:scale-105 group-hover:border-indigo-500 transition-all shadow-xs"
+            />
+          </button>
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Vendor</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+              {{ receipt.merchant_name || 'Extracted Receipt' }}
+            </h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Receipt ID: #{{ receipt.id }} • {{ formatDate(receipt.created_at) }}</p>
+          </div>
         </div>
 
-        <div class="flex items-center space-x-4 border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
+        <div class="flex items-center space-x-4 border-t md:border-t-0 border-slate-100 pt-3 md:pt-0 justify-between md:justify-end">
+          <button
+            v-if="receipt.image_path"
+            @click="showOriginalReceiptModal = true"
+            class="minimal-btn-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-2 rounded-xl shrink-0"
+          >
+            <ImageIcon class="w-4 h-4 text-indigo-600" />
+            <span>View Original Receipt</span>
+          </button>
+
           <div class="text-right">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
             <span class="text-2xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
@@ -273,6 +296,28 @@
           </div>
         </div>
       </div>
+
+      <!-- Original Scanned Receipt Modal -->
+      <div
+        v-if="showOriginalReceiptModal"
+        class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+        @click.self="showOriginalReceiptModal = false"
+      >
+        <div class="minimal-card max-w-xl w-full p-4 sm:p-5 space-y-3 animate-scale-up">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <ReceiptIcon class="w-4 h-4 text-indigo-600" />
+              <span>Original Scanned Receipt</span>
+            </h4>
+            <button @click="showOriginalReceiptModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+              <XIcon class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center max-h-[75vh]">
+            <img :src="receipt.image_path" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-xs" />
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -293,6 +338,9 @@ import {
   Copy as CopyIcon,
   RotateCcw as RotateCcwIcon,
   CheckCircle as CheckCircleIcon,
+  Image as ImageIcon,
+  Receipt as ReceiptIcon,
+  X as XIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -300,7 +348,11 @@ const props = defineProps({
   accounts: { type: Array, default: () => [] },
   categories: { type: Array, default: () => [] },
   shareUrl: { type: String, default: null },
+  taxesAndFees: { type: Array, default: () => [] },
+  discounts: { type: Array, default: () => [] },
 });
+
+const showOriginalReceiptModal = ref(false);
 
 const copied = ref(false);
 

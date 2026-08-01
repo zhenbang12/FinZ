@@ -337,6 +337,7 @@ class SubscriptionController extends Controller
             'reference_no' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
             'proof_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'remove_proof' => 'nullable|boolean',
             'account_id' => 'nullable|exists:accounts,id',
             'auto_post_income' => 'nullable|boolean',
         ]);
@@ -346,8 +347,10 @@ class SubscriptionController extends Controller
             abort(403);
         }
 
-        // Handle optional receipt image upload
+        // Handle optional receipt image upload or removal
         $proofPath = null;
+        $shouldRemoveProof = !empty($validated['remove_proof']);
+
         if ($request->hasFile('proof_image')) {
             $file = $request->file('proof_image');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -355,7 +358,7 @@ class SubscriptionController extends Controller
             $proofPath = '/proofs/' . $filename;
         }
 
-        DB::transaction(function () use ($request, $validated, $member, $proofPath) {
+        DB::transaction(function () use ($request, $validated, $member, $proofPath, $shouldRemoveProof) {
             $payment = SubscriptionPayment::firstOrNew([
                 'subscription_member_id' => $member->id,
                 'billing_year' => $validated['billing_year'],
@@ -371,6 +374,8 @@ class SubscriptionController extends Controller
             $payment->notes = $validated['notes'] ?? null;
             if ($proofPath) {
                 $payment->proof_image_path = $proofPath;
+            } elseif ($shouldRemoveProof) {
+                $payment->proof_image_path = null;
             }
 
             // Auto post as income transaction to FinZ ledger if requested
