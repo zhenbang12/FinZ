@@ -295,30 +295,30 @@
               <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
                 <div class="grid grid-cols-3 gap-2">
-                  <a
-                    href="tngd://"
-                    target="_blank"
-                    class="px-2 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open Touch 'n Go eWallet App"
+                  <button
+                    type="button"
+                    @click="launchAppOrWeb('tngd://', 'https://www.touchngo.com.my')"
+                    class="px-2 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    title="Open Touch 'n Go eWallet"
                   >
                     <span>Touch 'n Go</span>
-                  </a>
-                  <a
-                    href="maybank2umae://"
-                    target="_blank"
-                    class="px-2 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open Maybank MAE App"
+                  </button>
+                  <button
+                    type="button"
+                    @click="launchAppOrWeb('maybank2umae://', 'https://www.maybank2u.com.my')"
+                    class="px-2 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    title="Open Maybank MAE"
                   >
                     <span>MAE</span>
-                  </a>
-                  <a
-                    href="cimbclicks://"
-                    target="_blank"
-                    class="px-2 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open CIMB OCTO App"
+                  </button>
+                  <button
+                    type="button"
+                    @click="launchAppOrWeb('cimbclicks://', 'https://www.cimbclicks.com.my')"
+                    class="px-2 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    title="Open CIMB Clicks"
                   >
                     <span>CIMB</span>
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -446,6 +446,18 @@ onMounted(() => {
 onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
+
+const launchAppOrWeb = (appScheme, webUrl) => {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = appScheme;
+    setTimeout(() => {
+      window.open(webUrl, '_blank');
+    }, 1500);
+  } else {
+    window.open(webUrl, '_blank');
+  }
+};
 
 const confirmDeleteReceipt = () => {
   if (confirm(`Are you sure you want to delete this receipt from "${props.receipt.merchant_name || 'Receipt #' + props.receipt.id}"?`)) {
