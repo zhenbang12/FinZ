@@ -296,26 +296,29 @@
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
                 <div class="grid grid-cols-3 gap-2">
                   <a
-                    :href="getAppHref('tng')"
-                    :target="isDesktop ? '_blank' : '_self'"
+                    href="https://www.touchngo.com.my"
+                    target="_blank"
+                    @click="openEWallet($event, 'tngd://app')"
                     class="px-2 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open Touch 'n Go eWallet App"
+                    title="Open Touch 'n Go eWallet"
                   >
                     <span>Touch 'n Go</span>
                   </a>
                   <a
-                    :href="getAppHref('mae')"
-                    :target="isDesktop ? '_blank' : '_self'"
+                    href="https://www.maybank2u.com.my"
+                    target="_blank"
+                    @click="openEWallet($event, 'maybank2umae://')"
                     class="px-2 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open Maybank MAE App"
+                    title="Open Maybank MAE"
                   >
                     <span>MAE</span>
                   </a>
                   <a
-                    :href="getAppHref('cimb')"
-                    :target="isDesktop ? '_blank' : '_self'"
+                    href="https://www.cimbclicks.com.my"
+                    target="_blank"
+                    @click="openEWallet($event, 'cimbclicks://')"
                     class="px-2 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open CIMB OCTO App"
+                    title="Open CIMB Clicks"
                   >
                     <span>CIMB</span>
                   </a>
@@ -447,28 +450,11 @@ onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
 
-const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isDesktop = computed(() => !isMobile);
-
-const appLinks = {
-  tng: {
-    app: 'tngd://app',
-    web: 'https://www.touchngo.com.my',
-  },
-  mae: {
-    app: 'maybank2umae://',
-    web: 'https://www.maybank2u.com.my',
-  },
-  cimb: {
-    app: 'cimbclicks://',
-    web: 'https://www.cimbclicks.com.my',
-  },
-};
-
-const getAppHref = (appName) => {
-  const target = appLinks[appName];
-  if (!target) return '#';
-  return isDesktop.value ? target.web : target.app;
+const openEWallet = (event, appScheme) => {
+  const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobileDevice) {
+    window.location.href = appScheme;
+  }
 };
 
 const confirmDeleteReceipt = () => {
