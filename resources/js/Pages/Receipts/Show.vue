@@ -58,6 +58,13 @@
             <CopyIcon class="w-3.5 h-3.5" />
             <span>{{ copied ? 'Copied Link!' : 'Copy Guest Link' }}</span>
           </button>
+          <button
+            @click="showQrModal = true"
+            class="minimal-btn-secondary px-4 py-2 text-xs font-bold flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <QrCodeIcon class="w-3.5 h-3.5 text-indigo-600" />
+            <span>Show QR Code</span>
+          </button>
         </div>
       </div>
 
@@ -284,6 +291,37 @@
                 />
               </div>
 
+              <!-- Quick Pay via Banking / eWallet App Shortcuts -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">⚡ Quick Open eWallet / Banking App</span>
+                <div class="grid grid-cols-3 gap-2">
+                  <a
+                    href="tngd://"
+                    target="_blank"
+                    class="px-2 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
+                    title="Open Touch 'n Go eWallet App"
+                  >
+                    <span>Touch 'n Go</span>
+                  </a>
+                  <a
+                    href="maybank2umae://"
+                    target="_blank"
+                    class="px-2 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
+                    title="Open Maybank MAE App"
+                  >
+                    <span>MAE</span>
+                  </a>
+                  <a
+                    href="cimbclicks://"
+                    target="_blank"
+                    class="px-2 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
+                    title="Open CIMB OCTO App"
+                  >
+                    <span>CIMB</span>
+                  </a>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 :disabled="claimedItemIds.length === 0 || claimForm.processing"
@@ -317,12 +355,46 @@
           </div>
         </div>
       </div>
+
+      <!-- Table QR Code Modal -->
+      <div
+        v-if="showQrModal"
+        class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+        @click.self="showQrModal = false"
+      >
+        <div class="minimal-card max-w-sm w-full p-6 text-center space-y-4 animate-scale-up">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+              <QrCodeIcon class="w-4 h-4 text-indigo-600" />
+              <span>Scan Table QR Code</span>
+            </h4>
+            <button @click="showQrModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+              <XIcon class="w-5 h-5" />
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">
+            Hold up this QR code at the table! Friends can scan with their phone camera to join live.
+          </p>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 inline-block shadow-sm">
+            <img
+              :src="`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`"
+              alt="Session QR Code"
+              class="w-52 h-52 mx-auto rounded-lg object-contain"
+            />
+          </div>
+          <div class="pt-2">
+            <button @click="copyShareUrl" class="minimal-btn-primary w-full py-2.5 text-xs font-bold">
+              {{ copied ? 'Copied Link!' : 'Copy Guest Link Instead' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
@@ -341,6 +413,7 @@ import {
   Receipt as ReceiptIcon,
   X as XIcon,
   Trash2 as Trash2Icon,
+  QrCode as QrCodeIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -352,14 +425,33 @@ const props = defineProps({
   discounts: { type: Array, default: () => [] },
 });
 
+const showOriginalReceiptModal = ref(false);
+const showQrModal = ref(false);
+
+let syncInterval = null;
+
+onMounted(() => {
+  if (props.receipt.share_token) {
+    // Real-time live auto sync for host every 3.5 seconds
+    syncInterval = setInterval(() => {
+      router.reload({
+        only: ['receipt'],
+        preserveScroll: true,
+        preserveState: true,
+      });
+    }, 3500);
+  }
+});
+
+onUnmounted(() => {
+  if (syncInterval) clearInterval(syncInterval);
+});
+
 const confirmDeleteReceipt = () => {
   if (confirm(`Are you sure you want to delete this receipt from "${props.receipt.merchant_name || 'Receipt #' + props.receipt.id}"?`)) {
     router.delete(`/receipts/${props.receipt.id}`);
   }
 };
-
-const showOriginalReceiptModal = ref(false);
-
 const copied = ref(false);
 
 const getItemClaimStatus = (item) => {

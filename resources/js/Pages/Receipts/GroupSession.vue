@@ -220,6 +220,37 @@
               <span class="text-2xl font-black text-emerald-600">{{ formatCurrency(proRataData.final_total) }}</span>
             </div>
           </div>
+
+          <!-- Quick Pay via Banking / eWallet App Shortcuts -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">⚡ Quick Open eWallet / Banking App</span>
+            <div class="grid grid-cols-3 gap-2">
+              <a
+                href="tngd://"
+                target="_blank"
+                class="px-2.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open Touch 'n Go eWallet App"
+              >
+                <span>Touch 'n Go</span>
+              </a>
+              <a
+                href="maybank2umae://"
+                target="_blank"
+                class="px-2.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open Maybank MAE App"
+              >
+                <span>MAE</span>
+              </a>
+              <a
+                href="cimbclicks://"
+                target="_blank"
+                class="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
+                title="Open CIMB OCTO App"
+              >
+                <span>CIMB</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         <form @submit.prevent="submitGuestClaim" class="space-y-3 pt-4 border-t border-slate-100">
@@ -260,7 +291,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
@@ -281,6 +312,23 @@ const props = defineProps({
   taxesAndFees: { type: Array, default: () => [] },
   discounts: { type: Array, default: () => [] },
   existingClaims: { type: Array, default: () => [] },
+});
+
+let syncInterval = null;
+
+onMounted(() => {
+  // Real-time live auto sync every 3.5 seconds
+  syncInterval = setInterval(() => {
+    router.reload({
+      only: ['receipt', 'existingClaims'],
+      preserveScroll: true,
+      preserveState: true,
+    });
+  }, 3500);
+});
+
+onUnmounted(() => {
+  if (syncInterval) clearInterval(syncInterval);
 });
 
 const page = usePage();
