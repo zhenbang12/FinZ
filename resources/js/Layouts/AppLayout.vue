@@ -42,15 +42,8 @@
         </nav>
       </div>
 
-      <!-- Quick Action + User Badge & Logout -->
+      <!-- User Badge & Logout -->
       <div class="space-y-4 pt-6 border-t border-slate-100">
-        <Link
-          href="/receipts"
-          class="minimal-btn-primary w-full py-3 px-4 flex items-center justify-center space-x-2 text-xs font-semibold"
-        >
-          <CameraIcon class="w-4 h-4 text-white" />
-          <span>SmartSplit</span>
-        </Link>
 
         <div class="flex items-center justify-between p-2.5 rounded-full bg-slate-50 border border-slate-200">
           <div class="flex items-center space-x-3 min-w-0">
@@ -148,11 +141,11 @@
     <!-- Mobile Bottom Navigation Bar -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-2 flex items-center justify-around">
       <Link
-        href="/quick"
-        :class="[$page.url.startsWith('/quick') ? 'text-indigo-600 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
+        href="/"
+        :class="[$page.url === '/' ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <ZapIcon class="w-5 h-5 mb-0.5" />
-        <span>Quick Hub</span>
+        <HomeIcon class="w-5 h-5 mb-0.5" />
+        <span>Overview</span>
       </Link>
 
       <Link
@@ -183,11 +176,11 @@
       </Link>
 
       <Link
-        href="/"
-        :class="[$page.url === '/' ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
+        href="/accounts"
+        :class="[$page.url.startsWith('/accounts') ? 'text-slate-900 font-bold' : 'text-slate-400', 'flex flex-col items-center py-1 px-2 text-[10px] tracking-tight']"
       >
-        <HomeIcon class="w-5 h-5 mb-0.5" />
-        <span>Overview</span>
+        <WalletIcon class="w-5 h-5 mb-0.5" />
+        <span>Accounts</span>
       </Link>
     </nav>
   </div>
@@ -197,7 +190,6 @@
 import { computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import {
-  Zap as ZapIcon,
   LayoutDashboard as HomeIcon,
   ReceiptText as ReceiptTextIcon,
   Camera as CameraIcon,
@@ -230,7 +222,6 @@ const logout = () => {
 
 const navItems = computed(() => {
   return [
-    { name: 'Quick Hub', href: '/quick', icon: ZapIcon },
     { name: 'Overview', href: '/', icon: HomeIcon },
     { name: 'Financial Ledger', href: '/transactions', icon: ReceiptTextIcon },
     { name: 'SmartSplit', href: '/receipts', icon: CameraIcon },

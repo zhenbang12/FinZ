@@ -7,28 +7,28 @@
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
             Overview
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Real-time net worth tracking & receipt parsing in MYR.</p>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Real-time financial tracking & smart bill management in MYR.</p>
         </div>
 
-        <!-- Minimal Action Buttons -->
-        <div class="flex items-center gap-2">
-          <Link
-            href="/receipts"
-            class="minimal-btn-primary flex items-center justify-center space-x-2 px-5 py-2.5 text-xs font-semibold"
-          >
-            <CameraIcon class="w-4 h-4 text-white" />
-            <span>Scan Receipt</span>
-          </Link>
+        <!-- Desktop Action Buttons -->
+        <div class="hidden sm:flex items-center gap-2">
           <button
             @click="openModal('expense')"
-            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-4 py-2.5 text-xs font-semibold"
+            class="minimal-btn-primary flex items-center justify-center space-x-1.5 px-4 py-2.5 text-xs font-semibold"
           >
-            <PlusIcon class="w-4 h-4 text-emerald-600" />
+            <PlusIcon class="w-4 h-4 text-white" />
             <span>Log Expense</span>
           </button>
           <button
+            @click="openModal('income')"
+            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-3.5 py-2.5 text-xs font-semibold"
+          >
+            <PlusIcon class="w-4 h-4 text-emerald-600" />
+            <span>Log Income</span>
+          </button>
+          <button
             @click="openModal('transfer')"
-            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-4 py-2.5 text-xs font-semibold"
+            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-3.5 py-2.5 text-xs font-semibold"
           >
             <ArrowRightLeftIcon class="w-4 h-4 text-sky-600" />
             <span>Transfer</span>
@@ -36,200 +36,325 @@
         </div>
       </div>
 
-      <!-- Net Worth Hero Card (Minimalist Light Hero) -->
-      <div class="minimal-card-hero p-6 sm:p-8 space-y-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-2">
-              <TrendingUpIcon class="w-4 h-4 text-slate-900" />
-              <span>Total Net Worth (MYR)</span>
+      <!-- MOBILE VIEW: Compact Quick Summary Layout -->
+      <div class="block sm:hidden space-y-6">
+        <!-- 2 Stat Summary Boxes: Yesterday's Spent & Today's Spent -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="minimal-card p-4 border-l-4 border-l-slate-400 bg-slate-50/90 shadow-xs">
+            <div class="flex items-center justify-between text-slate-500 mb-1">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider">Yesterday's Spent</span>
+              <CalendarIcon class="w-3.5 h-3.5 text-slate-400" />
             </div>
-            <div class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-              {{ formatCurrency(totalNetWorth) }}
+            <div class="text-xl font-black text-slate-800 tracking-tight">
+              {{ formatCurrency(yesterdaySpending) }}
             </div>
-            <p class="text-xs text-slate-500 mt-2 flex items-center gap-2 font-medium">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-              Live calculated across {{ accounts.length }} financial accounts
-            </p>
           </div>
 
-          <!-- Monthly Summary Stats -->
-          <div class="grid grid-cols-2 gap-4 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-8">
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Monthly Expenses</span>
-              <span class="text-lg sm:text-xl font-bold text-rose-600 mt-0.5 block">{{ formatCurrency(monthlyExpenses) }}</span>
+          <div class="minimal-card p-4 border-l-4 border-l-rose-500 bg-rose-50/40 shadow-xs">
+            <div class="flex items-center justify-between text-rose-600 mb-1">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider">Today's Spent</span>
+              <SparklesIcon class="w-3.5 h-3.5 text-rose-500" />
             </div>
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Monthly Income</span>
-              <span class="text-lg sm:text-xl font-bold text-emerald-600 mt-0.5 block">{{ formatCurrency(monthlyIncome) }}</span>
+            <div class="text-xl font-black text-rose-600 tracking-tight">
+              {{ formatCurrency(todaySpending) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Primary Mobile Action Buttons -->
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            @click="openModal('expense')"
+            class="minimal-btn-primary py-3 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center active:scale-95 transition-all"
+          >
+            <PlusIcon class="w-4 h-4 text-white" />
+            <span class="text-[11px] font-bold">Log Expense</span>
+          </button>
+
+          <button
+            @click="openModal('income')"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center active:scale-95 transition-all"
+          >
+            <PlusIcon class="w-4 h-4 text-white" />
+            <span class="text-[11px] font-bold">Log Income</span>
+          </button>
+
+          <button
+            @click="openModal('transfer')"
+            class="minimal-btn-secondary py-3 px-2 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center active:scale-95 transition-all border-slate-300"
+          >
+            <ArrowRightLeftIcon class="w-4 h-4 text-sky-600" />
+            <span class="text-[11px] font-bold text-slate-900">Transfer</span>
+          </button>
+        </div>
+
+        <!-- Pinned Accounts (Mobile) -->
+        <div class="minimal-card p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <PinIcon class="w-3.5 h-3.5 text-indigo-600" />
+              <span>Pinned Accounts</span>
+            </h3>
+
+            <button
+              @click="showPinModal = true"
+              class="text-[10px] font-bold text-indigo-600 hover:underline"
+            >
+              Manage Pins ({{ pinnedAccounts.length }})
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 gap-2">
+            <div
+              v-for="acc in pinnedAccounts"
+              :key="acc.id"
+              class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between"
+            >
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold shrink-0"
+                  :style="{ backgroundColor: acc.color || '#0f172a' }"
+                >
+                  <WalletIcon class="w-3.5 h-3.5 text-white" />
+                </div>
+                <div>
+                  <span class="font-bold text-slate-900 text-xs block truncate">{{ acc.name }}</span>
+                  <span class="text-[10px] text-slate-400 capitalize">{{ acc.type }}</span>
+                </div>
+              </div>
+              <span class="font-extrabold text-slate-900 text-sm">{{ formatCurrency(acc.balance) }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Accounts Overview Grid -->
-      <div>
-        <div class="flex items-center justify-between mb-4">
+      <!-- DESKTOP / TABLET VIEW: Detailed Analytics & Net Worth Layout -->
+      <div class="hidden sm:block space-y-6">
+        <!-- Net Worth Hero Card -->
+        <div class="minimal-card-hero p-6 sm:p-8 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Net Worth</span>
+              <div class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-0.5">
+                {{ formatCurrency(totalNetWorth) }}
+              </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+              <div class="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold flex items-center gap-1.5">
+                <TrendingUpIcon class="w-4 h-4 text-emerald-600" />
+                <span>Income: {{ formatCurrency(monthlyIncome) }}</span>
+              </div>
+              <div class="px-4 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 font-semibold flex items-center gap-1.5">
+                <ArrowUpRightIcon class="w-4 h-4 text-rose-600" />
+                <span>Expenses: {{ formatCurrency(monthlyExpenses) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts Grid & Pinned Accounts -->
+        <div class="minimal-card p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <WalletIcon class="w-5 h-5 text-slate-700" />
+              <span>Financial Accounts ({{ accounts.length }})</span>
+            </h3>
+            <button
+              @click="showPinModal = true"
+              class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+            >
+              <PinIcon class="w-3.5 h-3.5 text-indigo-600" />
+              <span>Manage Pinned Accounts</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="acc in accounts"
+              :key="acc.id"
+              class="minimal-card p-4 bg-slate-50/70 hover:bg-slate-100/80 transition-all flex items-center justify-between"
+            >
+              <div class="flex items-center space-x-3 min-w-0">
+                <div
+                  class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-xs"
+                  :style="{ backgroundColor: acc.color || '#0f172a' }"
+                >
+                  <WalletIcon class="w-4 h-4 text-white" />
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="font-bold text-slate-900 text-sm truncate">{{ acc.name }}</span>
+                    <span v-if="acc.is_pinned" class="text-[9px] bg-indigo-100 text-indigo-800 font-extrabold px-1.5 py-0.5 rounded-full border border-indigo-200">
+                      Pinned
+                    </span>
+                  </div>
+                  <span class="text-xs text-slate-500 capitalize font-medium block truncate">{{ acc.type }}</span>
+                </div>
+              </div>
+              <span class="font-black text-slate-900 text-base shrink-0 ml-2">{{ formatCurrency(acc.balance) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Ledger Activity (Shared across Mobile & Desktop) -->
+      <div class="minimal-card p-6 space-y-4">
+        <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <WalletIcon class="w-5 h-5 text-slate-700" />
-            <span>Accounts</span>
+            <ClockIcon class="w-5 h-5 text-slate-700" />
+            <span>Recent Ledger Activity</span>
           </h3>
-          <Link href="/accounts" class="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
-            Manage Accounts →
+          <Link href="/transactions" class="text-xs font-bold text-slate-600 hover:text-slate-900">
+            View All →
           </Link>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div v-if="recentTransactions.length === 0" class="text-center py-8 text-slate-400 text-xs">
+          No recent transactions found. Log your first expense or transfer above!
+        </div>
+
+        <div v-else class="space-y-2.5">
           <div
-            v-for="account in accounts"
-            :key="account.id"
-            class="minimal-card minimal-card-hover p-5 flex flex-col justify-between"
+            v-for="tx in recentTransactions"
+            :key="tx.id"
+            class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 text-xs transition-all"
           >
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center space-x-3">
-                <div
-                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0"
-                  :style="{ backgroundColor: account.color || '#0f172a' }"
-                >
-                  <span class="uppercase">{{ account.name.charAt(0) }}</span>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="font-bold text-sm text-slate-900 truncate max-w-[130px]">{{ account.name }}</h4>
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{{ account.type }}</span>
+            <div class="flex items-center space-x-3.5 min-w-0">
+              <div
+                :class="[
+                  tx.type === 'expense' ? 'bg-rose-100 text-rose-700 border-rose-200' :
+                  tx.type === 'income' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                  'bg-sky-100 text-sky-700 border-sky-200',
+                  'w-9 h-9 rounded-full flex items-center justify-center border shrink-0'
+                ]"
+              >
+                <ArrowUpRightIcon v-if="tx.type === 'expense'" class="w-4 h-4" />
+                <ArrowDownLeftIcon v-else-if="tx.type === 'income'" class="w-4 h-4" />
+                <ArrowRightLeftIcon v-else class="w-4 h-4" />
+              </div>
+
+              <div class="min-w-0">
+                <span class="font-bold text-slate-900 text-sm block truncate">
+                  {{ tx.notes || (tx.category ? tx.category.name : 'Transaction') }}
+                </span>
+                <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 truncate mt-0.5">
+                  <span class="text-slate-700 font-bold">{{ tx.account?.name }}</span>
+                  <span v-if="tx.type === 'transfer' && tx.destination_account" class="text-sky-600 font-bold">→ {{ tx.destination_account.name }}</span>
+                  <span v-if="tx.category">• {{ tx.category.name }}</span>
+                  <span>• {{ formatDate(tx.date) }}</span>
                 </div>
               </div>
             </div>
 
-            <div>
-              <div class="text-xl font-extrabold text-slate-900">
-                {{ formatCurrency(account.balance) }}
-              </div>
-              <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Currency: {{ account.currency }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Two Column Layout: Recent Activity & Spending -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Recent Transactions Feed (2 cols) -->
-        <div class="lg:col-span-2 minimal-card p-6 space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <ReceiptIcon class="w-5 h-5 text-slate-700" />
-              <span>Recent Activity</span>
-            </h3>
-            <Link href="/transactions" class="text-xs font-bold text-slate-600 hover:text-slate-900">
-              View All →
-            </Link>
-          </div>
-
-          <div v-if="recentTransactions.length === 0" class="text-center py-8 text-slate-400 text-sm font-medium">
-            No transactions logged yet.
-          </div>
-
-          <div v-else class="space-y-2.5">
-            <div
-              v-for="tx in recentTransactions"
-              :key="tx.id"
-              class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/60 transition-all"
+            <span
+              :class="[
+                tx.type === 'expense' ? 'text-rose-600' :
+                tx.type === 'income' ? 'text-emerald-600' :
+                'text-slate-900',
+                'font-extrabold text-sm shrink-0 ml-3'
+              ]"
             >
-              <div class="flex items-center space-x-3.5 min-w-0">
-                <div
-                  :class="[
-                    tx.type === 'expense' ? 'bg-rose-100 text-rose-700 border-rose-200' :
-                    tx.type === 'income' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                    'bg-sky-100 text-sky-700 border-sky-200',
-                    'w-10 h-10 rounded-full flex items-center justify-center border shrink-0'
-                  ]"
-                >
-                  <ArrowUpRightIcon v-if="tx.type === 'expense'" class="w-4 h-4" />
-                  <ArrowDownLeftIcon v-else-if="tx.type === 'income'" class="w-4 h-4" />
-                  <ArrowRightLeftIcon v-else class="w-4 h-4" />
-                </div>
-
-                <div class="min-w-0">
-                  <p class="text-sm font-bold text-slate-900 truncate">
-                    {{ tx.notes || (tx.category ? tx.category.name : 'Transaction') }}
-                  </p>
-                  <p class="text-xs text-slate-500 flex items-center gap-2 truncate mt-0.5 font-medium">
-                    <span>{{ tx.account?.name }}</span>
-                    <span v-if="tx.destination_account" class="text-sky-600 font-semibold">→ {{ tx.destination_account.name }}</span>
-                    <span>•</span>
-                    <span>{{ formatDate(tx.date) }}</span>
-                  </p>
-                </div>
-              </div>
-
-              <div class="text-right shrink-0">
-                <span
-                  :class="[
-                    tx.type === 'expense' ? 'text-rose-600' :
-                    tx.type === 'income' ? 'text-emerald-600' :
-                    'text-slate-900',
-                    'text-base font-extrabold block'
-                  ]"
-                >
-                  {{ tx.type === 'expense' ? '-' : (tx.type === 'income' ? '+' : '') }}{{ formatCurrency(tx.amount) }}
-                </span>
-                <span v-if="tx.receipt_id" class="text-[9px] text-slate-700 font-bold bg-slate-200/80 px-2 py-0.5 rounded-full border border-slate-300">
-                  SmartSplit
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top Category Spending Widget (1 col) -->
-        <div class="minimal-card p-6 space-y-4">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <PieChartIcon class="w-5 h-5 text-slate-700" />
-            <span>Category Spending</span>
-          </h3>
-
-          <div v-if="topCategories.length === 0" class="text-center py-8 text-slate-400 text-sm font-medium">
-            No categorized expenses recorded.
-          </div>
-
-          <div v-else class="space-y-4">
-            <div v-for="cat in topCategories" :key="cat.category_name" class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs font-semibold">
-                <span class="text-slate-700 flex items-center gap-2 font-medium">
-                  <span class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: cat.color || '#0f172a' }"></span>
-                  {{ cat.category_name }}
-                </span>
-                <span class="text-slate-900 font-bold">{{ formatCurrency(cat.total_amount) }}</span>
-              </div>
-              <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-500"
-                  :style="{
-                    width: `${Math.min(100, (cat.total_amount / (monthlyExpenses || 1)) * 100)}%`,
-                    backgroundColor: cat.color || '#0f172a'
-                  }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100">
-              <Link href="/analytics" class="text-xs font-bold text-slate-700 hover:text-slate-900 block text-center">
-                Full Analytics Report →
-              </Link>
-            </div>
+              {{ tx.type === 'expense' ? '-' : (tx.type === 'income' ? '+' : '') }}{{ formatCurrency(tx.amount) }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Log Transaction Modal -->
+    <!-- Pin Accounts Selection Modal -->
+    <div v-if="showPinModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="minimal-card max-w-md w-full p-6 space-y-4 animate-scale-up">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <PinIcon class="w-5 h-5 text-indigo-600" />
+            <span>Pin Favourite Accounts</span>
+          </h3>
+          <button @click="showPinModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+            <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-500 font-medium">Select maximum 3 favourite accounts to pin to Quick Hub</p>
+
+        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+          <div
+            v-for="acc in accounts"
+            :key="acc.id"
+            @click="togglePinAccount(acc)"
+            :class="[
+              acc.is_pinned ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200',
+              'p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all hover:bg-slate-100'
+            ]"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                :style="{ backgroundColor: acc.color || '#0f172a' }"
+              >
+                <WalletIcon class="w-3.5 h-3.5 text-white" />
+              </div>
+              <div>
+                <span class="font-bold text-xs text-slate-900 block">{{ acc.name }}</span>
+                <span class="text-[10px] text-slate-400">{{ formatCurrency(acc.balance) }}</span>
+              </div>
+            </div>
+
+            <span
+              :class="[
+                acc.is_pinned ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600',
+                'px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors'
+              ]"
+            >
+              {{ acc.is_pinned ? 'Pinned' : 'Pin' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button
+            @click="showPinModal = false"
+            class="minimal-btn-primary px-6 py-2 text-xs font-bold"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Transaction Logging Modal -->
     <div v-if="showModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div class="minimal-card max-w-lg w-full p-6 space-y-5 animate-scale-up">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-bold text-slate-900">
-            {{ modalType === 'expense' ? 'Log Expense' : 'Log Cross-Account Transfer' }}
+            {{ modalType === 'expense' ? 'Log Expense' : (modalType === 'income' ? 'Log Income' : 'Cross-Account Transfer') }}
           </h3>
           <button @click="closeModal" class="text-slate-400 hover:text-slate-600 p-1">
             <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+
+        <!-- Transaction Type Switcher Pill -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button
+            type="button"
+            @click="setModalType('expense')"
+            :class="[modalType === 'expense' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            @click="setModalType('income')"
+            :class="[modalType === 'income' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Income
+          </button>
+          <button
+            type="button"
+            @click="setModalType('transfer')"
+            :class="[modalType === 'transfer' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Transfer
           </button>
         </div>
 
@@ -306,26 +431,22 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">
-              Date
-            </label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Date</label>
             <input
               v-model="form.date"
               type="date"
               required
-              class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-900"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">
-              Notes
-            </label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Notes / Merchant Name</label>
             <input
               v-model="form.notes"
               type="text"
-              placeholder="e.g. Lunch at Nasi Kandar"
-              class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Grocery shopping at Lotus's"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-900"
             />
           </div>
 
@@ -353,25 +474,29 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency, formatDate } from '@/Utils/formatters';
 import {
-  Camera as CameraIcon,
+  Calendar as CalendarIcon,
+  Sparkles as SparklesIcon,
   Plus as PlusIcon,
   ArrowRightLeft as ArrowRightLeftIcon,
   TrendingUp as TrendingUpIcon,
   Wallet as WalletIcon,
-  Receipt as ReceiptIcon,
-  PieChart as PieChartIcon,
+  Clock as ClockIcon,
   ArrowUpRight as ArrowUpRightIcon,
   ArrowDownLeft as ArrowDownLeftIcon,
+  Pin as PinIcon,
   X as XIcon,
 } from 'lucide-vue-next';
 
 const props = defineProps({
   accounts: { type: Array, default: () => [] },
+  pinnedAccounts: { type: Array, default: () => [] },
   totalNetWorth: { type: Number, default: 0 },
+  todaySpending: { type: Number, default: 0 },
+  yesterdaySpending: { type: Number, default: 0 },
   recentTransactions: { type: Array, default: () => [] },
   monthlyExpenses: { type: Number, default: 0 },
   monthlyIncome: { type: Number, default: 0 },
@@ -379,6 +504,7 @@ const props = defineProps({
   categories: { type: Array, default: () => [] },
 });
 
+const showPinModal = ref(false);
 const showModal = ref(false);
 const modalType = ref('expense');
 
@@ -394,13 +520,30 @@ const form = useForm({
   notes: '',
 });
 
-const openModal = (type) => {
+const togglePinAccount = (acc) => {
+  router.post(`/accounts/${acc.id}/toggle-pin`, {}, { preserveState: true });
+};
+
+const setModalType = (type) => {
   modalType.value = type;
   form.type = type;
+  if (type === 'transfer') {
+    if (!form.destination_account_id) {
+      form.destination_account_id = props.accounts.find(a => a.id !== form.account_id)?.id || '';
+    }
+  } else {
+    form.destination_account_id = '';
+    if (!form.category_id && props.categories.length > 0) {
+      form.category_id = props.categories[0].id;
+    }
+  }
+};
+
+const openModal = (type) => {
+  setModalType(type);
   form.account_id = props.accounts[0]?.id || '';
-  form.destination_account_id = props.accounts[1]?.id || '';
-  form.category_id = props.categories[0]?.id || '';
   form.amount = '';
+  form.date = todayStr;
   form.notes = '';
   showModal.value = true;
 };

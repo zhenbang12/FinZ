@@ -13,14 +13,21 @@
         <div class="flex items-center gap-2">
           <button
             @click="openModal('expense')"
-            class="minimal-btn-primary flex items-center justify-center space-x-2 px-5 py-2.5 text-xs font-semibold"
+            class="minimal-btn-primary flex items-center justify-center space-x-2 px-4 py-2.5 text-xs font-semibold"
           >
-            <PlusIcon class="w-4 h-4" />
+            <PlusIcon class="w-4 h-4 text-white" />
             <span>Log Expense</span>
           </button>
           <button
+            @click="openModal('income')"
+            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-4 py-2.5 text-xs font-semibold"
+          >
+            <PlusIcon class="w-4 h-4 text-emerald-600" />
+            <span>Log Income</span>
+          </button>
+          <button
             @click="openModal('transfer')"
-            class="minimal-btn-secondary flex items-center justify-center space-x-2 px-4 py-2.5 text-xs font-semibold"
+            class="minimal-btn-secondary flex items-center justify-center space-x-1.5 px-4 py-2.5 text-xs font-semibold"
           >
             <ArrowRightLeftIcon class="w-4 h-4 text-sky-600" />
             <span>Transfer</span>

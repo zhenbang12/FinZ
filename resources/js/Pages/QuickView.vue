@@ -34,7 +34,7 @@
       </div>
 
       <!-- 3 Primary Action Buttons -->
-      <div class="grid grid-cols-3 gap-2.5 sm:gap-3">
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
         <!-- Button 1: Log Expense -->
         <button
           @click="openModal('expense')"
@@ -44,7 +44,16 @@
           <span class="text-xs font-bold">Log Expense</span>
         </button>
 
-        <!-- Button 2: Log Transfer -->
+        <!-- Button 2: Log Income -->
+        <button
+          @click="openModal('income')"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-2 sm:px-4 rounded-2xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 shadow-sm text-center active:scale-95 transition-all"
+        >
+          <PlusIcon class="w-4 h-4 text-white" />
+          <span class="text-xs font-bold">Log Income</span>
+        </button>
+
+        <!-- Button 3: Log Transfer -->
         <button
           @click="openModal('transfer')"
           class="minimal-btn-secondary py-3 px-2 sm:px-4 rounded-2xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 shadow-sm text-center active:scale-95 transition-all border-slate-300"
@@ -52,15 +61,6 @@
           <ArrowRightLeftIcon class="w-4 h-4 text-sky-600" />
           <span class="text-xs font-bold text-slate-900">Log Transfer</span>
         </button>
-
-        <!-- Button 3: SmartSplit -->
-        <Link
-          href="/receipts"
-          class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-2 sm:px-4 rounded-2xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 shadow-sm text-center active:scale-95 transition-all"
-        >
-          <CameraIcon class="w-4 h-4 text-white" />
-          <span class="text-xs font-bold">SmartSplit</span>
-        </Link>
       </div>
 
       <!-- Pinned Account Balances (2-3 Favourite Accounts) -->
@@ -239,10 +239,35 @@
       <div class="minimal-card max-w-lg w-full p-6 space-y-5 animate-scale-up">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-bold text-slate-900">
-            {{ modalType === 'expense' ? 'Log Expense' : 'Cross-Account Transfer' }}
+            {{ modalType === 'expense' ? 'Log Expense' : (modalType === 'income' ? 'Log Income' : 'Cross-Account Transfer') }}
           </h3>
           <button @click="closeModal" class="text-slate-400 hover:text-slate-600 p-1">
             <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+
+        <!-- Transaction Type Switcher Pill -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button
+            type="button"
+            @click="setModalType('expense')"
+            :class="[modalType === 'expense' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            @click="setModalType('income')"
+            :class="[modalType === 'income' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Income
+          </button>
+          <button
+            type="button"
+            @click="setModalType('transfer')"
+            :class="[modalType === 'transfer' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 font-semibold', 'flex-1 py-1.5 text-xs rounded-lg transition-all text-center']"
+          >
+            Transfer
           </button>
         </div>
 
@@ -413,14 +438,25 @@ const togglePinAccount = (acc) => {
   router.post(`/accounts/${acc.id}/toggle-pin`, {}, { preserveState: true });
 };
 
-const openModal = (type) => {
+const setModalType = (type) => {
   modalType.value = type;
   form.type = type;
+  if (type === 'transfer') {
+    if (!form.destination_account_id) {
+      form.destination_account_id = props.allAccounts.find(a => a.id !== form.account_id)?.id || '';
+    }
+  } else {
+    form.destination_account_id = '';
+    if (!form.category_id && props.categories.length > 0) {
+      form.category_id = props.categories[0].id;
+    }
+  }
+};
+
+const openModal = (type) => {
+  setModalType(type);
   form.account_id = props.allAccounts[0]?.id || '';
-  form.destination_account_id = type === 'transfer' ? (props.allAccounts[1]?.id || '') : '';
-  form.category_id = type === 'transfer' ? '' : (props.categories[0]?.id || '');
   form.amount = '';
-  form.date = todayStr;
   form.notes = '';
   showModal.value = true;
 };

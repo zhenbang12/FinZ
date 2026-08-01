@@ -16,24 +16,35 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Mobile Device Detection: If user is on a mobile phone, render Quick Hub by default
-        $userAgent = strtolower($request->header('User-Agent', ''));
-        $isMobile = preg_match('/(android|iphone|ipod|blackberry|iemobile|opera mini|mobile)/i', $userAgent);
-
-        if ($isMobile) {
-            return (new QuickViewController())->index($request);
+        // Self-healing schema check for accounts table
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'is_pinned')) {
+            \Illuminate\Support\Facades\Schema::table('accounts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->boolean('is_pinned')->default(false);
+            });
         }
 
-        $accounts = Account::where('user_id', $user->id)->get();
-        $totalNetWorth = (float) $accounts->sum('balance');
+        $allAccounts = Account::where('user_id', $user->id)->get();
+        $totalNetWorth = (float) $allAccounts->sum('balance');
 
-        $recentTransactions = Transaction::where('user_id', $user->id)
-            ->with(['account', 'destinationAccount', 'category', 'receipt'])
-            ->orderBy('date', 'desc')
-            ->orderBy('id', 'desc')
-            ->take(6)
-            ->get();
+        // Pinned accounts
+        $pinned = $allAccounts->where('is_pinned', true);
+        $pinnedAccounts = $pinned->isEmpty() ? $allAccounts->take(3) : $pinned->values();
 
+        // Daily spending calculations
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+
+        $todaySpending = (float) Transaction::where('user_id', $user->id)
+            ->where('type', 'expense')
+            ->whereDate('date', $today)
+            ->sum('amount');
+
+        $yesterdaySpending = (float) Transaction::where('user_id', $user->id)
+            ->where('type', 'expense')
+            ->whereDate('date', $yesterday)
+            ->sum('amount');
+
+        // Monthly calculations
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
@@ -46,6 +57,13 @@ class DashboardController extends Controller
             ->where('type', 'income')
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
+
+        $recentTransactions = Transaction::where('user_id', $user->id)
+            ->with(['account', 'destinationAccount', 'category', 'receipt'])
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->take(6)
+            ->get();
 
         $topCategories = Transaction::where('transactions.user_id', $user->id)
             ->where('transactions.type', 'expense')
@@ -62,13 +80,39 @@ class DashboardController extends Controller
         })->get();
 
         return Inertia::render('Dashboard', [
-            'accounts' => $accounts,
+            'accounts' => $allAccounts,
+            'pinnedAccounts' => $pinnedAccounts,
             'totalNetWorth' => $totalNetWorth,
+            'todaySpending' => $todaySpending,
+            'yesterdaySpending' => $yesterdaySpending,
             'recentTransactions' => $recentTransactions,
             'monthlyExpenses' => $monthlyExpenses,
             'monthlyIncome' => $monthlyIncome,
             'topCategories' => $topCategories,
             'categories' => $categories,
         ]);
+    }
+
+    public function togglePin(Request $request, Account $account)
+    {
+        if ($account->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized account action.');
+        }
+
+        // Self-healing schema check for SQLite database
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'is_pinned')) {
+            \Illuminate\Support\Facades\Schema::table('accounts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->boolean('is_pinned')->default(false);
+            });
+        }
+
+        $account->update(['is_pinned' => !$account->is_pinned]);
+
+        return redirect()->back()->with(
+            'success',
+            $account->is_pinned
+                ? "'{$account->name}' pinned to Overview."
+                : "'{$account->name}' unpinned from Overview."
+        );
     }
 }

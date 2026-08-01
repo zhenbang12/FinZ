@@ -29,6 +29,13 @@ class QuickViewController extends Controller
             ->whereDate('date', $yesterday)
             ->sum('amount');
 
+        // Self-healing schema check for SQLite database
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'is_pinned')) {
+            \Illuminate\Support\Facades\Schema::table('accounts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->boolean('is_pinned')->default(false);
+            });
+        }
+
         $allAccounts = Account::where('user_id', $user->id)->get();
 
         // Pinned accounts (if none pinned yet, select top 3 by default)
@@ -64,6 +71,13 @@ class QuickViewController extends Controller
     {
         if ($account->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized account action.');
+        }
+
+        // Self-healing schema check for SQLite database
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'is_pinned')) {
+            \Illuminate\Support\Facades\Schema::table('accounts', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->boolean('is_pinned')->default(false);
+            });
         }
 
         $account->update(['is_pinned' => !$account->is_pinned]);
