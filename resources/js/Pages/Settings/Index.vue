@@ -14,12 +14,12 @@
         </div>
 
         <!-- Sub-Tab Selection (Preferences / Security / Users) -->
-        <div class="flex items-center bg-slate-200/70 p-1 rounded-full border border-slate-300">
+        <div class="flex items-center bg-slate-200/70 p-1 rounded-full border border-slate-300 overflow-x-auto">
           <button
             @click="activeTab = 'preferences'"
             :class="[
               activeTab === 'preferences' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5'
+              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
             ]"
           >
             <SlidersIcon class="w-3.5 h-3.5" />
@@ -30,11 +30,11 @@
             @click="activeTab = 'security'"
             :class="[
               activeTab === 'security' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5'
+              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
             ]"
           >
             <ShieldCheckIcon class="w-3.5 h-3.5" />
-            <span>Device Security</span>
+            <span>Security</span>
           </button>
 
           <button
@@ -42,11 +42,11 @@
             @click="activeTab = 'users'"
             :class="[
               activeTab === 'users' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5'
+              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
             ]"
           >
             <UsersIcon class="w-3.5 h-3.5" />
-            <span>User Management</span>
+            <span>Users</span>
           </button>
         </div>
       </div>

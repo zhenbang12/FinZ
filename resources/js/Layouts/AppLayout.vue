@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col font-sans selection:bg-[#0f172a] selection:text-white pb-24 md:pb-0 md:pl-64">
+    <!-- Global Navigation Progress Indicator Bar -->
+    <div v-if="isNavigating" class="fixed top-0 left-0 right-0 z-50 h-1 skeleton-shimmer"></div>
+
     <!-- Desktop Minimalist Sidebar Navigation -->
     <aside class="hidden md:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/80 z-30 p-6 justify-between">
       <div class="space-y-8">
@@ -135,7 +138,11 @@
 
     <!-- Main Content Container -->
     <main class="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
-      <slot />
+      <Transition name="page-fade" mode="out-in">
+        <div :key="$page.url">
+          <slot />
+        </div>
+      </Transition>
     </main>
 
     <!-- Mobile Bottom Navigation Bar -->
@@ -187,8 +194,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
+import SkeletonCard from '@/Components/SkeletonCard.vue';
 import {
   LayoutDashboard as HomeIcon,
   ReceiptText as ReceiptTextIcon,
@@ -210,6 +218,24 @@ const user = computed(() => page.props.auth?.user);
 const userInitial = computed(() => (user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'F'));
 const flashSuccess = computed(() => page.props.flash?.success);
 const flashError = computed(() => page.props.flash?.error);
+
+const isNavigating = ref(false);
+let unbindStart = null;
+let unbindFinish = null;
+
+onMounted(() => {
+  unbindStart = router.on('start', () => {
+    isNavigating.value = true;
+  });
+  unbindFinish = router.on('finish', () => {
+    isNavigating.value = false;
+  });
+});
+
+onUnmounted(() => {
+  if (unbindStart) unbindStart();
+  if (unbindFinish) unbindFinish();
+});
 
 const clearFlash = () => {
   page.props.flash.success = null;

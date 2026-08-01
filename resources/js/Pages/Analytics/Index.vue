@@ -11,14 +11,14 @@
         </div>
 
         <!-- Time Period Selector -->
-        <div class="flex items-center bg-slate-100 p-1.5 rounded-full border border-slate-200">
+        <div class="flex items-center bg-slate-100 p-1 sm:p-1.5 rounded-full border border-slate-200 overflow-x-auto">
           <button
             v-for="p in ['daily', 'weekly', 'monthly', 'yearly']"
             :key="p"
             @click="changePeriod(p)"
             :class="[
               period === p ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 font-medium',
-              'px-4 py-1.5 rounded-full text-xs capitalize transition-all'
+              'px-3 sm:px-4 py-1.5 rounded-full text-xs capitalize transition-all whitespace-nowrap shrink-0'
             ]"
           >
             {{ p }}

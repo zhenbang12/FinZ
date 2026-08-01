@@ -5,9 +5,9 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            Accounts
+            Account Management
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Manage Bank Accounts, E-Wallets, Cash & Credit Cards in MYR.</p>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Create, edit, and manage your bank accounts, e-wallets, cash & credit cards.</p>
         </div>
 
         <button
@@ -20,15 +20,20 @@
       </div>
 
       <!-- Combined Balance Banner -->
-      <div class="minimal-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Combined Balance</span>
-          <div class="text-3xl font-black text-slate-900 mt-0.5">{{ formatCurrency(totalNetWorth) }}</div>
+      <div class="minimal-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Combined Balance</span>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">{{ formatCurrency(totalNetWorth) }}</div>
+          </div>
         </div>
         <div class="flex items-center space-x-2">
           <span class="px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold">
-            {{ accounts.length }} Active Accounts
+            {{ accounts.length }} {{ accounts.length === 1 ? 'Account' : 'Accounts' }}
           </span>
+          <Link href="/" class="px-3.5 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold hover:bg-indigo-100 transition-colors">
+            ← Back to Overview
+          </Link>
         </div>
       </div>
 
@@ -196,7 +201,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatCurrency } from '@/Utils/formatters';
 import {

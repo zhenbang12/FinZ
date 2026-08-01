@@ -61,6 +61,27 @@
           </div>
         </div>
 
+        <!-- Mobile Net Worth + Monthly Summary -->
+        <div class="minimal-card p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Net Worth</span>
+            <TrendingUpIcon class="w-3.5 h-3.5 text-slate-400" />
+          </div>
+          <div class="text-2xl font-black text-slate-900 tracking-tight">{{ formatCurrency(totalNetWorth) }}</div>
+          <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span class="text-slate-500 font-medium">Income</span>
+              <span class="font-bold text-emerald-700">{{ formatCurrency(monthlyIncome) }}</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <span class="text-slate-500 font-medium">Expenses</span>
+              <span class="font-bold text-rose-700">{{ formatCurrency(monthlyExpenses) }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 3 Primary Mobile Action Buttons -->
         <div class="grid grid-cols-3 gap-2">
           <button
@@ -160,6 +181,7 @@
               <span>Financial Accounts ({{ accounts.length }})</span>
             </h3>
             <button
+              v-if="accounts.length > 0"
               @click="showPinModal = true"
               class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
             >
@@ -168,7 +190,18 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Empty State -->
+          <div v-if="accounts.length === 0" class="text-center py-10">
+            <WalletIcon class="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p class="text-sm font-bold text-slate-500 mb-1">No accounts yet</p>
+            <p class="text-xs text-slate-400 mb-4">Create your first bank account, e-wallet, or cash account to start tracking.</p>
+            <Link href="/accounts" class="minimal-btn-primary px-5 py-2 text-xs font-bold inline-flex items-center gap-1.5">
+              <PlusIcon class="w-3.5 h-3.5" />
+              <span>Create First Account</span>
+            </Link>
+          </div>
+
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div
               v-for="acc in accounts"
               :key="acc.id"
@@ -194,6 +227,33 @@
               <span class="font-black text-slate-900 text-base shrink-0 ml-2">{{ formatCurrency(acc.balance) }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Top Spending Categories This Month -->
+        <div v-if="topCategories.length > 0" class="minimal-card p-6 space-y-4">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <PieChartIcon class="w-5 h-5 text-slate-700" />
+            <span>Top Spending Categories (This Month)</span>
+          </h3>
+
+          <div class="space-y-2.5">
+            <div
+              v-for="(cat, idx) in topCategories"
+              :key="cat.category_name"
+              class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/60"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-extrabold text-slate-400 w-5 text-center">{{ idx + 1 }}</span>
+                <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: cat.color || '#0f172a' }"></span>
+                <span class="text-sm font-bold text-slate-800">{{ cat.category_name }}</span>
+              </div>
+              <span class="font-extrabold text-rose-600 text-sm">{{ formatCurrency(cat.total_amount) }}</span>
+            </div>
+          </div>
+
+          <Link href="/analytics" class="text-xs font-bold text-slate-600 hover:text-slate-900 block text-right">
+            View Full Analytics →
+          </Link>
         </div>
       </div>
 
@@ -488,6 +548,7 @@ import {
   ArrowUpRight as ArrowUpRightIcon,
   ArrowDownLeft as ArrowDownLeftIcon,
   Pin as PinIcon,
+  PieChart as PieChartIcon,
   X as XIcon,
 } from 'lucide-vue-next';
 
