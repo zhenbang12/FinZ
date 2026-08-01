@@ -151,7 +151,7 @@
 
                 <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5 truncate font-medium">
                   <span class="font-semibold text-slate-700">{{ tx.account?.name }}</span>
-                  <span v-if="tx.destination_account" class="text-sky-600 font-semibold">→ {{ tx.destination_account.name }}</span>
+                  <span v-if="tx.type === 'transfer' && tx.destination_account" class="text-sky-600 font-semibold">→ {{ tx.destination_account.name }}</span>
                   <span v-if="tx.category" class="text-slate-400">• {{ tx.category.name }}</span>
                   <span class="text-slate-400">• {{ formatDate(tx.date) }}</span>
                 </div>
@@ -571,7 +571,7 @@ const openModal = (type) => {
   modalType.value = type;
   form.type = type;
   form.account_id = props.accounts[0]?.id || '';
-  form.destination_account_id = props.accounts[1]?.id || '';
+  form.destination_account_id = type === 'transfer' ? (props.accounts[1]?.id || '') : '';
   form.category_id = type === 'transfer' ? '' : (props.categories[0]?.id || '');
   form.amount = '';
   form.date = todayStr;
@@ -584,7 +584,7 @@ const openEditModal = (tx) => {
   modalType.value = tx.type;
   form.type = tx.type;
   form.account_id = tx.account_id || '';
-  form.destination_account_id = tx.destination_account_id || '';
+  form.destination_account_id = tx.type === 'transfer' ? (tx.destination_account_id || '') : '';
   form.category_id = tx.type === 'transfer' ? '' : (tx.category_id || '');
   form.amount = tx.amount;
   form.date = tx.date ? tx.date.substring(0, 10) : todayStr;
@@ -600,6 +600,8 @@ const closeModal = () => {
 const submitTransaction = () => {
   if (form.type === 'transfer') {
     form.category_id = null;
+  } else {
+    form.destination_account_id = null;
   }
   if (editingTransactionId.value) {
     form.put(`/transactions/${editingTransactionId.value}`, {
