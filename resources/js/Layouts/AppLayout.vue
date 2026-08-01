@@ -197,6 +197,7 @@ import {
   PieChart as PieChartIcon,
   Wallet as WalletIcon,
   Users as UsersIcon,
+  Settings as SettingsIcon,
   ShieldCheck as ShieldCheckIcon,
   LogOut as LogOutIcon,
   CheckCircle as CheckCircleIcon,
@@ -221,20 +222,14 @@ const logout = () => {
 };
 
 const navItems = computed(() => {
-  const base = [
+  return [
     { name: 'Quick Hub', href: '/quick', icon: ZapIcon },
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Financial Ledger', href: '/transactions', icon: ReceiptTextIcon },
     { name: 'SmartSplit OCR', href: '/receipts', icon: CameraIcon },
     { name: 'Analytics & Reports', href: '/analytics', icon: PieChartIcon },
     { name: 'Accounts', href: '/accounts', icon: WalletIcon },
-    { name: 'Device Security', href: '/security', icon: ShieldCheckIcon },
+    { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
-
-  if (user.value?.is_admin) {
-    base.push({ name: 'User Management', href: '/admin/users', icon: UsersIcon });
-  }
-
-  return base;
 });
 </script>

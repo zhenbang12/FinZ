@@ -13,13 +13,13 @@
       </div>
 
       <!-- Live Group Session Share Banner -->
-      <div class="minimal-card p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="rounded-2xl p-5 bg-slate-900 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="space-y-1">
           <div class="flex items-center space-x-2">
             <UsersIcon class="w-5 h-5 text-amber-400" />
-            <h3 class="font-bold text-base">Live Group Session Splitting</h3>
+            <h3 class="font-bold text-base text-white">Live Group Session Splitting</h3>
           </div>
-          <p class="text-xs text-slate-300">
+          <p class="text-xs text-slate-200 font-medium">
             Generate a guest link so anyone can join without an account, tick what they ate, and pay their share!
           </p>
         </div>

@@ -54,10 +54,10 @@ Route::middleware(['web'])->group(function () {
         Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
 
-        // Active Sessions & Device Security
-        Route::get('/security', [App\Http\Controllers\SecurityController::class, 'index'])->name('security.index');
-        Route::delete('/security/sessions/{session}', [App\Http\Controllers\SecurityController::class, 'destroySession'])->name('security.sessions.destroy');
-        Route::post('/security/sessions/logout-others', [App\Http\Controllers\SecurityController::class, 'logoutOtherDevices'])->name('security.sessions.logout-others');
+        // Settings & Device Security
+        Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::delete('/settings/sessions/{session}', [App\Http\Controllers\SettingsController::class, 'destroySession'])->name('settings.sessions.destroy');
+        Route::post('/settings/sessions/logout-others', [App\Http\Controllers\SettingsController::class, 'logoutOtherDevices'])->name('settings.sessions.logout-others');
 
         // Superuser Account Management
         Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
