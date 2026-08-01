@@ -16,6 +16,14 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // Mobile Device Detection: If user is on a mobile phone, render Quick Hub by default
+        $userAgent = strtolower($request->header('User-Agent', ''));
+        $isMobile = preg_match('/(android|iphone|ipod|blackberry|iemobile|opera mini|mobile)/i', $userAgent);
+
+        if ($isMobile) {
+            return (new QuickViewController())->index($request);
+        }
+
         $accounts = Account::where('user_id', $user->id)->get();
         $totalNetWorth = (float) $accounts->sum('balance');
 

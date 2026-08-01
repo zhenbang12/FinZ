@@ -56,6 +56,7 @@ Route::middleware(['web'])->group(function () {
 
         // Settings & Device Security
         Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings/preferences', [App\Http\Controllers\SettingsController::class, 'updatePreferences'])->name('settings.preferences.update');
         Route::delete('/settings/sessions/{session}', [App\Http\Controllers\SettingsController::class, 'destroySession'])->name('settings.sessions.destroy');
         Route::post('/settings/sessions/logout-others', [App\Http\Controllers\SettingsController::class, 'logoutOtherDevices'])->name('settings.sessions.logout-others');
 

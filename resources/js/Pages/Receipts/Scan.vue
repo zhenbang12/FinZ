@@ -4,7 +4,7 @@
       <!-- Page Header -->
       <div>
         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          SmartSplit OCR Receipt Parser
+          SmartSplit
         </h2>
         <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Scan or upload receipt images to extract line items and split bills with pro-rata tax math.</p>
       </div>
@@ -49,7 +49,7 @@
               {{ previewUrl ? 'Image Selected (Replace below)' : 'Scan or Upload Receipt' }}
             </h3>
             <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium mb-6">
-              Powered strictly by <span class="text-slate-900 font-bold">Google Gemini AI Vision</span>. Take a photo directly or choose from gallery!
+              Powered by <span class="text-slate-900 font-bold">Google Gemini</span>. Take a photo directly or choose from gallery.
             </p>
 
             <!-- Dual Action Selection Buttons for Mobile & Desktop -->

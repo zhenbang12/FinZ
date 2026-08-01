@@ -13,8 +13,19 @@
           </p>
         </div>
 
-        <!-- Sub-Tab Selection (Device Security / User Management) -->
+        <!-- Sub-Tab Selection (Preferences / Security / Users) -->
         <div class="flex items-center bg-slate-200/70 p-1 rounded-full border border-slate-300">
+          <button
+            @click="activeTab = 'preferences'"
+            :class="[
+              activeTab === 'preferences' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
+              'px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5'
+            ]"
+          >
+            <SlidersIcon class="w-3.5 h-3.5" />
+            <span>Preferences</span>
+          </button>
+
           <button
             @click="activeTab = 'security'"
             :class="[
@@ -37,6 +48,67 @@
             <UsersIcon class="w-3.5 h-3.5" />
             <span>User Management</span>
           </button>
+        </div>
+      </div>
+
+      <!-- SECTION 0: General Preferences Tab -->
+      <div v-if="activeTab === 'preferences'" class="space-y-6 animate-fade-in max-w-2xl">
+        <div class="minimal-card p-6 space-y-5">
+          <div class="flex items-center space-x-3 pb-3 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold">
+              <GlobeIcon class="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 class="font-extrabold text-base text-slate-900">Regional & Display Preferences</h3>
+              <p class="text-xs text-slate-600 font-medium">Configure your time zone and default accounting currency.</p>
+            </div>
+          </div>
+
+          <form @submit.prevent="submitPreferences" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-800 mb-1">Application Time Zone</label>
+              <select
+                v-model="prefForm.timezone"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+              >
+                <option value="Asia/Kuala_Lumpur">Asia/Kuala_Lumpur (GMT+8 - Malaysia / SG / HK)</option>
+                <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+                <option value="Asia/Hong_Kong">Asia/Hong_Kong (GMT+8)</option>
+                <option value="Asia/Tokyo">Asia/Tokyo (GMT+9 - Japan)</option>
+                <option value="Asia/Jakarta">Asia/Jakarta (GMT+7 - Indonesia)</option>
+                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                <option value="UTC">UTC (Coordinated Universal Time)</option>
+              </select>
+              <p class="text-[11px] text-slate-600 mt-1 font-medium">System default timezone is set to GMT+8 (Asia/Kuala_Lumpur).</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-800 mb-1">Default Base Currency</label>
+              <select
+                v-model="prefForm.currency"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+              >
+                <option value="MYR">MYR - Malaysian Ringgit (RM)</option>
+                <option value="USD">USD - United States Dollar ($)</option>
+                <option value="SGD">SGD - Singapore Dollar (S$)</option>
+                <option value="EUR">EUR - Euro (€)</option>
+                <option value="GBP">GBP - British Pound (£)</option>
+                <option value="JPY">JPY - Japanese Yen (¥)</option>
+                <option value="AUD">AUD - Australian Dollar (A$)</option>
+              </select>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+              <button
+                type="submit"
+                :disabled="prefForm.processing"
+                class="minimal-btn-primary px-6 py-2.5 text-xs font-bold shadow-md disabled:opacity-50"
+              >
+                Save Preferences
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -352,6 +424,8 @@ import {
   UserPlus as UserPlusIcon,
   Pencil as PencilIcon,
   Trash2 as Trash2Icon,
+  Sliders as SlidersIcon,
+  Globe as GlobeIcon,
   X as XIcon,
 } from 'lucide-vue-next';
 
@@ -361,12 +435,22 @@ const user = computed(() => page.props.auth?.user);
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
   users: { type: Array, default: () => [] },
+  preferences: { type: Object, default: () => ({ timezone: 'Asia/Kuala_Lumpur', currency: 'MYR' }) },
 });
 
-const activeTab = ref('security');
+const activeTab = ref('preferences');
 const showUserModal = ref(false);
 const userModalMode = ref('create');
 const selectedUserId = ref(null);
+
+const prefForm = useForm({
+  timezone: props.preferences?.timezone || 'Asia/Kuala_Lumpur',
+  currency: props.preferences?.currency || 'MYR',
+});
+
+const submitPreferences = () => {
+  prefForm.put('/settings/preferences');
+};
 
 const userForm = useForm({
   name: '',

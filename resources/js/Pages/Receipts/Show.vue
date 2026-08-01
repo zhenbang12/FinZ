@@ -214,9 +214,6 @@
                 <CheckCircleIcon class="w-4 h-4 text-emerald-600" />
                 <span>Expense Logged in Financial Ledger</span>
               </div>
-              <p class="text-[11px] text-emerald-700">
-                This receipt total has already been formally logged into your financial ledger to prevent duplicate entries.
-              </p>
               <Link href="/transactions" class="text-xs font-bold text-emerald-800 underline block">
                 View Ledger Transactions →
               </Link>

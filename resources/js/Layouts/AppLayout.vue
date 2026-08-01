@@ -49,7 +49,7 @@
           class="minimal-btn-primary w-full py-3 px-4 flex items-center justify-center space-x-2 text-xs font-semibold"
         >
           <CameraIcon class="w-4 h-4 text-white" />
-          <span>SmartSplit OCR</span>
+          <span>SmartSplit</span>
         </Link>
 
         <div class="flex items-center justify-between p-2.5 rounded-full bg-slate-50 border border-slate-200">
@@ -89,15 +89,22 @@
         </div>
         <span class="font-bold text-lg text-slate-900">FinZ</span>
       </Link>
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-1.5">
         <span
           :class="[
             user?.is_admin ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-slate-100 text-slate-700 border-slate-200',
-            'px-3 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider'
+            'px-2.5 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider'
           ]"
         >
           {{ user?.is_admin ? 'Superuser' : 'MYR Ledger' }}
         </span>
+        <Link
+          href="/settings"
+          class="p-1.5 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          title="Settings"
+        >
+          <SettingsIcon class="w-4.5 h-4.5" />
+        </Link>
         <button
           @click="logout"
           class="p-1.5 rounded-full text-slate-500 hover:text-rose-600 transition-colors"
@@ -224,9 +231,9 @@ const logout = () => {
 const navItems = computed(() => {
   return [
     { name: 'Quick Hub', href: '/quick', icon: ZapIcon },
-    { name: 'Dashboard', href: '/', icon: HomeIcon },
+    { name: 'Overview', href: '/', icon: HomeIcon },
     { name: 'Financial Ledger', href: '/transactions', icon: ReceiptTextIcon },
-    { name: 'SmartSplit OCR', href: '/receipts', icon: CameraIcon },
+    { name: 'SmartSplit', href: '/receipts', icon: CameraIcon },
     { name: 'Analytics & Reports', href: '/analytics', icon: PieChartIcon },
     { name: 'Accounts', href: '/accounts', icon: WalletIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },

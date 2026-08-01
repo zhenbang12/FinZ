@@ -53,13 +53,13 @@
           <span class="text-xs font-bold text-slate-900">Log Transfer</span>
         </button>
 
-        <!-- Button 3: Scan Receipt -->
+        <!-- Button 3: SmartSplit -->
         <Link
           href="/receipts"
           class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-2 sm:px-4 rounded-2xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 shadow-sm text-center active:scale-95 transition-all"
         >
           <CameraIcon class="w-4 h-4 text-white" />
-          <span class="text-xs font-bold">Scan Receipt</span>
+          <span class="text-xs font-bold">SmartSplit</span>
         </Link>
       </div>
 

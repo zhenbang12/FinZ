@@ -47,7 +47,27 @@ class SettingsController extends Controller
         return Inertia::render('Settings/Index', [
             'sessions' => $sessions,
             'users' => $users,
+            'preferences' => [
+                'timezone' => $user->timezone ?: 'Asia/Kuala_Lumpur',
+                'currency' => $user->currency ?: 'MYR',
+            ],
         ]);
+    }
+
+    public function updatePreferences(Request $request)
+    {
+        $request->validate([
+            'timezone' => 'required|string|max:50',
+            'currency' => 'required|string|max:10',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'timezone' => $request->timezone,
+            'currency' => strtoupper($request->currency),
+        ]);
+
+        return redirect()->back()->with('success', 'General preferences updated successfully.');
     }
 
     public function destroySession(Request $request, string $sessionId)

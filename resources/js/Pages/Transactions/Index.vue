@@ -30,21 +30,30 @@
 
       <!-- Filter Bar -->
       <div class="minimal-card p-4 sm:p-5 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <FilterIcon class="w-4 h-4 text-slate-600" />
-            Filter History
-          </span>
-          <button
-            v-if="hasActiveFilters"
-            @click="resetFilters"
-            class="text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors"
-          >
-            Clear Filters
-          </button>
+        <div class="flex items-center justify-between cursor-pointer select-none" @click="showFilters = !showFilters">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <FilterIcon class="w-4 h-4 text-slate-800" />
+              Filter History
+            </span>
+            <span v-if="hasActiveFilters" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold border border-indigo-300">
+              Active
+            </span>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <button
+              v-if="hasActiveFilters"
+              @click.stop="resetFilters"
+              class="text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors"
+            >
+              Clear Filters
+            </button>
+            <ChevronDownIcon :class="[showFilters ? 'rotate-180' : '', 'w-4 h-4 text-slate-600 transition-transform']" />
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div v-show="showFilters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
           <!-- Search input -->
           <div>
             <input
@@ -454,6 +463,7 @@ import {
   Plus as PlusIcon,
   ArrowRightLeft as ArrowRightLeftIcon,
   Filter as FilterIcon,
+  ChevronDown as ChevronDownIcon,
   Pencil as PencilIcon,
   Trash2 as Trash2Icon,
   ArrowUpRight as ArrowUpRightIcon,
@@ -534,6 +544,8 @@ const filterForm = ref({
   category_id: props.filters.category_id || '',
   start_date: props.filters.start_date || '',
 });
+
+const showFilters = ref(!!(props.filters.search || props.filters.type || props.filters.account_id || props.filters.category_id || props.filters.start_date));
 
 const hasActiveFilters = computed(() => {
   return (

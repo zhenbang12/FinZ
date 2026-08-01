@@ -14,10 +14,12 @@ class AnalyticsController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $period = $request->input('period', 'monthly'); // weekly, monthly, yearly
-
+        $period = $request->input('period', 'monthly'); // daily, weekly, monthly, yearly
         $now = Carbon::now();
-        if ($period === 'weekly') {
+        if ($period === 'daily') {
+            $startDate = $now->copy()->startOfDay();
+            $endDate = $now->copy()->endOfDay();
+        } elseif ($period === 'weekly') {
             $startDate = $now->copy()->startOfWeek();
             $endDate = $now->copy()->endOfWeek();
         } elseif ($period === 'yearly') {

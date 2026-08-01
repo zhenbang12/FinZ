@@ -13,7 +13,7 @@
         <!-- Time Period Selector -->
         <div class="flex items-center bg-slate-100 p-1.5 rounded-full border border-slate-200">
           <button
-            v-for="p in ['weekly', 'monthly', 'yearly']"
+            v-for="p in ['daily', 'weekly', 'monthly', 'yearly']"
             :key="p"
             @click="changePeriod(p)"
             :class="[

@@ -28,3 +28,4 @@ jobs:
               -v finz_storage:/app/storage/app/public \
               -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
               finz
+            sudo docker exec finz_app php artisan migrate --force
