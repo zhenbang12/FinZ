@@ -179,7 +179,9 @@
 
               <div class="flex justify-between text-xs text-slate-500 font-medium">
                 <span>Pro-Rata SST Tax Share:</span>
-                <span class="font-semibold text-slate-700">+ {{ formatCurrency(proRataData.tax_share) }}</span>
+                <span class="font-semibold text-slate-700">
+                  {{ proRataData.is_tax_inclusive ? formatCurrency(proRataData.tax_share) + ' (Included)' : '+ ' + formatCurrency(proRataData.tax_share) }}
+                </span>
               </div>
 
               <div class="flex justify-between text-xs text-slate-500 font-medium">
@@ -190,6 +192,11 @@
               <div v-if="proRataData.discount_share > 0" class="flex justify-between text-xs text-emerald-700 font-bold">
                 <span>Pro-Rata Discount Deducted:</span>
                 <span>- {{ formatCurrency(proRataData.discount_share) }}</span>
+              </div>
+
+              <div v-if="Math.abs(proRataData.rounding_share) > 0" class="flex justify-between text-xs text-slate-500 font-medium">
+                <span>Pro-Rata Rounding:</span>
+                <span>{{ proRataData.rounding_share > 0 ? '+' : '' }} {{ formatCurrency(proRataData.rounding_share) }}</span>
               </div>
 
               <div class="pt-3 border-t border-slate-200 flex justify-between items-center">
@@ -361,30 +368,57 @@ const undoOwnerClaim = (claim) => {
 const proRataData = computed(() => {
   const claimedItems = (props.receipt.items || []).filter(i => claimedItemIds.value.includes(i.id));
   const claimedSubtotal = claimedItems.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
-  const receiptSubtotal = parseFloat(props.receipt.subtotal) || (props.receipt.items || []).reduce((sum, i) => sum + parseFloat(i.total_price), 0);
+  const allItemsSubtotal = (props.receipt.items || []).reduce((sum, i) => sum + parseFloat(i.total_price), 0);
+  const receiptSubtotal = parseFloat(props.receipt.subtotal) || allItemsSubtotal;
+
+  const rawOcr = props.receipt.raw_ocr_data || {};
+  const roundingAmount = parseFloat(rawOcr.rounding_amount || rawOcr.rounding || 0);
+
+  const taxAmount = parseFloat(props.receipt.tax_amount || 0);
+  const serviceAmount = parseFloat(props.receipt.service_charge_amount || 0);
+  const discountAmount = parseFloat(props.receipt.discount_amount || 0);
+  const totalAmount = parseFloat(props.receipt.total_amount || 0);
 
   let proRataRatio = 0;
-  let taxShare = 0;
-  let serviceChargeShare = 0;
-  let discountShare = 0;
-
   if (receiptSubtotal > 0) {
     proRataRatio = claimedSubtotal / receiptSubtotal;
-    taxShare = (parseFloat(props.receipt.tax_amount || 0) * proRataRatio);
-    serviceChargeShare = (parseFloat(props.receipt.service_charge_amount || 0) * proRataRatio);
-    discountShare = (parseFloat(props.receipt.discount_amount || 0) * proRataRatio);
   }
 
-  const netAdjustment = taxShare + serviceChargeShare - discountShare;
-  const finalTotal = claimedSubtotal + netAdjustment;
+  let isTaxInclusive = false;
+  if (rawOcr.is_tax_inclusive !== undefined) {
+    isTaxInclusive = Boolean(rawOcr.is_tax_inclusive);
+  } else if (totalAmount > 0) {
+    const exclusiveEst = allItemsSubtotal - discountAmount + taxAmount + serviceAmount + roundingAmount;
+    const inclusiveEst = allItemsSubtotal - discountAmount + serviceAmount + roundingAmount;
+
+    const diffInclusive = Math.abs(inclusiveEst - totalAmount);
+    const diffExclusive = Math.abs(exclusiveEst - totalAmount);
+
+    if (diffInclusive < diffExclusive && diffInclusive <= 0.75) {
+      isTaxInclusive = true;
+    }
+  }
+
+  const taxShare = taxAmount * proRataRatio;
+  const serviceChargeShare = serviceAmount * proRataRatio;
+  const discountShare = discountAmount * proRataRatio;
+  const roundingShare = roundingAmount * proRataRatio;
+
+  let finalTotal = 0;
+  if (isTaxInclusive) {
+    finalTotal = claimedSubtotal - discountShare + serviceChargeShare + roundingShare;
+  } else {
+    finalTotal = claimedSubtotal + taxShare + serviceChargeShare - discountShare + roundingShare;
+  }
 
   return {
     claimed_subtotal: claimedSubtotal,
     tax_share: taxShare,
     service_charge_share: serviceChargeShare,
     discount_share: discountShare,
-    total_tax_share: netAdjustment,
-    final_total: finalTotal,
+    rounding_share: roundingShare,
+    is_tax_inclusive: isTaxInclusive,
+    final_total: Math.max(0, finalTotal),
     pro_rata_percentage: (proRataRatio * 100).toFixed(1),
   };
 });

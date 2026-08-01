@@ -19,16 +19,6 @@ Route::middleware(['web'])->group(function () {
     Route::post('/receipts/session/{token}/claim', [ReceiptController::class, 'claimGroupSessionItems'])->name('receipts.session.claim');
     Route::delete('/receipts/session/{token}/claim/{claim}', [ReceiptController::class, 'deleteGroupSessionClaim'])->name('receipts.session.delete');
 
-    // Debug Route for PHP & Upload Limits
-    Route::get('/debug-limits', function () {
-        return response()->json([
-            'upload_max_filesize' => ini_get('upload_max_filesize'),
-            'post_max_size'        => ini_get('post_max_size'),
-            'memory_limit'         => ini_get('memory_limit'),
-            'upload_tmp_dir'       => ini_get('upload_tmp_dir') ?: sys_get_temp_dir(),
-        ]);
-    });
-
     // Authenticated Application Routes
     Route::middleware(['auth'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

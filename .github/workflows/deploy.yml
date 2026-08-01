@@ -1,0 +1,30 @@
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Build & Deploy to Lightsail
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Deploy to Lightsail
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            cd ~/FinZ
+            git pull origin main
+            sudo docker build -t finz .
+            sudo docker rm -f finz_app
+            sudo docker run -d \
+              --name finz_app \
+              --restart always \
+              -p 10000:10000 \
+              -v finz_db:/app/database \
+              -v finz_storage:/app/storage/app/public \
+              -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+              finz

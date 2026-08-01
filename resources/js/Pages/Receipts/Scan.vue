@@ -14,14 +14,20 @@
         <form @submit.prevent="submitUpload" class="space-y-6">
           <div
             @click="triggerFileInput"
-            class="border-2 border-dashed border-slate-300 hover:border-slate-800 bg-slate-50 hover:bg-slate-100/80 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all group"
+            @dragover.prevent="isDragging = true"
+            @dragenter.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="handleDrop"
+            :class="[
+              isDragging ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20' : 'border-slate-300 hover:border-slate-800 bg-slate-50 hover:bg-slate-100/80',
+              'border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all group'
+            ]"
           >
-            <!-- Native Mobile Camera Input -->
+            <!-- Native File Input (Removed capture="environment" to allow both library selection & camera on mobile) -->
             <input
               ref="fileInputRef"
               type="file"
               accept="image/*"
-              capture="environment"
               class="hidden"
               @change="handleFileSelected"
             />
@@ -31,10 +37,10 @@
             </div>
 
             <h3 class="text-lg font-bold text-slate-900 mb-1">
-              {{ previewUrl ? 'Image Selected (Click to change)' : 'Take Photo or Upload Receipt' }}
+              {{ previewUrl ? 'Image Selected (Click or drop to replace)' : 'Take Photo, Upload, or Drag & Drop Receipt' }}
             </h3>
             <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium">
-              Powered strictly by <span class="text-slate-900 font-bold">Google Gemini AI Vision</span>. Upload any receipt photo for line-item extraction!
+              Powered strictly by <span class="text-slate-900 font-bold">Google Gemini AI Vision</span>. Drag & drop image here or click to select from library!
             </p>
 
             <!-- Preview Image if selected -->
@@ -134,6 +140,7 @@ const fileInputRef = ref(null);
 const selectedFile = ref(null);
 const previewUrl = ref(null);
 const isProcessing = ref(false);
+const isDragging = ref(false);
 
 const form = useForm({
   image: null,
@@ -143,13 +150,23 @@ const triggerFileInput = () => {
   fileInputRef.value.click();
 };
 
-const handleFileSelected = (e) => {
-  const file = e.target.files[0];
-  if (file) {
+const setFile = (file) => {
+  if (file && file.type.startsWith('image/')) {
     selectedFile.value = file;
     form.image = file;
     previewUrl.value = URL.createObjectURL(file);
   }
+};
+
+const handleFileSelected = (e) => {
+  const file = e.target.files[0];
+  setFile(file);
+};
+
+const handleDrop = (e) => {
+  isDragging.value = false;
+  const file = e.dataTransfer.files[0];
+  setFile(file);
 };
 
 const submitUpload = () => {

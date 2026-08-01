@@ -71,6 +71,7 @@ class ReceiptOcrService
 
     /**
      * Calculate user's specific total using strict pro-rata calculation (SRS REQ-3.4 & REQ-3.6).
+     * Handles both Tax-Inclusive (e.g. SST built into prices) and Tax-Exclusive (tax added on top) shops.
      */
     public function calculateProRataSplit(Receipt $receipt, array $claimedItemIds): array
     {
@@ -90,16 +91,50 @@ class ReceiptOcrService
         // Pro-Rata Ratio
         $proRataRatio = $claimedSubtotal / $receiptSubtotal;
 
-        // Pro-Rata Tax & Service Charge Shares
-        $taxShare = (float) $receipt->tax_amount * $proRataRatio;
-        $serviceChargeShare = (float) $receipt->service_charge_amount * $proRataRatio;
+        // Extract raw OCR extra details
+        $rawOcr = $receipt->raw_ocr_data ?? [];
+        $roundingAmount = (float) ($rawOcr['rounding_amount'] ?? $rawOcr['rounding'] ?? 0.00);
 
-        // Pro-Rata Discount Share (Rebates / Vouchers)
-        $discountShare = (float) $receipt->discount_amount * $proRataRatio;
+        $taxAmount = (float) $receipt->tax_amount;
+        $serviceAmount = (float) $receipt->service_charge_amount;
+        $discountAmount = (float) $receipt->discount_amount;
+        $totalAmount = (float) $receipt->total_amount;
 
-        // Final Calculated User Total
-        $finalTotal = $claimedSubtotal + $taxShare + $serviceChargeShare - $discountShare;
-        $netAdjustment = $taxShare + $serviceChargeShare - $discountShare;
+        // Determine if Tax is Inclusive vs Exclusive
+        // Inclusive formula: sum of item prices - discount + service + rounding == total
+        // Exclusive formula: sum of item prices - discount + tax + service + rounding == total
+        $isTaxInclusive = false;
+        if (isset($rawOcr['is_tax_inclusive'])) {
+            $isTaxInclusive = (bool) $rawOcr['is_tax_inclusive'];
+        } else if ($totalAmount > 0) {
+            $exclusiveEst = $allItemsSubtotal - $discountAmount + $taxAmount + $serviceAmount + $roundingAmount;
+            $inclusiveEst = $allItemsSubtotal - $discountAmount + $serviceAmount + $roundingAmount;
+
+            $diffInclusive = abs($inclusiveEst - $totalAmount);
+            $diffExclusive = abs($exclusiveEst - $totalAmount);
+
+            // If inclusive formula is closer to receipt total than exclusive formula, tax is built into item prices
+            if ($diffInclusive < $diffExclusive && $diffInclusive <= 0.75) {
+                $isTaxInclusive = true;
+            }
+        }
+
+        // Pro-Rata Shares
+        $taxShare = $taxAmount * $proRataRatio;
+        $serviceChargeShare = $serviceAmount * $proRataRatio;
+        $discountShare = $discountAmount * $proRataRatio;
+        $roundingShare = $roundingAmount * $proRataRatio;
+
+        // Final User Total Math
+        if ($isTaxInclusive) {
+            // Tax is already included in item prices; do NOT add taxShare on top
+            $finalTotal = $claimedSubtotal - $discountShare + $serviceChargeShare + $roundingShare;
+            $netAdjustment = -$discountShare + $serviceChargeShare + $roundingShare;
+        } else {
+            // Tax is exclusive; add taxShare on top
+            $finalTotal = $claimedSubtotal + $taxShare + $serviceChargeShare - $discountShare + $roundingShare;
+            $netAdjustment = $taxShare + $serviceChargeShare - $discountShare + $roundingShare;
+        }
 
         return [
             'claimed_subtotal' => round($claimedSubtotal, 2),
@@ -108,6 +143,8 @@ class ReceiptOcrService
             'tax_share' => round($taxShare, 2),
             'service_charge_share' => round($serviceChargeShare, 2),
             'discount_share' => round($discountShare, 2),
+            'rounding_share' => round($roundingShare, 2),
+            'is_tax_inclusive' => $isTaxInclusive,
             'total_tax_share' => round($netAdjustment, 2),
             'net_adjustment' => round($netAdjustment, 2),
             'final_total' => max(0, round($finalTotal, 2)),
@@ -135,15 +172,16 @@ class ReceiptOcrService
         $mimeType = mime_content_type($fullPath) ?: 'image/jpeg';
 
         $prompt = <<<PROMPT
-You are a precise Malaysian receipt OCR engine. Extract data from this receipt image into strict JSON.
-JSON format requirements:
+You are an expert Malaysian receipt OCR engine. Analyze this receipt image and extract data into strict JSON format:
 {
   "merchant_name": "string",
   "subtotal": float,
-  "tax_amount": float (SST / Tax),
-  "service_charge_amount": float (Service Charge / Service Fee),
-  "discount_amount": float (Total Discount / Voucher / Rebate),
-  "total_amount": float,
+  "tax_amount": float (SST / Service Tax),
+  "service_charge_amount": float (Service Fee / Service Charge),
+  "discount_amount": float (Total Discount / Voucher / Staff Discount / Rebate),
+  "rounding_amount": float (Rounding adjustment like -0.02 or +0.01 if present, else 0.00),
+  "total_amount": float (Final Net Total / Cash Amount paid),
+  "is_tax_inclusive": boolean (true if prices include SST/tax like 'PRICE SUB TO SERV TAX', false if SST is added on top below subtotal),
   "items": [
     {
       "name": "string",
@@ -153,11 +191,13 @@ JSON format requirements:
     }
   ]
 }
+
 Rules:
-1. All currency values in MYR / RM.
-2. Breakdown items with quantity > 1 into separate entries if needed.
-3. Include discounts under discount_amount.
-Return raw valid JSON only without markdown formatting.
+1. Extract line items strictly (purchased food/drinks/products). Do NOT include discount lines or rounding lines inside "items" array; put discounts under "discount_amount" and rounding under "rounding_amount".
+2. If line item quantity > 1, extract exact unit_price and total_price.
+3. If receipt says "PRICE SUB TO SERV TAX" or prices already contain tax, set is_tax_inclusive = true.
+4. All numeric amounts in MYR (RM).
+5. Return raw valid JSON only without markdown formatting.
 PROMPT;
 
         // Try gemini-2.5-flash then fallback to gemini-flash-latest / gemini-1.5-flash
@@ -222,6 +262,26 @@ PROMPT;
                 'items' => [],
                 'ocr_engine' => 'Google Gemini AI Vision',
             ];
+        }
+
+        // Clean items array: remove negative items (discounts) and add to discount_amount if not already captured
+        if (!empty($data['items']) && is_array($data['items'])) {
+            $cleanItems = [];
+            $extraDiscount = 0.0;
+            foreach ($data['items'] as $it) {
+                $itemPrice = (float) ($it['total_price'] ?? 0);
+                if ($itemPrice < 0) {
+                    $extraDiscount += abs($itemPrice);
+                } else if (preg_match('/disc|voucher|rebate|rounding/i', $it['name'] ?? '')) {
+                    $extraDiscount += abs($itemPrice);
+                } else {
+                    $cleanItems[] = $it;
+                }
+            }
+            $data['items'] = $cleanItems;
+            if ($extraDiscount > 0 && empty($data['discount_amount'])) {
+                $data['discount_amount'] = $extraDiscount;
+            }
         }
 
         $data['ocr_engine'] = 'Google Gemini AI Vision';
