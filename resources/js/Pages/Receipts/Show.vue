@@ -296,29 +296,29 @@
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
                 <div class="grid grid-cols-3 gap-2">
                   <a
-                    href="https://www.touchngo.com.my"
+                    :href="getStoreHref('tng')"
                     target="_blank"
-                    @click="openEWallet($event, 'tngd://app')"
+                    @click="openEWalletApp($event, 'tng')"
                     class="px-2 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
                     title="Open Touch 'n Go eWallet"
                   >
                     <span>Touch 'n Go</span>
                   </a>
                   <a
-                    href="https://www.maybank2u.com.my"
+                    :href="getStoreHref('mae')"
                     target="_blank"
-                    @click="openEWallet($event, 'maybank2umae://')"
+                    @click="openEWalletApp($event, 'mae')"
                     class="px-2 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
                     title="Open Maybank MAE"
                   >
                     <span>MAE</span>
                   </a>
                   <a
-                    href="https://www.cimbclicks.com.my"
+                    :href="getStoreHref('cimb')"
                     target="_blank"
-                    @click="openEWallet($event, 'cimbclicks://')"
+                    @click="openEWalletApp($event, 'cimb')"
                     class="px-2 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center justify-center gap-1 transition-colors shadow-xs"
-                    title="Open CIMB Clicks"
+                    title="Open CIMB OCTO"
                   >
                     <span>CIMB</span>
                   </a>
@@ -450,10 +450,39 @@ onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
 
-const openEWallet = (event, appScheme) => {
-  const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobileDevice) {
-    window.location.href = appScheme;
+const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+const appStoreLinks = {
+  tng: {
+    scheme: 'tngd://app',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
+    appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
+  },
+  mae: {
+    scheme: 'maybank2umae://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
+    appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
+  },
+  cimb: {
+    scheme: 'cimbclicks://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.cimb.octo',
+    appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
+  },
+};
+
+const getStoreHref = (appName) => {
+  const target = appStoreLinks[appName];
+  if (!target) return '#';
+  if (isIOS) return target.appStore;
+  return target.playStore;
+};
+
+const openEWalletApp = (event, appName) => {
+  const target = appStoreLinks[appName];
+  if (!target) return;
+  if (isAndroid || isIOS) {
+    window.location.href = target.scheme;
   }
 };
 
