@@ -45,15 +45,23 @@ class SettingsController extends Controller
         }
 
         // 3. Fetch registered passkeys for current user
-        $passkeys = \App\Models\Passkey::where('user_id', $user->id)
-            ->latest()
-            ->get()
-            ->map(fn($p) => [
-                'id' => $p->id,
-                'name' => $p->name,
-                'created_at' => $p->created_at->format('Y-m-d H:i:s'),
-                'created_at_human' => $p->created_at->diffForHumans(),
-            ]);
+        if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $passkeys = \Illuminate\Support\Facades\Schema::hasTable('passkeys')
+            ? \App\Models\Passkey::where('user_id', $user->id)
+                ->latest()
+                ->get()
+                ->map(fn($p) => [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'created_at' => $p->created_at->format('Y-m-d H:i:s'),
+                    'created_at_human' => $p->created_at->diffForHumans(),
+                ])
+            : collect([]);
 
         return Inertia::render('Settings/Index', [
             'sessions' => $sessions,
