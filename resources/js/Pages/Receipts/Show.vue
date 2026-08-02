@@ -443,37 +443,37 @@ const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navig
 const appStoreLinks = {
   tng: {
     name: "Touch 'n Go",
-    scheme: 'tngd://app',
+    scheme: 'tngdwallet://',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
     color: 'bg-blue-600 hover:bg-blue-700 text-white',
   },
   mae: {
     name: 'Maybank MAE',
-    scheme: 'maybank2umae://',
+    scheme: 'maybank2u://',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
     color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
   },
   cimb: {
     name: 'CIMB OCTO',
-    scheme: 'cimbclicks://',
-    playStore: 'https://play.google.com/store/apps/details?id=com.cimb.octo',
+    scheme: 'cimbocto://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.cimb.cimbocto',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
     color: 'bg-rose-600 hover:bg-rose-700 text-white',
   },
   rhb: {
     name: 'RHB Mobile',
-    scheme: 'rhb://',
+    scheme: 'rhbmobile://',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhb.mobile.mb',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
     color: 'bg-sky-600 hover:bg-sky-700 text-white',
   },
-  pbe: {
-    name: 'PB engage',
-    scheme: 'pbengage://',
-    playStore: 'https://play.google.com/store/apps/details?id=com.publicbank.pbengage',
-    appStore: 'https://apps.apple.com/app/pb-engage-MY/id1377543265',
+  pbe: { 
+    name: 'MyPB', 
+    scheme: 'mypb://',
+    playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
+    appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
     color: 'bg-red-600 hover:bg-red-700 text-white',
   },
   gxbank: {
