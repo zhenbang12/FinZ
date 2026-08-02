@@ -454,7 +454,7 @@ const appStoreLinks = {
     name: 'Maybank MAE',
     scheme: 'maybank2u://',
     intentScheme: 'maybank2u',
-    intentPackage: 'com.maybank2u.mae',
+    intentPackage: 'com.maybank2u.life',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
     color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
@@ -510,7 +510,7 @@ const getStoreHref = (appName) => {
   const target = appStoreLinks[appName];
   if (!target) return '#';
   if (isIOS) return target.appStore;
-  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng' && appName !== 'mae') {
+  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng' && appName !== 'hlb') {
     return `intent://open#Intent;scheme=${target.intentScheme};package=${target.intentPackage};end`;
   }
   return target.playStore;
@@ -521,7 +521,7 @@ const openEWalletApp = (event, appName) => {
   if (!target) return;
   if (isIOS) {
     window.location.href = target.scheme;
-  } else if (isAndroid && (appName === 'tng' || appName === 'mae')) {
+  } else if (isAndroid && (appName === 'tng' || appName === 'hlb')) {
     window.location.href = target.scheme;
   }
 };
