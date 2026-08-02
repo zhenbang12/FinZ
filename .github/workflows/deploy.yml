@@ -24,8 +24,9 @@ jobs:
               --name finz_app \
               --restart always \
               -p 10000:10000 \
-              -v finz_db:/app/database \
+              -v finz_db:/app/database/db \
               -v finz_storage:/app/storage/app/public \
+              -e DB_DATABASE=/app/database/db/database.sqlite \
               -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
               finz
             sudo docker exec finz_app chmod -R 777 /app/database /app/storage
