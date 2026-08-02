@@ -337,7 +337,7 @@ const appStoreLinks = {
   mae: {
     name: 'Maybank MAE',
     scheme: 'maybank2u://',
-    intentScheme: 'maybank2u',
+    intentScheme: 'mae',
     intentPackage: 'com.maybank2u.life',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
@@ -356,15 +356,15 @@ const appStoreLinks = {
     name: 'HLB Connect',
     scheme: 'hlbconnect://',
     intentScheme: 'hlbconnect',
-    intentPackage: 'my.com.hongleongconnect.mobileconnect',
-    playStore: 'https://play.google.com/store/apps/details?id=my.com.hongleongconnect.mobileconnect',
+    intentPackage: 'my.com.hlb.connect',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.hlb.connect',
     appStore: 'https://apps.apple.com/app/hlb-connect-mobile-banking/id1458055610',
     color: 'bg-blue-700 hover:bg-blue-800 text-white',
   },
   rhb: {
     name: 'RHB Mobile',
     scheme: 'rhbmb://',
-    intentScheme: 'rhbmb',
+    intentScheme: 'rhbmobile',
     intentPackage: 'com.rhbgroup.rhbmobilebanking',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
@@ -394,7 +394,7 @@ const getStoreHref = (appName) => {
   const target = appStoreLinks[appName];
   if (!target) return '#';
   if (isIOS) return target.appStore;
-  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng' && appName !== 'hlb') {
+  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng') {
     return `intent://open#Intent;scheme=${target.intentScheme};package=${target.intentPackage};end`;
   }
   return target.playStore;
@@ -405,7 +405,7 @@ const openEWalletApp = (event, appName) => {
   if (!target) return;
   if (isIOS) {
     window.location.href = target.scheme;
-  } else if (isAndroid && (appName === 'tng' || appName === 'hlb')) {
+  } else if (isAndroid && appName === 'tng') {
     window.location.href = target.scheme;
   }
 };
