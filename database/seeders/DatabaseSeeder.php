@@ -28,6 +28,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // 1b. Primary Owner Account
+        $owner = User::firstOrCreate(
+            ['email' => 'zbliow12570zb@gmail.com'],
+            [
+                'name' => 'Zhen Bang',
+                'password' => Hash::make('adminpassword'),
+                'is_admin' => true,
+            ]
+        );
+
         // 2. Regular User Account
         $user = User::firstOrCreate(
             ['email' => 'demo@finz.app'],

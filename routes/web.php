@@ -18,9 +18,12 @@ Route::get('/debug-migrate', function () {
         \Illuminate\Support\Facades\Artisan::call('migrate:status');
         $output .= "=== MIGRATION STATUS ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
         
-        // 2. Run migrate
+        // 2. Run migrate & seed
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         $output .= "=== MIGRATION RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+        
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $output .= "=== DB SEED RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
         
         return response($output, 200)->header('Content-Type', 'text/plain');
     } catch (\Throwable $e) {
