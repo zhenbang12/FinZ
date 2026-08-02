@@ -363,8 +363,8 @@ const appStoreLinks = {
   },
   rhb: {
     name: 'RHB Mobile',
-    scheme: 'rhbmobile://',
-    intentScheme: 'rhbmobile',
+    scheme: 'rhbmb://',
+    intentScheme: 'rhbmb',
     intentPackage: 'com.rhbgroup.rhbmobilebanking',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
@@ -394,7 +394,7 @@ const getStoreHref = (appName) => {
   const target = appStoreLinks[appName];
   if (!target) return '#';
   if (isIOS) return target.appStore;
-  if (isAndroid && target.intentScheme && target.intentPackage) {
+  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng' && appName !== 'mae' && appName !== 'cimb') {
     return `intent://open#Intent;scheme=${target.intentScheme};package=${target.intentPackage};end`;
   }
   return target.playStore;
@@ -404,6 +404,8 @@ const openEWalletApp = (event, appName) => {
   const target = appStoreLinks[appName];
   if (!target) return;
   if (isIOS) {
+    window.location.href = target.scheme;
+  } else if (isAndroid && (appName === 'tng' || appName === 'mae' || appName === 'cimb')) {
     window.location.href = target.scheme;
   }
 };
