@@ -532,6 +532,10 @@ const addPasskey = async () => {
       headers: { 'Accept': 'application/json' },
     });
     const options = await res.json();
+    if (!res.ok) {
+      passkeyError.value = options.message || 'Failed to fetch options.';
+      return;
+    }
 
     // Convert base64url to ArrayBuffers for native WebAuthn API
     const publicKeyOptions = {

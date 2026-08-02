@@ -24,6 +24,10 @@ class PasskeyController extends Controller
             } catch (\Throwable $e) {}
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            return response()->json(['message' => 'Passkeys feature is currently being set up. Please try again in a minute.'], 500);
+        }
+
         $challenge = $this->base64urlEncode(random_bytes(32));
         session(['passkey_register_challenge' => $challenge]);
 
@@ -98,6 +102,16 @@ class PasskeyController extends Controller
      */
     public function loginOptions(Request $request): JsonResponse
     {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            return response()->json(['message' => 'Passkeys feature is currently being set up. Please try again in a minute.'], 500);
+        }
+
         $challenge = $this->base64urlEncode(random_bytes(32));
         session(['passkey_login_challenge' => $challenge]);
 
@@ -114,6 +128,10 @@ class PasskeyController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            return response()->json(['message' => 'Passkeys database table does not exist.'], 500);
+        }
+
         $request->validate([
             'id' => 'required|string',
             'response' => 'required|array',
