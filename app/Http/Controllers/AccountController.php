@@ -39,8 +39,8 @@ class AccountController extends Controller
         if ($hasCategory) {
             $categoryTotals = [
                 'current' => (float) $accounts->where('category', 'current')->sum('balance'),
-                'savings' => (float) $accounts->where('category', 'savings')->sum('balance'),
-                'other' => (float) $accounts->whereNotIn('category', ['current', 'savings'])->sum('balance'),
+                'savings' => (float) $accounts->whereIn('category', ['savings', 'investment'])->sum('balance'),
+                'other' => (float) $accounts->whereNotIn('category', ['current', 'savings', 'investment'])->sum('balance'),
             ];
         }
 
@@ -59,7 +59,7 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:bank,e-wallet,cash,credit_card',
-            'category' => 'nullable|string|in:current,savings,wallet,credit_card,investment',
+            'category' => 'nullable|string|in:current,savings,investment,other,wallet,credit_card',
             'currency' => 'required|string|max:10',
             'initial_balance' => 'required|numeric',
             'color' => 'required|string',
@@ -70,8 +70,7 @@ class AccountController extends Controller
         if ($hasCategory) {
             if (empty($validated['category'])) {
                 $validated['category'] = match ($validated['type']) {
-                    'e-wallet' => 'wallet',
-                    'credit_card' => 'credit_card',
+                    'e-wallet', 'cash', 'credit_card' => 'other',
                     default => 'current',
                 };
             }
@@ -105,7 +104,7 @@ class AccountController extends Controller
         ];
 
         if ($hasCategory) {
-            $rules['category'] = 'nullable|string|in:current,savings,wallet,credit_card,investment';
+            $rules['category'] = 'nullable|string|in:current,savings,investment,other,wallet,credit_card';
         }
 
         $validated = $request->validate($rules);

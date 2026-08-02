@@ -201,11 +201,9 @@
                 required
                 class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
               >
-                <option value="current">Current / Spending Account</option>
-                <option value="savings">Savings Account</option>
-                <option value="wallet">E-Wallet / App</option>
-                <option value="credit_card">Credit Card</option>
-                <option value="investment">Investment / Fixed Deposit</option>
+                <option value="current">Current / Daily Account</option>
+                <option value="savings">Savings & Investment Account</option>
+                <option value="other">E-Wallets, Cash & Credit Cards</option>
               </select>
             </div>
 
@@ -329,8 +327,8 @@ const form = useForm({
 
 const categorizedSections = computed(() => {
   const current = props.accounts.filter(a => (a.category || 'current') === 'current');
-  const savings = props.accounts.filter(a => a.category === 'savings');
-  const other = props.accounts.filter(a => !['current', 'savings'].includes(a.category));
+  const savings = props.accounts.filter(a => ['savings', 'investment'].includes(a.category));
+  const other = props.accounts.filter(a => !['current', 'savings', 'investment'].includes(a.category));
 
   return [
     {
@@ -342,7 +340,7 @@ const categorizedSections = computed(() => {
     },
     {
       key: 'savings',
-      title: 'Savings Accounts',
+      title: 'Savings & Investments',
       iconComponent: PiggyBankIcon,
       items: savings,
       subtotal: savings.reduce((sum, a) => sum + parseFloat(a.balance || 0), 0),
@@ -360,11 +358,9 @@ const categorizedSections = computed(() => {
 const getCategoryLabel = (category) => {
   switch (category) {
     case 'current': return 'Current';
-    case 'savings': return 'Savings';
-    case 'wallet': return 'E-Wallet';
-    case 'credit_card': return 'Credit Card';
-    case 'investment': return 'Investment';
-    default: return 'Account';
+    case 'savings':
+    case 'investment': return 'Savings & Investment';
+    default: return 'E-Wallets, Cash & Credit Cards';
   }
 };
 
