@@ -7,6 +7,7 @@
     <meta name="description" content="FinZ - Financial Tracker & Smart Receipt Parser (SmartSplit)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
 

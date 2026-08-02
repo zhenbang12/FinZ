@@ -674,27 +674,19 @@ const addPasskey = async () => {
       },
     };
 
-    const storeRes = await fetch('/passkeys/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+    router.post('/passkeys/register', credentialData, {
+      preserveScroll: true,
+      onFinish: () => {
+        passkeyRegistering.value = false;
       },
-      body: JSON.stringify(credentialData),
+      onError: (errors) => {
+        passkeyError.value = errors.message || 'Failed to register passkey.';
+      },
     });
-
-    const storeData = await storeRes.json();
-    if (storeRes.ok) {
-      router.reload({ only: ['passkeys'] });
-    } else {
-      passkeyError.value = storeData.message || 'Failed to register passkey.';
-    }
   } catch (err) {
     if (err.name !== 'NotAllowedError') {
       passkeyError.value = err.message || 'Passkey creation failed or was cancelled.';
     }
-  } finally {
     passkeyRegistering.value = false;
   }
 };
