@@ -14,14 +14,34 @@ Route::get('/debug-migrate', function () {
     try {
         $output = '';
         
-        // 0. Inspect SQLite files on container
-        $output .= "=== SQLITE FILES ON CONTAINER ===\n";
-        $files = glob('/app/database/*.sqlite');
-        $files2 = glob('/app/database/*/*.sqlite');
-        foreach (array_merge($files ?: [], $files2 ?: []) as $f) {
-            $output .= "$f - Size: " . filesize($f) . " bytes\n";
+        // 0. Deep Recovery Search for previous SQLite/database files
+        $output .= "=== DEEP DATABASE RECOVERY SEARCH ===\n";
+        $searchDirs = ['/app/database', '/app/storage', '/tmp', '/var/tmp', '/app'];
+        $foundFiles = [];
+        foreach ($searchDirs as $dir) {
+            if (is_dir($dir)) {
+                $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+                foreach ($rii as $file) {
+                    if ($file->isDir()) continue;
+                    $path = $file->getPathname();
+                    if (preg_match('/\.(sqlite|db|bak|sql)/i', $path)) {
+                        $size = filesize($path);
+                        $foundFiles[] = "$path ($size bytes)";
+                        // Try querying sqlite table counts
+                        try {
+                            $pdo = new \PDO("sqlite:" . $path);
+                            $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(\PDO::FETCH_COLUMN);
+                            $foundFiles[] = "   -> Tables: " . implode(', ', $tables);
+                            if (in_array('transactions', $tables)) {
+                                $txCount = $pdo->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
+                                $foundFiles[] = "   -> Transactions Count: " . $txCount;
+                            }
+                        } catch (\Throwable $t) {}
+                    }
+                }
+            }
         }
-        $output .= "\n";
+        $output .= implode("\n", array_unique($foundFiles)) . "\n\n";
 
         // 1. Run status
         \Illuminate\Support\Facades\Artisan::call('migrate:status');
