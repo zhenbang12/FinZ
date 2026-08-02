@@ -31,7 +31,7 @@
         <!-- Current Accounts Card -->
         <div class="minimal-card p-3.5 sm:p-4 flex flex-col justify-between border-l-4 border-l-blue-600 rounded-2xl">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Current</span>
+            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Current/ Spending</span>
             <span class="p-1.5 bg-blue-50 rounded-lg text-blue-600">
               <CreditCardIcon class="w-4 h-4" />
             </span>
@@ -43,7 +43,7 @@
         <!-- Savings Accounts Card -->
         <div class="minimal-card p-3.5 sm:p-4 flex flex-col justify-between border-l-4 border-l-emerald-600 rounded-2xl">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Savings</span>
+            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Savings/ Investment</span>
             <span class="p-1.5 bg-emerald-50 rounded-lg text-emerald-600">
               <PiggyBankIcon class="w-4 h-4" />
             </span>
@@ -55,13 +55,13 @@
         <!-- E-Wallets & Other Card -->
         <div class="minimal-card p-3.5 sm:p-4 flex flex-col justify-between border-l-4 border-l-indigo-600 rounded-2xl">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">E-Wallet & Other</span>
+            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">E-Wallets, Cash & Credit Cards</span>
             <span class="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
               <WalletIcon class="w-4 h-4" />
             </span>
           </div>
           <div class="text-lg sm:text-xl font-black text-slate-900 mt-1.5">{{ formatCurrency(categoryTotals.other || 0) }}</div>
-          <span class="text-[10px] text-slate-500 mt-1">TnG, Credit Cards</span>
+          <span class="text-[10px] text-slate-500 mt-1">TnG, Credit Cards, Cash</span>
         </div>
       </div>
 
@@ -201,8 +201,8 @@
                 required
                 class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
               >
-                <option value="current">Current / Daily Account</option>
-                <option value="savings">Savings & Investment Account</option>
+                <option value="current">Current/ Spending Account</option>
+                <option value="savings">Savings/ Investment</option>
                 <option value="other">E-Wallets, Cash & Credit Cards</option>
               </select>
             </div>
@@ -333,14 +333,14 @@ const categorizedSections = computed(() => {
   return [
     {
       key: 'current',
-      title: 'Current / Daily Accounts',
+      title: 'Current/ Spending Accounts',
       iconComponent: CreditCardIcon,
       items: current,
       subtotal: current.reduce((sum, a) => sum + parseFloat(a.balance || 0), 0),
     },
     {
       key: 'savings',
-      title: 'Savings & Investments',
+      title: 'Savings/ Investment Accounts',
       iconComponent: PiggyBankIcon,
       items: savings,
       subtotal: savings.reduce((sum, a) => sum + parseFloat(a.balance || 0), 0),
@@ -357,9 +357,9 @@ const categorizedSections = computed(() => {
 
 const getCategoryLabel = (category) => {
   switch (category) {
-    case 'current': return 'Current';
+    case 'current': return 'Current/ Spending';
     case 'savings':
-    case 'investment': return 'Savings & Investment';
+    case 'investment': return 'Savings/ Investment';
     default: return 'E-Wallets, Cash & Credit Cards';
   }
 };
