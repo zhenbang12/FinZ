@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('accounts', function (Blueprint $table) {
-            $table->string('category')->default('current')->after('type'); // 'current', 'savings', 'wallet', 'credit_card', 'investment'
-            $table->integer('sort_order')->default(0)->after('balance');
+            if (!Schema::hasColumn('accounts', 'category')) {
+                $table->string('category')->default('current'); // 'current', 'savings', 'wallet', 'credit_card', 'investment'
+            }
+            if (!Schema::hasColumn('accounts', 'sort_order')) {
+                $table->integer('sort_order')->default(0);
+            }
         });
     }
 

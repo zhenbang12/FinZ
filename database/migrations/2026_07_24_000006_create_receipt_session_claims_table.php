@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('receipts', function (Blueprint $table) {
-            $table->string('share_token', 64)->nullable()->unique()->after('status');
-        });
+        if (!Schema::hasColumn('receipts', 'share_token')) {
+            Schema::table('receipts', function (Blueprint $table) {
+                $table->string('share_token', 64)->nullable()->unique();
+            });
+        }
 
         Schema::create('receipt_session_claims', function (Blueprint $table) {
             $table->id();
@@ -32,8 +34,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('receipt_session_claims');
-        Schema::table('receipts', function (Blueprint $table) {
-            $table->dropColumn('share_token');
-        });
+        if (Schema::hasColumn('receipts', 'share_token')) {
+            Schema::table('receipts', function (Blueprint $table) {
+                $table->dropColumn('share_token');
+            });
+        }
     }
 };

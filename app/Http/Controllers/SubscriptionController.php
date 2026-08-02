@@ -141,6 +141,11 @@ class SubscriptionController extends Controller
             } catch (\Throwable $e) {}
         }
 
+        // If table STILL doesn't exist after migration attempt, bail out gracefully
+        if (!Schema::hasTable('subscriptions')) {
+            return redirect()->back()->with('error', 'Subscriptions feature is being set up. Please try again in a minute.');
+        }
+
         DB::transaction(function () use ($request, $validated) {
             $subscription = Subscription::create([
                 'user_id' => $request->user()->id,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Services\LedgerService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,37 +21,41 @@ class AccountController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $hasCategory = Schema::hasColumn('accounts', 'category');
+        $hasSortOrder = Schema::hasColumn('accounts', 'sort_order');
 
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'category')) {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
+        $query = Account::where('user_id', $user->id)
+            ->withCount(['outgoingTransactions', 'incomingTransfers']);
+
+        if ($hasSortOrder) {
+            $query->orderBy('sort_order', 'asc');
         }
-
-        $accounts = Account::where('user_id', $user->id)
-            ->withCount(['outgoingTransactions', 'incomingTransfers'])
-            ->orderBy('sort_order', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query->orderBy('created_at', 'desc');
+        $accounts = $query->get();
 
         $totalNetWorth = (float) $accounts->sum('balance');
-        $currentTotal = (float) $accounts->where('category', 'current')->sum('balance');
-        $savingsTotal = (float) $accounts->where('category', 'savings')->sum('balance');
-        $otherTotal = (float) $accounts->whereNotIn('category', ['current', 'savings'])->sum('balance');
+
+        $categoryTotals = ['current' => $totalNetWorth, 'savings' => 0, 'other' => 0];
+        if ($hasCategory) {
+            $categoryTotals = [
+                'current' => (float) $accounts->where('category', 'current')->sum('balance'),
+                'savings' => (float) $accounts->where('category', 'savings')->sum('balance'),
+                'other' => (float) $accounts->whereNotIn('category', ['current', 'savings'])->sum('balance'),
+            ];
+        }
 
         return Inertia::render('Accounts/Index', [
             'accounts' => $accounts,
             'totalNetWorth' => $totalNetWorth,
-            'categoryTotals' => [
-                'current' => $currentTotal,
-                'savings' => $savingsTotal,
-                'other' => $otherTotal,
-            ],
+            'categoryTotals' => $categoryTotals,
         ]);
     }
 
     public function store(Request $request)
     {
+        $hasCategory = Schema::hasColumn('accounts', 'category');
+        $hasSortOrder = Schema::hasColumn('accounts', 'sort_order');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:bank,e-wallet,cash,credit_card',
@@ -61,17 +66,25 @@ class AccountController extends Controller
             'icon' => 'required|string',
         ]);
 
-        if (empty($validated['category'])) {
-            $validated['category'] = match ($validated['type']) {
-                'e-wallet' => 'wallet',
-                'credit_card' => 'credit_card',
-                default => 'current',
-            };
+        // Only set category if column exists
+        if ($hasCategory) {
+            if (empty($validated['category'])) {
+                $validated['category'] = match ($validated['type']) {
+                    'e-wallet' => 'wallet',
+                    'credit_card' => 'credit_card',
+                    default => 'current',
+                };
+            }
+        } else {
+            unset($validated['category']);
         }
 
         $validated['user_id'] = $request->user()->id;
         $validated['balance'] = $validated['initial_balance'];
-        $validated['sort_order'] = (Account::where('user_id', $request->user()->id)->max('sort_order') ?? 0) + 1;
+
+        if ($hasSortOrder) {
+            $validated['sort_order'] = (Account::where('user_id', $request->user()->id)->max('sort_order') ?? 0) + 1;
+        }
 
         Account::create($validated);
 
@@ -81,15 +94,26 @@ class AccountController extends Controller
     public function update(Request $request, Account $account)
     {
         $this->authorizeOwner($request, $account);
+        $hasCategory = Schema::hasColumn('accounts', 'category');
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:bank,e-wallet,cash,credit_card',
-            'category' => 'required|string|in:current,savings,wallet,credit_card,investment',
             'currency' => 'required|string|max:10',
             'color' => 'required|string',
             'icon' => 'required|string',
-        ]);
+        ];
+
+        if ($hasCategory) {
+            $rules['category'] = 'nullable|string|in:current,savings,wallet,credit_card,investment';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Strip category from update if column doesn't exist
+        if (!$hasCategory) {
+            unset($validated['category']);
+        }
 
         $account->update($validated);
 
@@ -98,10 +122,8 @@ class AccountController extends Controller
 
     public function reorder(Request $request)
     {
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'sort_order')) {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
+        if (!Schema::hasColumn('accounts', 'sort_order')) {
+            return redirect()->back()->with('info', 'Reordering not available yet. Please wait for database migration.');
         }
 
         $validated = $request->validate([
@@ -112,12 +134,10 @@ class AccountController extends Controller
 
         $user = $request->user();
 
-        if (\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'sort_order')) {
-            foreach ($validated['orders'] as $order) {
-                Account::where('id', $order['id'])
-                    ->where('user_id', $user->id)
-                    ->update(['sort_order' => $order['sort_order']]);
-            }
+        foreach ($validated['orders'] as $order) {
+            Account::where('id', $order['id'])
+                ->where('user_id', $user->id)
+                ->update(['sort_order' => $order['sort_order']]);
         }
 
         return redirect()->back()->with('success', 'Account order updated.');

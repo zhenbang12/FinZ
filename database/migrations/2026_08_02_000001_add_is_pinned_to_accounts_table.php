@@ -10,7 +10,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('accounts', 'is_pinned')) {
             Schema::table('accounts', function (Blueprint $table) {
-                $table->boolean('is_pinned')->default(false)->after('balance');
+                $table->boolean('is_pinned')->default(false);
             });
         }
     }

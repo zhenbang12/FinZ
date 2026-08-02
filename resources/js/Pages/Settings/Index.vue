@@ -467,7 +467,6 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
-import { startRegistration } from '@simplewebauthn/browser';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatDate } from '@/Utils/formatters';
 import {
@@ -488,6 +487,23 @@ import {
   Fingerprint as FingerprintIcon,
   X as XIcon,
 } from 'lucide-vue-next';
+
+// Base64URL helpers for WebAuthn
+function base64urlToBuffer(base64url) {
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
+  const binary = atob(base64 + pad);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function bufferToBase64url(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
@@ -517,7 +533,36 @@ const addPasskey = async () => {
     });
     const options = await res.json();
 
-    const attResp = await startRegistration({ optionsJSON: options });
+    // Convert base64url to ArrayBuffers for native WebAuthn API
+    const publicKeyOptions = {
+      challenge: base64urlToBuffer(options.challenge),
+      rp: options.rp,
+      user: {
+        id: base64urlToBuffer(options.user.id),
+        name: options.user.name,
+        displayName: options.user.displayName,
+      },
+      pubKeyCredParams: options.pubKeyCredParams,
+      timeout: options.timeout,
+      attestation: options.attestation || 'none',
+      authenticatorSelection: options.authenticatorSelection,
+      excludeCredentials: (options.excludeCredentials || []).map(c => ({
+        id: base64urlToBuffer(c.id),
+        type: c.type,
+      })),
+    };
+
+    const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
+
+    const credentialData = {
+      id: credential.id,
+      rawId: bufferToBase64url(credential.rawId),
+      type: credential.type,
+      response: {
+        clientDataJSON: bufferToBase64url(credential.response.clientDataJSON),
+        attestationObject: bufferToBase64url(credential.response.attestationObject),
+      },
+    };
 
     const storeRes = await fetch('/passkeys/register', {
       method: 'POST',
@@ -526,7 +571,7 @@ const addPasskey = async () => {
         'Accept': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
       },
-      body: JSON.stringify(attResp),
+      body: JSON.stringify(credentialData),
     });
 
     const storeData = await storeRes.json();

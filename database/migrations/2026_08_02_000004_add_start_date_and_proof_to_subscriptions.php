@@ -11,14 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->integer('start_month')->default(8)->after('billing_cycle_day'); // 1 - 12
-            $table->integer('start_year')->default(2026)->after('start_month');
-        });
+        if (Schema::hasTable('subscriptions')) {
+            Schema::table('subscriptions', function (Blueprint $table) {
+                if (!Schema::hasColumn('subscriptions', 'start_month')) {
+                    $table->integer('start_month')->default(8); // 1 - 12
+                }
+                if (!Schema::hasColumn('subscriptions', 'start_year')) {
+                    $table->integer('start_year')->default(2026);
+                }
+            });
+        }
 
-        Schema::table('subscription_payments', function (Blueprint $table) {
-            $table->string('proof_image_path')->nullable()->after('notes');
-        });
+        if (Schema::hasTable('subscription_payments')) {
+            Schema::table('subscription_payments', function (Blueprint $table) {
+                if (!Schema::hasColumn('subscription_payments', 'proof_image_path')) {
+                    $table->string('proof_image_path')->nullable();
+                }
+            });
+        }
     }
 
     /**
@@ -26,12 +36,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->dropColumn(['start_month', 'start_year']);
-        });
+        if (Schema::hasTable('subscriptions')) {
+            Schema::table('subscriptions', function (Blueprint $table) {
+                $table->dropColumn(['start_month', 'start_year']);
+            });
+        }
 
-        Schema::table('subscription_payments', function (Blueprint $table) {
-            $table->dropColumn('proof_image_path');
-        });
+        if (Schema::hasTable('subscription_payments')) {
+            Schema::table('subscription_payments', function (Blueprint $table) {
+                $table->dropColumn('proof_image_path');
+            });
+        }
     }
 };

@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('timezone')->default('Asia/Kuala_Lumpur')->after('is_admin');
-            $table->string('currency')->default('MYR')->after('timezone');
+            if (!Schema::hasColumn('users', 'timezone')) {
+                $table->string('timezone')->default('Asia/Kuala_Lumpur');
+            }
+            if (!Schema::hasColumn('users', 'currency')) {
+                $table->string('currency')->default('MYR');
+            }
         });
     }
 
