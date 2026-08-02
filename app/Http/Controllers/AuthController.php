@@ -46,13 +46,13 @@ class AuthController extends Controller
     /**
      * Destroy an authenticated session (Logout).
      */
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request): Response|RedirectResponse
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'You have been logged out.');
+        return Inertia::location(route('login'));
     }
 }

@@ -160,27 +160,19 @@ const loginWithPasskey = async () => {
       },
     };
 
-    const verifyRes = await fetch('/passkeys/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+    router.post('/passkeys/login', credentialData, {
+      preserveScroll: true,
+      onFinish: () => {
+        passkeyAuthenticating.value = false;
       },
-      body: JSON.stringify(credentialData),
+      onError: (errors) => {
+        passkeyError.value = errors.message || errors.id || 'Passkey authentication failed.';
+      },
     });
-
-    const verifyData = await verifyRes.json();
-    if (verifyRes.ok && verifyData.redirect) {
-      window.location.href = verifyData.redirect;
-    } else {
-      passkeyError.value = verifyData.message || 'Passkey authentication failed.';
-    }
   } catch (err) {
     if (err.name !== 'NotAllowedError') {
       passkeyError.value = err.message || 'Passkey sign in failed or was cancelled.';
     }
-  } finally {
     passkeyAuthenticating.value = false;
   }
 };
