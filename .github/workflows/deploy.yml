@@ -19,6 +19,13 @@ jobs:
             cd ~/FinZ
             git pull origin main
             sudo docker build -t finz .
+
+            # Generate APP_KEY once on host and persist it forever
+            if [ ! -f ~/finz_app_key ]; then
+              sudo docker run --rm finz php artisan key:generate --show | tr -d '\r\n' > ~/finz_app_key
+            fi
+            FINZ_APP_KEY=$(cat ~/finz_app_key)
+
             sudo docker rm -f finz_app
             sudo docker run -d \
               --name finz_app \
@@ -28,7 +35,7 @@ jobs:
               -v finz_storage:/app/storage/app/public \
               -e DB_DATABASE=/app/database/db/database.sqlite \
               -e APP_ENV=production \
-              -e APP_KEY="${{ secrets.APP_KEY }}" \
+              -e APP_KEY="$FINZ_APP_KEY" \
               -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
               finz
             sudo docker exec finz_app chmod -R 777 /app/database /app/storage
