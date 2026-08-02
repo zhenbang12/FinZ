@@ -363,6 +363,7 @@ const appStoreLinks = {
   mypb: {
     name: 'MyPB',
     scheme: 'mypb://',
+    intentPackage: 'com.pbb.mypb',
     playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
     appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
     color: 'bg-red-600 hover:bg-red-700 text-white',
@@ -370,6 +371,7 @@ const appStoreLinks = {
   gxbank: {
     name: 'GXBank',
     scheme: 'gxbank://',
+    intentPackage: 'my.com.gxbank.app',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank.app',
     appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
     color: 'bg-purple-600 hover:bg-purple-700 text-white',
@@ -392,11 +394,10 @@ const openEWalletApp = (event, appName) => {
       window.location.href = target.scheme;
     }
   } else if (isAndroid) {
-    // Direct app launching for apps known to handle URI schemes cleanly
-    const directLaunchApps = ['tng', 'gxbank', 'mypb'];
-
-    if (directLaunchApps.includes(appName) && target.scheme) {
+    if (appName === 'tng' && target.scheme) {
       window.location.href = target.scheme;
+    } else if ((appName === 'gxbank' || appName === 'mypb') && target.intentPackage) {
+      window.location.href = `intent://open#Intent;scheme=https;package=${target.intentPackage};end`;
     } else {
       // For MAE, CIMB, HLB, RHB -> navigate straight to Play Store
       window.location.href = target.playStore;
