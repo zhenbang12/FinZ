@@ -43,7 +43,7 @@ class PasskeyController extends Controller
             'challenge' => $challenge,
             'rp' => [
                 'name' => config('app.name', 'FinZ'),
-                'id' => parse_url(config('app.url'), PHP_URL_HOST) ?: $request->getHost(),
+                'id' => $request->getHost(),
             ],
             'user' => [
                 'id' => $userIdBase64Url,
@@ -119,7 +119,7 @@ class PasskeyController extends Controller
             'challenge' => $challenge,
             'timeout' => 60000,
             'userVerification' => 'preferred',
-            'rpId' => parse_url(config('app.url'), PHP_URL_HOST) ?: $request->getHost(),
+            'rpId' => $request->getHost(),
         ]);
     }
 
