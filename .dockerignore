@@ -2,12 +2,10 @@
 .env
 vendor
 node_modules
-*.sqlite
-*.sqlite-journal
-*.sqlite-wal
-*.sqlite-shm
-database/*.sqlite
-storage/database/*.sqlite
+**/*.sqlite
+**/*.sqlite-journal
+**/*.sqlite-wal
+**/*.sqlite-shm
 storage/*.key
 storage/logs/*
 !storage/logs/.gitkeep
