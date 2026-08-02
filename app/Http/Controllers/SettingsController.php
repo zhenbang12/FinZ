@@ -122,7 +122,7 @@ class SettingsController extends Controller
         $accounts = \App\Models\Account::where('user_id', $user->id)->get();
         $categories = \App\Models\Category::where('user_id', $user->id)->get();
         $transactions = \App\Models\Transaction::where('user_id', $user->id)->get();
-        $receipts = \App\Models\Receipt::where('user_id', $user->id)->with(['items', 'claims'])->get();
+        $receipts = \App\Models\Receipt::where('user_id', $user->id)->with(['items', 'sessionClaims'])->get();
         $subscriptions = \App\Models\Subscription::where('user_id', $user->id)->with(['members.payments'])->get();
 
         $backupData = [

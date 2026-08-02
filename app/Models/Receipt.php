@@ -69,4 +69,9 @@ class Receipt extends Model
     {
         return $this->hasMany(ReceiptSessionClaim::class);
     }
+
+    public function claims(): HasMany
+    {
+        return $this->hasMany(ReceiptSessionClaim::class);
+    }
 }
