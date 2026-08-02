@@ -10,7 +10,9 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     zip \
-    unzip
+    unzip \
+    nodejs \
+    npm
 
 # Install PHP SQLite and GD extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -30,6 +32,9 @@ COPY . /app
 
 # Install PHP production dependencies cleanly without build-time scripts
 RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Build Inertia Vue frontend assets for production
+RUN npm install --no-audit --no-fund && npm run build
 
 # Ensure permissions for runtime storage and cache
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/database
