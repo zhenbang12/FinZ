@@ -46,8 +46,8 @@ class AppServiceProvider extends ServiceProvider
             }
             if (!\Illuminate\Support\Facades\Schema::hasTable('sessions') || !\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-            } elseif (\App\Models\User::count() === 0) {
+            }
+            if (\App\Models\User::count() === 0) {
                 \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
             }
         } catch (\Throwable $e) {
