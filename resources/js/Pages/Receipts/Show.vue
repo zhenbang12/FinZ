@@ -510,8 +510,19 @@ const openEWalletApp = (event, appName) => {
   const target = appStoreLinks[appName];
   if (!target) return;
 
-  if (target.scheme) {
-    window.location.href = target.scheme;
+  if (isIOS) {
+    if (target.scheme) {
+      window.location.href = target.scheme;
+    }
+  } else if (isAndroid) {
+    // 1. Force explicit Android Intent by Package Name (Works universally across GXBank, MAE, CIMB, RHB, HLB)
+    if (target.intentPackage) {
+      window.location.href = `intent://open#Intent;scheme=https;package=${target.intentPackage};end`;
+    } 
+    // 2. Fallback to custom URI scheme if no package target available
+    else if (target.scheme) {
+      window.location.href = target.scheme;
+    }
   }
 };
 
