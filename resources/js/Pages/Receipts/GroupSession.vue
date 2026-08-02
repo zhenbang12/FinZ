@@ -230,7 +230,7 @@
                 :key="key"
                 :href="getStoreHref(key)"
                 target="_blank"
-                @click="openEWalletApp($event, key)"
+                @click.prevent="openEWalletApp($event, key)"
                 :class="[
                   app.color,
                   'px-2.5 py-2 rounded-xl font-extrabold text-[11px] sm:text-xs flex items-center justify-center gap-1 transition-colors shadow-xs'
@@ -328,7 +328,6 @@ const appStoreLinks = {
   tng: {
     name: "Touch 'n Go",
     scheme: 'tngdwallet://',
-    intentScheme: 'tngdwallet',
     intentPackage: 'com.touchngo.ewallet',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
@@ -337,7 +336,6 @@ const appStoreLinks = {
   mae: {
     name: 'Maybank MAE',
     scheme: 'maybank2u://',
-    intentScheme: 'mae',
     intentPackage: 'com.maybank2u.life',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
@@ -346,7 +344,6 @@ const appStoreLinks = {
   cimb: {
     name: 'CIMB OCTO',
     scheme: 'cimbocto://',
-    intentScheme: 'cimbocto',
     intentPackage: 'com.cimb.cimbocto',
     playStore: 'https://play.google.com/store/apps/details?id=com.cimb.cimbocto',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
@@ -355,16 +352,14 @@ const appStoreLinks = {
   hlb: {
     name: 'HLB Connect',
     scheme: 'hlbconnect://',
-    intentScheme: 'hlbconnect',
-    intentPackage: 'my.com.hlb.connect',
-    playStore: 'https://play.google.com/store/apps/details?id=my.com.hlb.connect',
+    intentPackage: 'my.com.hongleongconnect.mobileconnect',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.hongleongconnect.mobileconnect',
     appStore: 'https://apps.apple.com/app/hlb-connect-mobile-banking/id1458055610',
     color: 'bg-blue-700 hover:bg-blue-800 text-white',
   },
   rhb: {
     name: 'RHB Mobile',
     scheme: 'rhbmb://',
-    intentScheme: 'rhbmobile',
     intentPackage: 'com.rhbgroup.rhbmobilebanking',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
@@ -373,7 +368,6 @@ const appStoreLinks = {
   mypb: {
     name: 'MyPB',
     scheme: 'mypb://',
-    intentScheme: 'mypb',
     intentPackage: 'com.pbb.mypb',
     playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
     appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
@@ -382,7 +376,6 @@ const appStoreLinks = {
   gxbank: {
     name: 'GXBank',
     scheme: 'gxbank://',
-    intentScheme: 'gxbank',
     intentPackage: 'my.com.gxbank.app',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank.app',
     appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
@@ -394,18 +387,14 @@ const getStoreHref = (appName) => {
   const target = appStoreLinks[appName];
   if (!target) return '#';
   if (isIOS) return target.appStore;
-  if (isAndroid && target.intentScheme && target.intentPackage && appName !== 'tng') {
-    return `intent://open#Intent;scheme=${target.intentScheme};package=${target.intentPackage};end`;
-  }
   return target.playStore;
 };
 
 const openEWalletApp = (event, appName) => {
   const target = appStoreLinks[appName];
   if (!target) return;
-  if (isIOS) {
-    window.location.href = target.scheme;
-  } else if (isAndroid && appName === 'tng') {
+
+  if (target.scheme) {
     window.location.href = target.scheme;
   }
 };
