@@ -26,7 +26,12 @@ Route::get('/debug-migrate', function () {
     } catch (\Throwable $e) {
         return response("Error: " . $e->getMessage() . "\n\nStack:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
     }
-});
+})->withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\Cookie\Middleware\EncryptCookies::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \App\Http\Middleware\HandleInertiaRequests::class,
+]);
 
 Route::middleware(['web'])->group(function () {
     // Auth Routes

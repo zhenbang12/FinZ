@@ -39,7 +39,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Global self-healing database migration runner
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('migrations')) {
+            $dbPath = config('database.connections.sqlite.database');
+            if ($dbPath && !file_exists($dbPath) && str_ends_with($dbPath, '.sqlite')) {
+                @mkdir(dirname($dbPath), 0777, true);
+                @touch($dbPath);
+            }
+            if (!\Illuminate\Support\Facades\Schema::hasTable('sessions') || !\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             }
         } catch (\Throwable $e) {
