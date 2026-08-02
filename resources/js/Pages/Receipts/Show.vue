@@ -444,7 +444,7 @@ const appStoreLinks = {
   tng: {
     name: "Touch 'n Go",
     scheme: 'tngdwallet://',
-    intentPackage: 'com.touchngo.ewallet',
+    intentPackage: 'my.com.tngdigital.ewallet',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
     color: 'bg-blue-600 hover:bg-blue-700 text-white',
@@ -515,14 +515,16 @@ const openEWalletApp = (event, appName) => {
       window.location.href = target.scheme;
     }
   } else if (isAndroid) {
-    // 1. Force explicit Android Intent by Package Name (Works universally across GXBank, MAE, CIMB, RHB, HLB)
-    if (target.intentPackage) {
-      window.location.href = `intent://open#Intent;scheme=https;package=${target.intentPackage};end`;
-    } 
-    // 2. Fallback to custom URI scheme if no package target available
-    else if (target.scheme) {
-      window.location.href = target.scheme;
-    }
+    // 1. First attempt: Launch app directly via custom scheme (Works for TNG, MyPB, etc.)
+    window.location.href = target.scheme;
+
+    // 2. Fallback attempt: If custom scheme isn't captured within 500ms, trigger explicit Android Intent package
+    setTimeout(() => {
+      if (document.hidden) return; // If user switched into the app, stop fallback execution
+      if (target.intentPackage) {
+        window.location.href = `intent://launch#Intent;scheme=${target.scheme.replace('://', '')};package=${target.intentPackage};end`;
+      }
+    }, 500);
   }
 };
 
