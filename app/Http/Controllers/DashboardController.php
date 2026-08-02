@@ -23,7 +23,10 @@ class DashboardController extends Controller
             });
         }
 
-        $allAccounts = Account::where('user_id', $user->id)->get();
+        $allAccounts = Account::where('user_id', $user->id)
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->get();
         $totalNetWorth = (float) $allAccounts->sum('balance');
 
         // Pinned accounts

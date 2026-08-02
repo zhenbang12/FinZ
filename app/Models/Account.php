@@ -15,9 +15,11 @@ class Account extends Model
         'user_id',
         'name',
         'type',
+        'category',
         'currency',
         'initial_balance',
         'balance',
+        'sort_order',
         'is_pinned',
         'color',
         'icon',
@@ -26,6 +28,7 @@ class Account extends Model
     protected $casts = [
         'initial_balance' => 'decimal:2',
         'balance' => 'decimal:2',
+        'sort_order' => 'integer',
         'is_pinned' => 'boolean',
     ];
 

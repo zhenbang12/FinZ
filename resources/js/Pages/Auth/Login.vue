@@ -7,10 +7,32 @@
           Z
         </div>
         <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">FinZ Login</h2>
-        <p class="text-xs text-slate-500 font-medium">Enter your credentials to access your financial ledger.</p>
+        <p class="text-xs text-slate-500 font-medium">Enter your credentials or use Google Passkey / Biometrics to sign in.</p>
       </div>
 
-      <!-- Clean Login Form -->
+      <!-- Passkey Sign In Button -->
+      <div class="space-y-3">
+        <button
+          @click="loginWithPasskey"
+          :disabled="passkeyAuthenticating"
+          type="button"
+          class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50"
+        >
+          <FingerprintIcon class="w-4 h-4 text-indigo-400" />
+          <span>{{ passkeyAuthenticating ? 'Authenticating Passkey...' : 'Sign in with Passkey / Biometrics' }}</span>
+        </button>
+
+        <div v-if="passkeyError" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 text-center">
+          {{ passkeyError }}
+        </div>
+
+        <div class="relative flex items-center justify-center my-4">
+          <div class="border-t border-slate-200 w-full"></div>
+          <span class="bg-[#f8fafc] px-3 text-[10px] uppercase font-bold text-slate-400 tracking-wider absolute">or login with password</span>
+        </div>
+      </div>
+
+      <!-- Password Login Form -->
       <form @submit.prevent="submit" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
@@ -62,7 +84,10 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
+import { startAuthentication } from '@simplewebauthn/browser';
+import { Fingerprint as FingerprintIcon } from 'lucide-vue-next';
 
 const form = useForm({
   email: '',
@@ -70,9 +95,49 @@ const form = useForm({
   remember: false,
 });
 
+const passkeyAuthenticating = ref(false);
+const passkeyError = ref(null);
+
 const submit = () => {
   form.post('/login', {
     onFinish: () => form.reset('password'),
   });
+};
+
+const loginWithPasskey = async () => {
+  passkeyAuthenticating.value = true;
+  passkeyError.value = null;
+
+  try {
+    const res = await fetch('/passkeys/login/options', {
+      headers: { 'Accept': 'application/json' },
+    });
+    const options = await res.json();
+
+    const asseResp = await startAuthentication({ optionsJSON: options });
+
+    const verifyRes = await fetch('/passkeys/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      },
+      body: JSON.stringify(asseResp),
+    });
+
+    const verifyData = await verifyRes.json();
+    if (verifyRes.ok && verifyData.redirect) {
+      window.location.href = verifyData.redirect;
+    } else {
+      passkeyError.value = verifyData.message || 'Passkey authentication failed.';
+    }
+  } catch (err) {
+    if (err.name !== 'NotAllowedError') {
+      passkeyError.value = err.message || 'Passkey sign in failed or was cancelled.';
+    }
+  } finally {
+    passkeyAuthenticating.value = false;
+  }
 };
 </script>

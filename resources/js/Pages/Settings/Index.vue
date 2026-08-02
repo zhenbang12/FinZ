@@ -129,6 +129,63 @@
           </div>
         </div>
 
+        <!-- Passkeys & Biometrics Section -->
+        <div class="minimal-card p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <ShieldCheckIcon class="w-5 h-5 text-indigo-600 shrink-0" />
+                <span>Google Passkeys & Biometric Security</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Use your fingerprint, Face ID, or Google Password Manager passkeys for fast, passwordless login.</p>
+            </div>
+
+            <button
+              @click="addPasskey"
+              :disabled="passkeyRegistering"
+              class="minimal-btn-primary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+            >
+              <PlusIcon class="w-4 h-4" />
+              <span>{{ passkeyRegistering ? 'Prompting Device...' : 'Add Google Passkey' }}</span>
+            </button>
+          </div>
+
+          <div v-if="passkeyError" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+            {{ passkeyError }}
+          </div>
+
+          <!-- Registered Passkeys List -->
+          <div v-if="passkeys.length === 0" class="p-5 text-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+            <p class="text-xs text-slate-400 font-medium">No passkeys registered yet. Click "Add Google Passkey" above to enable biometric login.</p>
+          </div>
+
+          <div v-else class="space-y-2.5">
+            <div
+              v-for="p in passkeys"
+              :key="p.id"
+              class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                  <FingerprintIcon class="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-xs sm:text-sm text-slate-900">{{ p.name }}</h4>
+                  <span class="text-[10px] text-slate-400 font-medium block">Added {{ p.created_at_human }}</span>
+                </div>
+              </div>
+
+              <button
+                @click="deletePasskey(p)"
+                class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                title="Remove Passkey"
+              >
+                <Trash2Icon class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Active Sessions List -->
         <div class="minimal-card p-6 space-y-4">
           <div class="flex items-center justify-between">
@@ -410,6 +467,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
+import { startRegistration } from '@simplewebauthn/browser';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatDate } from '@/Utils/formatters';
 import {
@@ -426,6 +484,8 @@ import {
   Trash2 as Trash2Icon,
   Sliders as SlidersIcon,
   Globe as GlobeIcon,
+  Plus as PlusIcon,
+  Fingerprint as FingerprintIcon,
   X as XIcon,
 } from 'lucide-vue-next';
 
@@ -435,6 +495,7 @@ const user = computed(() => page.props.auth?.user);
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
   users: { type: Array, default: () => [] },
+  passkeys: { type: Array, default: () => [] },
   preferences: { type: Object, default: () => ({ timezone: 'Asia/Kuala_Lumpur', currency: 'MYR' }) },
 });
 
@@ -442,6 +503,52 @@ const activeTab = ref('preferences');
 const showUserModal = ref(false);
 const userModalMode = ref('create');
 const selectedUserId = ref(null);
+
+const passkeyRegistering = ref(false);
+const passkeyError = ref(null);
+
+const addPasskey = async () => {
+  passkeyRegistering.value = true;
+  passkeyError.value = null;
+
+  try {
+    const res = await fetch('/passkeys/register/options', {
+      headers: { 'Accept': 'application/json' },
+    });
+    const options = await res.json();
+
+    const attResp = await startRegistration({ optionsJSON: options });
+
+    const storeRes = await fetch('/passkeys/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      },
+      body: JSON.stringify(attResp),
+    });
+
+    const storeData = await storeRes.json();
+    if (storeRes.ok) {
+      router.reload({ only: ['passkeys'] });
+    } else {
+      passkeyError.value = storeData.message || 'Failed to register passkey.';
+    }
+  } catch (err) {
+    if (err.name !== 'NotAllowedError') {
+      passkeyError.value = err.message || 'Passkey creation failed or was cancelled.';
+    }
+  } finally {
+    passkeyRegistering.value = false;
+  }
+};
+
+const deletePasskey = (p) => {
+  if (confirm(`Remove passkey "${p.name}"?`)) {
+    router.delete(`/passkeys/${p.id}`);
+  }
+};
 
 const prefForm = useForm({
   timezone: props.preferences?.timezone || 'Asia/Kuala_Lumpur',

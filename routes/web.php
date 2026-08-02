@@ -14,6 +14,8 @@ Route::middleware(['web'])->group(function () {
     // Auth Routes
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/passkeys/login/options', [\App\Http\Controllers\PasskeyController::class, 'loginOptions']);
+    Route::post('/passkeys/login', [\App\Http\Controllers\PasskeyController::class, 'login']);
 
     // Public SmartSplit Live Group Session Routes (No Login Required)
     Route::get('/receipts/session/{token}', [ReceiptController::class, 'showGroupSession'])->name('receipts.session.show');
@@ -24,12 +26,18 @@ Route::middleware(['web'])->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+        // Passkey Registration & Management
+        Route::get('/passkeys/register/options', [\App\Http\Controllers\PasskeyController::class, 'registerOptions']);
+        Route::post('/passkeys/register', [\App\Http\Controllers\PasskeyController::class, 'register']);
+        Route::delete('/passkeys/{passkey}', [\App\Http\Controllers\PasskeyController::class, 'destroy'])->name('passkeys.destroy');
+
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::redirect('/quick', '/');
 
         // Accounts Management
         Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
         Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
+        Route::post('/accounts/reorder', [AccountController::class, 'reorder'])->name('accounts.reorder');
         Route::put('/accounts/{account}', [AccountController::class, 'update'])->name('accounts.update');
         Route::post('/accounts/{account}/toggle-pin', [DashboardController::class, 'togglePin'])->name('accounts.toggle-pin');
         Route::delete('/accounts/{account}', [AccountController::class, 'destroy'])->name('accounts.destroy');

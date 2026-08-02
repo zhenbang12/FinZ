@@ -20,16 +20,32 @@ class AccountController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'category')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $accounts = Account::where('user_id', $user->id)
             ->withCount(['outgoingTransactions', 'incomingTransfers'])
+            ->orderBy('sort_order', 'asc')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $totalNetWorth = (float) $accounts->sum('balance');
+        $currentTotal = (float) $accounts->where('category', 'current')->sum('balance');
+        $savingsTotal = (float) $accounts->where('category', 'savings')->sum('balance');
+        $otherTotal = (float) $accounts->whereNotIn('category', ['current', 'savings'])->sum('balance');
 
         return Inertia::render('Accounts/Index', [
             'accounts' => $accounts,
             'totalNetWorth' => $totalNetWorth,
+            'categoryTotals' => [
+                'current' => $currentTotal,
+                'savings' => $savingsTotal,
+                'other' => $otherTotal,
+            ],
         ]);
     }
 
@@ -38,14 +54,24 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:bank,e-wallet,cash,credit_card',
+            'category' => 'nullable|string|in:current,savings,wallet,credit_card,investment',
             'currency' => 'required|string|max:10',
             'initial_balance' => 'required|numeric',
             'color' => 'required|string',
             'icon' => 'required|string',
         ]);
 
+        if (empty($validated['category'])) {
+            $validated['category'] = match ($validated['type']) {
+                'e-wallet' => 'wallet',
+                'credit_card' => 'credit_card',
+                default => 'current',
+            };
+        }
+
         $validated['user_id'] = $request->user()->id;
         $validated['balance'] = $validated['initial_balance'];
+        $validated['sort_order'] = (Account::where('user_id', $request->user()->id)->max('sort_order') ?? 0) + 1;
 
         Account::create($validated);
 
@@ -59,6 +85,7 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:bank,e-wallet,cash,credit_card',
+            'category' => 'required|string|in:current,savings,wallet,credit_card,investment',
             'currency' => 'required|string|max:10',
             'color' => 'required|string',
             'icon' => 'required|string',
@@ -67,6 +94,25 @@ class AccountController extends Controller
         $account->update($validated);
 
         return redirect()->back()->with('success', 'Account updated successfully.');
+    }
+
+    public function reorder(Request $request)
+    {
+        $validated = $request->validate([
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|exists:accounts,id',
+            'orders.*.sort_order' => 'required|integer',
+        ]);
+
+        $user = $request->user();
+
+        foreach ($validated['orders'] as $order) {
+            Account::where('id', $order['id'])
+                ->where('user_id', $user->id)
+                ->update(['sort_order' => $order['sort_order']]);
+        }
+
+        return redirect()->back()->with('success', 'Account order updated.');
     }
 
     public function destroy(Request $request, Account $account)

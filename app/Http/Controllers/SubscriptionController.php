@@ -36,8 +36,22 @@ class SubscriptionController extends Controller
             try {
                 Artisan::call('migrate', ['--force' => true]);
             } catch (\Throwable $e) {
-                // Ignore if already migrated concurrently
+                // Ignore failure if permissions prevent migrate in HTTP process
             }
+        }
+
+        if (!Schema::hasTable('subscriptions')) {
+            return Inertia::render('Subscriptions/Index', [
+                'subscriptions' => [],
+                'totals' => [
+                    'activeCount' => 0,
+                    'totalMonthlyCost' => 0,
+                    'myMonthlyShare' => 0,
+                    'othersMonthlyShare' => 0,
+                    'uncollectedDues' => 0,
+                ],
+                'availableAccounts' => Schema::hasTable('accounts') ? Account::where('user_id', $user->id)->get() : [],
+            ]);
         }
 
         $subscriptions = Subscription::with(['members.payments'])
