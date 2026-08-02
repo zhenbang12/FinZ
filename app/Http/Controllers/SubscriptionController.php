@@ -11,7 +11,9 @@ use App\Models\Transaction;
 use App\Services\LedgerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,6 +31,14 @@ class SubscriptionController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+
+        if (!Schema::hasTable('subscriptions')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                // Ignore if already migrated concurrently
+            }
+        }
 
         $subscriptions = Subscription::with(['members.payments'])
             ->where('user_id', $user->id)

@@ -17,6 +17,7 @@
     "dependencies": {
         "@inertiajs/vue3": "^3.6.1",
         "@lucide/vue": "^1.25.0",
+        "@simplewebauthn/browser": "^13.3.0",
         "@vitejs/plugin-vue": "^6.0.8",
         "chart.js": "^4.5.1",
         "lucide-vue-next": "^1.0.0",
