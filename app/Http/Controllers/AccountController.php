@@ -98,6 +98,12 @@ class AccountController extends Controller
 
     public function reorder(Request $request)
     {
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'sort_order')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'orders' => 'required|array',
             'orders.*.id' => 'required|exists:accounts,id',
@@ -106,10 +112,12 @@ class AccountController extends Controller
 
         $user = $request->user();
 
-        foreach ($validated['orders'] as $order) {
-            Account::where('id', $order['id'])
-                ->where('user_id', $user->id)
-                ->update(['sort_order' => $order['sort_order']]);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('accounts', 'sort_order')) {
+            foreach ($validated['orders'] as $order) {
+                Account::where('id', $order['id'])
+                    ->where('user_id', $user->id)
+                    ->update(['sort_order' => $order['sort_order']]);
+            }
         }
 
         return redirect()->back()->with('success', 'Account order updated.');

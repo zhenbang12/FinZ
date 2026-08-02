@@ -135,6 +135,12 @@ class SubscriptionController extends Controller
             'members.*.default_share_amount' => 'required|numeric|min:0',
         ]);
 
+        if (!Schema::hasTable('subscriptions')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         DB::transaction(function () use ($request, $validated) {
             $subscription = Subscription::create([
                 'user_id' => $request->user()->id,

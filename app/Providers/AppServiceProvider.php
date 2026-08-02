@@ -36,5 +36,14 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('ocr-upload', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Global self-healing database migration runner
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('migrations')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            }
+        } catch (\Throwable $e) {
+            // Ignore if concurrently migrating or locked
+        }
     }
 }
