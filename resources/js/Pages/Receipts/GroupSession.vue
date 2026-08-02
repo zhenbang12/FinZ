@@ -230,7 +230,6 @@
                 :key="key"
                 :href="getStoreHref(key)"
                 target="_blank"
-                @click.prevent="openEWalletApp($event, key)"
                 :class="[
                   app.color,
                   'px-2.5 py-2 rounded-xl font-extrabold text-[11px] sm:text-xs flex items-center justify-center gap-1 transition-colors shadow-xs'
@@ -327,51 +326,42 @@ const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navig
 const appStoreLinks = {
   tng: {
     name: "Touch 'n Go",
-    scheme: 'tngdwallet://',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
     color: 'bg-blue-600 hover:bg-blue-700 text-white',
   },
   mae: {
     name: 'Maybank MAE',
-    scheme: 'maybank2u://',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
     color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
   },
   cimb: {
     name: 'CIMB OCTO',
-    scheme: 'cimbocto://',
     playStore: 'https://play.google.com/store/apps/details?id=com.cimb.cimbocto',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
     color: 'bg-rose-600 hover:bg-rose-700 text-white',
   },
   hlb: {
     name: 'HLB Connect',
-    scheme: 'hlbconnect://',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.hongleongconnect.mobileconnect',
     appStore: 'https://apps.apple.com/app/hlb-connect-mobile-banking/id1458055610',
     color: 'bg-blue-700 hover:bg-blue-800 text-white',
   },
   rhb: {
     name: 'RHB Mobile',
-    scheme: 'rhbmb://',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
     color: 'bg-sky-600 hover:bg-sky-700 text-white',
   },
   mypb: {
     name: 'MyPB',
-    scheme: 'mypb://',
-    intentPackage: 'com.pbb.mypb',
     playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
     appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
     color: 'bg-red-600 hover:bg-red-700 text-white',
   },
   gxbank: {
     name: 'GXBank',
-    scheme: 'gxbank://',
-    intentPackage: 'my.com.gxbank.app',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank.app',
     appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
     color: 'bg-purple-600 hover:bg-purple-700 text-white',
@@ -383,26 +373,6 @@ const getStoreHref = (appName) => {
   if (!target) return '#';
   if (isIOS) return target.appStore;
   return target.playStore;
-};
-
-const openEWalletApp = (event, appName) => {
-  const target = appStoreLinks[appName];
-  if (!target) return;
-
-  if (isIOS) {
-    if (target.scheme) {
-      window.location.href = target.scheme;
-    }
-  } else if (isAndroid) {
-    if (appName === 'tng' && target.scheme) {
-      window.location.href = target.scheme;
-    } else if ((appName === 'gxbank' || appName === 'mypb') && target.intentPackage) {
-      window.location.href = `intent://open#Intent;scheme=https;package=${target.intentPackage};end`;
-    } else {
-      // For MAE, CIMB, HLB, RHB -> navigate straight to Play Store
-      window.location.href = target.playStore;
-    }
-  }
 };
 
 const page = usePage();
