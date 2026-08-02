@@ -186,6 +186,62 @@
           </div>
         </div>
 
+        <!-- Data Backup & Recovery Section -->
+        <div class="minimal-card p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <DatabaseIcon class="w-5 h-5 text-slate-800 shrink-0" />
+                <span>Data Backup & Disaster Recovery</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Export a full JSON copy of your accounts, transactions, receipts, and subscriptions, or restore from a previous backup file.</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                @click="exportBackup"
+                class="minimal-btn-secondary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+              >
+                <DownloadIcon class="w-4 h-4 text-slate-700" />
+                <span>Export Backup (.json)</span>
+              </button>
+
+              <button
+                @click="triggerRestoreFile"
+                :disabled="backupUploading"
+                class="minimal-btn-primary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+              >
+                <UploadIcon class="w-4 h-4 text-white" />
+                <span>{{ backupUploading ? 'Restoring Data...' : 'Restore Backup' }}</span>
+              </button>
+
+              <input
+                ref="restoreFileInput"
+                type="file"
+                accept=".json"
+                class="hidden"
+                @change="handleRestoreFile"
+              />
+            </div>
+          </div>
+
+          <div v-if="backupError" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+            {{ backupError }}
+          </div>
+
+          <div class="flex items-center gap-4 text-xs font-medium text-slate-600 pt-1">
+            <span>Restore Mode:</span>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-800 font-bold">
+              <input type="radio" v-model="restoreMode" value="replace" class="text-slate-900 focus:ring-slate-900" />
+              <span>Replace Existing Data</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-800 font-bold">
+              <input type="radio" v-model="restoreMode" value="merge" class="text-slate-900 focus:ring-slate-900" />
+              <span>Merge with Existing Data</span>
+            </label>
+          </div>
+        </div>
+
         <!-- Active Sessions List -->
         <div class="minimal-card p-6 space-y-4">
           <div class="flex items-center justify-between">
@@ -485,6 +541,9 @@ import {
   Globe as GlobeIcon,
   Plus as PlusIcon,
   Fingerprint as FingerprintIcon,
+  Database as DatabaseIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
   X as XIcon,
 } from 'lucide-vue-next';
 
@@ -522,6 +581,53 @@ const selectedUserId = ref(null);
 
 const passkeyRegistering = ref(false);
 const passkeyError = ref(null);
+
+const backupUploading = ref(false);
+const backupError = ref(null);
+const restoreFileInput = ref(null);
+const restoreMode = ref('replace');
+
+const exportBackup = () => {
+  window.location.href = '/settings/backup/export';
+};
+
+const triggerRestoreFile = () => {
+  restoreFileInput.value?.click();
+};
+
+const handleRestoreFile = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const confirmMsg = restoreMode.value === 'replace'
+    ? `REPLACE your existing data with backup "${file.name}"? Current records will be overwritten.`
+    : `MERGE backup "${file.name}" into your existing data?`;
+
+  if (!confirm(confirmMsg)) {
+    event.target.value = '';
+    return;
+  }
+
+  backupUploading.value = true;
+  backupError.value = null;
+
+  const formData = new FormData();
+  formData.append('backup_file', file);
+  formData.append('mode', restoreMode.value);
+
+  router.post('/settings/backup/restore', formData, {
+    forceFormData: true,
+    onSuccess: () => {
+      backupUploading.value = false;
+      event.target.value = '';
+    },
+    onError: (errors) => {
+      backupUploading.value = false;
+      backupError.value = errors.backup_file || errors.error || 'Failed to restore backup.';
+      event.target.value = '';
+    },
+  });
+};
 
 const addPasskey = async () => {
   passkeyRegistering.value = true;

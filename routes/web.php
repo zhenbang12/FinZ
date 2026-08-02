@@ -123,6 +123,8 @@ Route::middleware(['web'])->group(function () {
         Route::put('/settings/preferences', [App\Http\Controllers\SettingsController::class, 'updatePreferences'])->name('settings.preferences.update');
         Route::delete('/settings/sessions/{session}', [App\Http\Controllers\SettingsController::class, 'destroySession'])->name('settings.sessions.destroy');
         Route::post('/settings/sessions/logout-others', [App\Http\Controllers\SettingsController::class, 'logoutOtherDevices'])->name('settings.sessions.logout-others');
+        Route::get('/settings/backup/export', [App\Http\Controllers\SettingsController::class, 'exportBackup'])->name('settings.backup.export');
+        Route::post('/settings/backup/restore', [App\Http\Controllers\SettingsController::class, 'restoreBackup'])->name('settings.backup.restore');
 
         // Superuser Account Management
         Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
