@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Superuser Account
         $admin = User::firstOrCreate(
-            ['email' => 'admin'],
+            ['email' => 'admin@finz.app'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('adminpassword'),
