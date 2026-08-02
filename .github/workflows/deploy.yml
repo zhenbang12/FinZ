@@ -27,6 +27,8 @@ jobs:
               -v finz_db:/app/database/db \
               -v finz_storage:/app/storage/app/public \
               -e DB_DATABASE=/app/database/db/database.sqlite \
+              -e APP_ENV=production \
+              -e APP_KEY="${{ secrets.APP_KEY }}" \
               -e GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
               finz
             sudo docker exec finz_app chmod -R 777 /app/database /app/storage

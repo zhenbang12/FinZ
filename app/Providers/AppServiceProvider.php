@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Global self-healing database migration runner
+        // Global self-healing database migration runner - NEVER seeds in production
         try {
             $dbPath = config('database.connections.sqlite.database');
             if ($dbPath && !file_exists($dbPath) && str_ends_with($dbPath, '.sqlite')) {
@@ -47,9 +47,8 @@ class AppServiceProvider extends ServiceProvider
             if (!\Illuminate\Support\Facades\Schema::hasTable('sessions') || !\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             }
-            if (\App\Models\User::count() === 0) {
-                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-            }
+            // NOTE: db:seed is intentionally NOT called here.
+            // Seeding wipes custom user data. Use `php artisan db:seed` manually on a fresh install only.
         } catch (\Throwable $e) {
             // Ignore if concurrently migrating or locked
         }
