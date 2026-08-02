@@ -14,6 +14,15 @@ Route::get('/debug-migrate', function () {
     try {
         $output = '';
         
+        // 0. Inspect SQLite files on container
+        $output .= "=== SQLITE FILES ON CONTAINER ===\n";
+        $files = glob('/app/database/*.sqlite');
+        $files2 = glob('/app/database/*/*.sqlite');
+        foreach (array_merge($files ?: [], $files2 ?: []) as $f) {
+            $output .= "$f - Size: " . filesize($f) . " bytes\n";
+        }
+        $output .= "\n";
+
         // 1. Run status
         \Illuminate\Support\Facades\Artisan::call('migrate:status');
         $output .= "=== MIGRATION STATUS ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
@@ -24,6 +33,13 @@ Route::get('/debug-migrate', function () {
         
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         $output .= "=== DB SEED RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+
+        // 3. User & Record Counts
+        $output .= "=== TABLE COUNTS ===\n";
+        $output .= "Users: " . \App\Models\User::count() . "\n";
+        $output .= "Accounts: " . \App\Models\Account::count() . "\n";
+        $output .= "Transactions: " . \App\Models\Transaction::count() . "\n";
+        $output .= "Receipts: " . \App\Models\Receipt::count() . "\n";
         
         return response($output, 200)->header('Content-Type', 'text/plain');
     } catch (\Throwable $e) {
