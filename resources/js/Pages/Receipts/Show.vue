@@ -444,6 +444,8 @@ const appStoreLinks = {
   tng: {
     name: "Touch 'n Go",
     scheme: 'tngdwallet://',
+    intentScheme: 'tngdwallet',
+    intentPackage: 'com.touchngo.ewallet',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
     color: 'bg-blue-600 hover:bg-blue-700 text-white',
@@ -451,6 +453,8 @@ const appStoreLinks = {
   mae: {
     name: 'Maybank MAE',
     scheme: 'maybank2u://',
+    intentScheme: 'maybank2u',
+    intentPackage: 'com.maybank2u.mae',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
     color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
@@ -458,20 +462,35 @@ const appStoreLinks = {
   cimb: {
     name: 'CIMB OCTO',
     scheme: 'cimbocto://',
+    intentScheme: 'cimbocto',
+    intentPackage: 'com.cimb.octo',
     playStore: 'https://play.google.com/store/apps/details?id=com.cimb.cimbocto',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
     color: 'bg-rose-600 hover:bg-rose-700 text-white',
   },
+  hlb: {
+    name: 'HLB Connect',
+    scheme: 'hlbconnect://',
+    intentScheme: 'hlbconnect',
+    intentPackage: 'my.com.hongleongconnect.mobileconnect',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.hongleongconnect.mobileconnect',
+    appStore: 'https://apps.apple.com/app/hlb-connect-mobile-banking/id1458055610',
+    color: 'bg-blue-700 hover:bg-blue-800 text-white',
+  },
   rhb: {
     name: 'RHB Mobile',
     scheme: 'rhbmobile://',
-    playStore: 'https://play.google.com/store/apps/details?id=com.rhb.mobile.mb',
+    intentScheme: 'rhbmobile',
+    intentPackage: 'com.rhbgroup.rhbmobilebanking',
+    playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
     color: 'bg-sky-600 hover:bg-sky-700 text-white',
   },
-  pbe: { 
-    name: 'MyPB', 
+  mypb: {
+    name: 'MyPB',
     scheme: 'mypb://',
+    intentScheme: 'mypb',
+    intentPackage: 'com.pbb.mypb',
     playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
     appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
     color: 'bg-red-600 hover:bg-red-700 text-white',
@@ -479,23 +498,11 @@ const appStoreLinks = {
   gxbank: {
     name: 'GXBank',
     scheme: 'gxbank://',
-    playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank',
+    intentScheme: 'gxbank',
+    intentPackage: 'my.com.gxbank.app',
+    playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank.app',
     appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
     color: 'bg-purple-600 hover:bg-purple-700 text-white',
-  },
-  boost: {
-    name: 'Boost eWallet',
-    scheme: 'myboost://',
-    playStore: 'https://play.google.com/store/apps/details?id=my.com.myboost',
-    appStore: 'https://apps.apple.com/app/boost-e-wallet/id1235193962',
-    color: 'bg-rose-500 hover:bg-rose-600 text-white',
-  },
-  grab: {
-    name: 'GrabPay',
-    scheme: 'grab://',
-    playStore: 'https://play.google.com/store/apps/details?id=com.grabtaxi.passenger',
-    appStore: 'https://apps.apple.com/app/grab-taxi-ride-food-delivery/id647268330',
-    color: 'bg-emerald-600 hover:bg-emerald-700 text-white',
   },
 };
 
@@ -503,13 +510,16 @@ const getStoreHref = (appName) => {
   const target = appStoreLinks[appName];
   if (!target) return '#';
   if (isIOS) return target.appStore;
+  if (isAndroid && target.intentScheme && target.intentPackage) {
+    return `intent://open#Intent;scheme=${target.intentScheme};package=${target.intentPackage};end`;
+  }
   return target.playStore;
 };
 
 const openEWalletApp = (event, appName) => {
   const target = appStoreLinks[appName];
   if (!target) return;
-  if (isAndroid || isIOS) {
+  if (isIOS) {
     window.location.href = target.scheme;
   }
 };
