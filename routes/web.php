@@ -47,6 +47,7 @@ Route::get('/debug-migrate', function () {
     }
 })->withoutMiddleware([
     \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
     \Illuminate\Cookie\Middleware\EncryptCookies::class,
     \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
     \App\Http\Middleware\HandleInertiaRequests::class,
