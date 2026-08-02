@@ -54,10 +54,12 @@ class BackupTest extends TestCase
             'accounts' => [
                 ['id' => 10, 'name' => 'Legacy Wallet', 'type' => 'cash', 'currency' => 'MYR', 'initial_balance' => 500.00, 'balance' => 500.00],
             ],
-            'transactions' => [
-                ['id' => 100, 'account_id' => 10, 'category_id' => 1, 'type' => 'expense', 'amount' => 50.00, 'date' => '2026-08-01', 'notes' => 'Old Transaction'],
+            'receipts' => [
+                ['id' => 3, 'merchant_name' => 'Kopitiam Test', 'subtotal' => 30.00, 'total_amount' => 30.00, 'status' => 'parsed', 'items' => []],
             ],
-            'receipts' => [],
+            'transactions' => [
+                ['id' => 100, 'account_id' => 10, 'category_id' => 1, 'receipt_id' => 3, 'type' => 'expense', 'amount' => 30.00, 'date' => '2026-08-01', 'notes' => 'Old Transaction'],
+            ],
             'subscriptions' => [],
         ];
 
@@ -93,7 +95,7 @@ class BackupTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'user_id' => $user->id,
             'account_id' => $restoredAccount->id,
-            'amount' => 50.00,
+            'amount' => 30.00,
             'notes' => 'Old Transaction',
         ]);
 

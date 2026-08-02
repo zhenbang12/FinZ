@@ -181,6 +181,7 @@ class SettingsController extends Controller
 
             $accountMap = [];
             $categoryMap = [];
+            $receiptMap = [];
 
             // 1. Restore Categories
             if (!empty($data['categories'])) {
@@ -209,7 +210,25 @@ class SettingsController extends Controller
                 }
             }
 
-            // 3. Restore Transactions
+            // 3. Restore Receipts (before Transactions so receipt_id map exists)
+            if (!empty($data['receipts'])) {
+                foreach ($data['receipts'] as $r) {
+                    $oldId = $r['id'] ?? null;
+                    $items = $r['items'] ?? [];
+                    unset($r['id'], $r['user_id'], $r['created_at'], $r['updated_at'], $r['items'], $r['claims'], $r['session_claims']);
+                    $r['user_id'] = $user->id;
+                    $createdReceipt = \App\Models\Receipt::create($r);
+                    if ($oldId) $receiptMap[$oldId] = $createdReceipt->id;
+
+                    foreach ($items as $item) {
+                        unset($item['id'], $item['receipt_id'], $item['created_at'], $item['updated_at']);
+                        $item['receipt_id'] = $createdReceipt->id;
+                        \App\Models\ReceiptItem::create($item);
+                    }
+                }
+            }
+
+            // 4. Restore Transactions
             if (!empty($data['transactions'])) {
                 foreach ($data['transactions'] as $tx) {
                     unset($tx['id'], $tx['user_id'], $tx['created_at'], $tx['updated_at']);
@@ -219,27 +238,20 @@ class SettingsController extends Controller
                     }
                     if (isset($tx['destination_account_id']) && isset($accountMap[$tx['destination_account_id']])) {
                         $tx['destination_account_id'] = $accountMap[$tx['destination_account_id']];
+                    } else {
+                        $tx['destination_account_id'] = null;
                     }
                     if (isset($tx['category_id']) && isset($categoryMap[$tx['category_id']])) {
                         $tx['category_id'] = $categoryMap[$tx['category_id']];
+                    } else {
+                        $tx['category_id'] = null;
+                    }
+                    if (isset($tx['receipt_id']) && isset($receiptMap[$tx['receipt_id']])) {
+                        $tx['receipt_id'] = $receiptMap[$tx['receipt_id']];
+                    } else {
+                        $tx['receipt_id'] = null;
                     }
                     \App\Models\Transaction::create($tx);
-                }
-            }
-
-            // 4. Restore Receipts
-            if (!empty($data['receipts'])) {
-                foreach ($data['receipts'] as $r) {
-                    $items = $r['items'] ?? [];
-                    unset($r['id'], $r['user_id'], $r['created_at'], $r['updated_at'], $r['items'], $r['claims']);
-                    $r['user_id'] = $user->id;
-                    $createdReceipt = \App\Models\Receipt::create($r);
-
-                    foreach ($items as $item) {
-                        unset($item['id'], $item['receipt_id'], $item['created_at'], $item['updated_at']);
-                        $item['receipt_id'] = $createdReceipt->id;
-                        \App\Models\ReceiptItem::create($item);
-                    }
                 }
             }
 
