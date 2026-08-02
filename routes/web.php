@@ -11,6 +11,24 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->group(function () {
+    Route::get('/debug-migrate', function () {
+        try {
+            $output = '';
+            
+            // 1. Run status
+            \Illuminate\Support\Facades\Artisan::call('migrate:status');
+            $output .= "=== MIGRATION STATUS ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            
+            // 2. Run migrate
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output .= "=== MIGRATION RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            
+            return response($output, 200)->header('Content-Type', 'text/plain');
+        } catch (\Throwable $e) {
+            return response("Error: " . $e->getMessage() . "\n\nStack:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
+        }
+    });
+
     // Auth Routes
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
