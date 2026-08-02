@@ -32,9 +32,22 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+        $dbPath = config('database.connections.sqlite.database');
+        $userCount = \App\Models\User::count();
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        $hashCheck = $user ? \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password) : false;
+        $attemptResult = Auth::attempt($credentials, $request->boolean('remember'));
 
+        \Illuminate\Support\Facades\Log::info('LOGIN_DEBUG', [
+            'db' => $dbPath,
+            'users' => $userCount,
+            'user_found' => !!$user,
+            'hash_check' => $hashCheck,
+            'attempt' => $attemptResult,
+        ]);
+
+        if ($attemptResult) {
+            $request->session()->regenerate();
             return redirect()->intended('/')->with('success', 'Logged in successfully.');
         }
 
