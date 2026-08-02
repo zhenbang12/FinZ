@@ -1,5 +1,7 @@
 <?php
 
+// FinZ Web Routes - Release 1.0.1 (Persistence Test)
+
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
