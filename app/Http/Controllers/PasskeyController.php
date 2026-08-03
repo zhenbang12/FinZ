@@ -67,7 +67,7 @@ class PasskeyController extends Controller
     /**
      * Store a newly created Passkey credential.
      */
-    public function register(Request $request): JsonResponse
+    public function register(Request $request): JsonResponse|RedirectResponse
     {
         $request->validate([
             'id' => 'required|string',
@@ -81,6 +81,9 @@ class PasskeyController extends Controller
         session()->forget('passkey_register_challenge');
 
         if (!$storedChallenge) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['message' => 'Registration challenge expired. Please try again.']);
+            }
             return response()->json(['message' => 'Registration challenge expired. Please try again.'], 422);
         }
 
@@ -93,6 +96,10 @@ class PasskeyController extends Controller
             'public_key' => json_encode($request->response),
             'counter' => 0,
         ]);
+
+        if ($request->header('X-Inertia')) {
+            return redirect()->back()->with('success', 'Passkey registered successfully!');
+        }
 
         return response()->json(['success' => true, 'message' => 'Passkey registered successfully!']);
     }
@@ -126,9 +133,12 @@ class PasskeyController extends Controller
     /**
      * Verify Passkey signature and authenticate user session.
      */
-    public function login(Request $request): JsonResponse
+    public function login(Request $request): JsonResponse|RedirectResponse
     {
         if (!\Illuminate\Support\Facades\Schema::hasTable('passkeys')) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['email' => 'Passkeys database table does not exist.']);
+            }
             return response()->json(['message' => 'Passkeys database table does not exist.'], 500);
         }
 
@@ -141,23 +151,36 @@ class PasskeyController extends Controller
         session()->forget('passkey_login_challenge');
 
         if (!$storedChallenge) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['email' => 'Login challenge expired. Please try again.']);
+            }
             return response()->json(['message' => 'Login challenge expired. Please try again.'], 422);
         }
 
         $passkey = Passkey::where('credential_id', $request->id)->first();
 
         if (!$passkey) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['email' => 'Passkey not recognized. Please sign in with your email & password.']);
+            }
             return response()->json(['message' => 'Passkey not recognized. Please sign in with your email & password.'], 404);
         }
 
         $user = $passkey->user;
 
         if (!$user) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['email' => 'User associated with this passkey was not found.']);
+            }
             return response()->json(['message' => 'User associated with this passkey was not found.'], 404);
         }
 
         Auth::login($user, true);
         $request->session()->regenerate();
+
+        if ($request->header('X-Inertia')) {
+            return redirect()->intended('/')->with('success', 'Logged in successfully with Passkey!');
+        }
 
         return response()->json([
             'success' => true,
