@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\LedgerService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,7 +29,6 @@ class TransactionController extends Controller
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc');
 
-        // Apply REQ-4.3 Filters
         if ($request->filled('type')) {
             $query->where('type', $request->input('type'));
         }
@@ -78,8 +78,13 @@ class TransactionController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|string|in:expense,income,transfer',
-            'account_id' => 'required|exists:accounts,id',
-            'destination_account_id' => 'nullable|required_if:type,transfer|exists:accounts,id|different:account_id',
+            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', $user->id)],
+            'destination_account_id' => [
+                'nullable',
+                'required_if:type,transfer',
+                Rule::exists('accounts', 'id')->where('user_id', $user->id),
+                'different:account_id',
+            ],
             'category_id' => 'nullable|exists:categories,id',
             'receipt_id' => 'nullable|exists:receipts,id',
             'amount' => 'required|numeric|min:0.01',
@@ -102,11 +107,17 @@ class TransactionController extends Controller
     public function update(Request $request, Transaction $transaction)
     {
         $this->authorizeOwner($request, $transaction);
+        $user = $request->user();
 
         $validated = $request->validate([
             'type' => 'required|string|in:expense,income,transfer',
-            'account_id' => 'required|exists:accounts,id',
-            'destination_account_id' => 'nullable|required_if:type,transfer|exists:accounts,id|different:account_id',
+            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', $user->id)],
+            'destination_account_id' => [
+                'nullable',
+                'required_if:type,transfer',
+                Rule::exists('accounts', 'id')->where('user_id', $user->id),
+                'different:account_id',
+            ],
             'category_id' => 'nullable|exists:categories,id',
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',

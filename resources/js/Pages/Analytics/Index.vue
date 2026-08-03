@@ -1,24 +1,24 @@
 <template>
   <AppLayout>
-    <div class="space-y-6">
+    <div class="space-y-6 max-w-5xl mx-auto pb-12">
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            Analytics & Reports
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 flex items-center gap-2">
+            <span>Analytics & Reports</span>
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Categorized spending breakdowns and monthly expenditure trends in MYR.</p>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1 font-bold">Categorized spending breakdowns and monthly expenditure trends in MYR.</p>
         </div>
 
         <!-- Time Period Selector -->
-        <div class="flex items-center bg-slate-100 p-1 sm:p-1.5 rounded-full border border-slate-200 overflow-x-auto">
+        <div class="flex items-center bg-white p-1 sm:p-1.5 rounded-2xl border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] overflow-x-auto">
           <button
             v-for="p in ['daily', 'weekly', 'monthly', 'yearly']"
             :key="p"
             @click="changePeriod(p)"
             :class="[
-              period === p ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 font-medium',
-              'px-3 sm:px-4 py-1.5 rounded-full text-xs capitalize transition-all whitespace-nowrap shrink-0'
+              period === p ? 'bg-slate-950 text-amber-300 font-black shadow-[2px_2px_0px_#0f172a]' : 'text-slate-800 hover:text-slate-950 font-bold',
+              'px-3 sm:px-4 py-1.5 rounded-xl text-xs capitalize transition-all whitespace-nowrap shrink-0 border border-transparent'
             ]"
           >
             {{ p }}
@@ -28,29 +28,29 @@
 
       <!-- Totals Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="minimal-card p-6 border-l-4 border-l-rose-500">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Expenditure ({{ period }})</span>
-          <div class="text-3xl font-black text-rose-600 mt-0.5">{{ formatCurrency(totalExpenses) }}</div>
-          <span class="text-[10px] text-slate-400 mt-1 block font-medium">From {{ startDate }} to {{ endDate }}</span>
+        <div class="p-6 rounded-3xl bg-rose-300 border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-1 text-slate-950">
+          <span class="text-[10px] font-black uppercase tracking-wider block">Total Expenditure ({{ period }})</span>
+          <div class="text-3xl font-black font-mono text-slate-950">{{ formatCurrency(totalExpenses) }}</div>
+          <span class="text-[10px] text-slate-900 font-bold block">From {{ startDate }} to {{ endDate }}</span>
         </div>
 
-        <div class="minimal-card p-6 border-l-4 border-l-emerald-500">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Income ({{ period }})</span>
-          <div class="text-3xl font-black text-emerald-600 mt-0.5">{{ formatCurrency(totalIncome) }}</div>
-          <span class="text-[10px] text-slate-400 mt-1 block font-medium">From {{ startDate }} to {{ endDate }}</span>
+        <div class="p-6 rounded-3xl bg-emerald-400 border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-1 text-slate-950">
+          <span class="text-[10px] font-black uppercase tracking-wider block">Total Income ({{ period }})</span>
+          <div class="text-3xl font-black font-mono text-slate-950">{{ formatCurrency(totalIncome) }}</div>
+          <span class="text-[10px] text-slate-900 font-bold block">From {{ startDate }} to {{ endDate }}</span>
         </div>
       </div>
 
       <!-- Charts Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Category Expense Pie/Donut Chart Card -->
-        <div class="minimal-card p-6 space-y-4">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <PieChartIcon class="w-5 h-5 text-slate-700" />
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
+          <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+            <PieChartIcon class="w-5 h-5 text-slate-950" />
             <span>Category Expenditure Breakdown</span>
           </h3>
 
-          <div v-if="categoryBreakdown.length === 0" class="text-center py-12 text-slate-400 text-sm font-medium">
+          <div v-if="categoryBreakdown.length === 0" class="text-center py-12 text-slate-500 font-bold text-sm">
             No expenses recorded for this period.
           </div>
 
@@ -60,26 +60,26 @@
             </div>
 
             <!-- Legend breakdown list -->
-            <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+            <div class="grid grid-cols-2 gap-3 pt-4 border-t-2 border-slate-950/10">
               <div
                 v-for="cat in categoryBreakdown"
                 :key="cat.category_name"
-                class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] text-xs"
               >
-                <span class="text-slate-700 flex items-center gap-2 truncate font-medium">
-                  <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: cat.color || '#0f172a' }"></span>
+                <span class="text-slate-950 flex items-center gap-2 truncate font-extrabold">
+                  <span class="w-3 h-3 rounded-full shrink-0 border border-slate-950" :style="{ backgroundColor: cat.color || '#0f172a' }"></span>
                   {{ cat.category_name }}
                 </span>
-                <span class="font-bold text-slate-900 shrink-0">{{ formatCurrency(cat.total_amount) }}</span>
+                <span class="font-black font-mono text-slate-950 shrink-0">{{ formatCurrency(cat.total_amount) }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Monthly Trends Bar Graph Card -->
-        <div class="minimal-card p-6 space-y-4">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <BarChart2Icon class="w-5 h-5 text-slate-700" />
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
+          <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+            <BarChart2Icon class="w-5 h-5 text-slate-950" />
             <span>Monthly Cash Flow Trend (Past 6 Months)</span>
           </h3>
 
@@ -137,7 +137,7 @@ const doughnutChartData = computed(() => {
         data: props.categoryBreakdown.map(c => c.total_amount),
         backgroundColor: props.categoryBreakdown.map(c => c.color || '#0f172a'),
         borderWidth: 2,
-        borderColor: '#ffffff',
+        borderColor: '#0f172a',
       },
     ],
   };
@@ -164,14 +164,18 @@ const barChartData = computed(() => {
       {
         label: 'Expenses (MYR)',
         data: props.monthlyTrends.map(m => m.expense),
-        backgroundColor: '#e11d48',
-        borderRadius: 6,
+        backgroundColor: '#fb7185',
+        borderColor: '#0f172a',
+        borderWidth: 2,
+        borderRadius: 8,
       },
       {
         label: 'Income (MYR)',
         data: props.monthlyTrends.map(m => m.income),
-        backgroundColor: '#059669',
-        borderRadius: 6,
+        backgroundColor: '#34d399',
+        borderColor: '#0f172a',
+        borderWidth: 2,
+        borderRadius: 8,
       },
     ],
   };
@@ -182,7 +186,7 @@ const barOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      labels: { color: '#475569', font: { family: 'Inter', size: 12 } },
+      labels: { color: '#0f172a', font: { family: 'Inter', size: 12, weight: 'bold' } },
     },
     tooltip: {
       callbacks: {
@@ -192,12 +196,12 @@ const barOptions = {
   },
   scales: {
     x: {
-      ticks: { color: '#64748b' },
-      grid: { color: 'rgba(0,0,0,0.04)' },
+      ticks: { color: '#0f172a', font: { weight: 'bold' } },
+      grid: { color: 'rgba(15,23,42,0.1)' },
     },
     y: {
-      ticks: { color: '#64748b' },
-      grid: { color: 'rgba(0,0,0,0.04)' },
+      ticks: { color: '#0f172a', font: { weight: 'bold' } },
+      grid: { color: 'rgba(15,23,42,0.1)' },
     },
   },
 };

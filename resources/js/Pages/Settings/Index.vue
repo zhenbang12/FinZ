@@ -1,25 +1,24 @@
 <template>
   <AppLayout>
-    <div class="space-y-6 max-w-5xl mx-auto">
+    <div class="space-y-6 max-w-5xl mx-auto pb-12">
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            <SettingsIcon class="w-7 h-7 text-slate-800" />
-            <span>Settings</span>
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 flex items-center gap-2">
+            <span>Settings & Control Panel</span>
           </h2>
-          <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+          <p class="text-xs sm:text-sm text-slate-600 mt-1 font-bold">
             Manage device security, active sessions, and system user management.
           </p>
         </div>
 
         <!-- Sub-Tab Selection (Preferences / Security / Users) -->
-        <div class="flex items-center bg-slate-200/70 p-1 rounded-full border border-slate-300 overflow-x-auto">
+        <div class="flex items-center bg-white p-1 rounded-2xl border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] overflow-x-auto">
           <button
             @click="activeTab = 'preferences'"
             :class="[
-              activeTab === 'preferences' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
+              activeTab === 'preferences' ? 'bg-slate-950 text-amber-300 font-black shadow-[2px_2px_0px_#0f172a]' : 'text-slate-950 font-bold',
+              'px-3 sm:px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 border border-transparent'
             ]"
           >
             <SlidersIcon class="w-3.5 h-3.5" />
@@ -29,8 +28,8 @@
           <button
             @click="activeTab = 'security'"
             :class="[
-              activeTab === 'security' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
+              activeTab === 'security' ? 'bg-slate-950 text-amber-300 font-black shadow-[2px_2px_0px_#0f172a]' : 'text-slate-950 font-bold',
+              'px-3 sm:px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 border border-transparent'
             ]"
           >
             <ShieldCheckIcon class="w-3.5 h-3.5" />
@@ -41,8 +40,8 @@
             v-if="user?.is_admin"
             @click="activeTab = 'users'"
             :class="[
-              activeTab === 'users' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:text-slate-900 font-bold',
-              'px-3 sm:px-4 py-2 rounded-full text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0'
+              activeTab === 'users' ? 'bg-slate-950 text-amber-300 font-black shadow-[2px_2px_0px_#0f172a]' : 'text-slate-950 font-bold',
+              'px-3 sm:px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 border border-transparent'
             ]"
           >
             <UsersIcon class="w-3.5 h-3.5" />
@@ -52,24 +51,24 @@
       </div>
 
       <!-- SECTION 0: General Preferences Tab -->
-      <div v-if="activeTab === 'preferences'" class="space-y-6 animate-fade-in max-w-2xl">
-        <div class="minimal-card p-6 space-y-5">
-          <div class="flex items-center space-x-3 pb-3 border-b border-slate-100">
-            <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold">
-              <GlobeIcon class="w-5 h-5 text-white" />
+      <div v-if="activeTab === 'preferences'" class="space-y-6 max-w-2xl">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-5">
+          <div class="flex items-center space-x-3 pb-3 border-b-2 border-slate-950/10">
+            <div class="w-10 h-10 rounded-2xl bg-amber-300 text-slate-950 flex items-center justify-center font-black border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
+              <GlobeIcon class="w-5 h-5 text-slate-950" />
             </div>
             <div>
-              <h3 class="font-extrabold text-base text-slate-900">Regional & Display Preferences</h3>
-              <p class="text-xs text-slate-600 font-medium">Configure your time zone and default accounting currency.</p>
+              <h3 class="font-black text-base text-slate-950">Regional & Display Preferences</h3>
+              <p class="text-xs text-slate-600 font-bold">Configure your time zone and default accounting currency.</p>
             </div>
           </div>
 
           <form @submit.prevent="submitPreferences" class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-slate-800 mb-1">Application Time Zone</label>
+              <label class="block text-xs font-black text-slate-950 uppercase tracking-wider mb-1">Application Time Zone</label>
               <select
                 v-model="prefForm.timezone"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+                class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 text-xs font-bold focus:outline-none"
               >
                 <option value="Asia/Kuala_Lumpur">Asia/Kuala_Lumpur (GMT+8 - Malaysia / SG / HK)</option>
                 <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
@@ -80,14 +79,14 @@
                 <option value="America/New_York">America/New_York (EST/EDT)</option>
                 <option value="UTC">UTC (Coordinated Universal Time)</option>
               </select>
-              <p class="text-[11px] text-slate-600 mt-1 font-medium">System default timezone is set to GMT+8 (Asia/Kuala_Lumpur).</p>
+              <p class="text-[11px] text-slate-600 mt-1 font-bold">System default timezone is set to GMT+8 (Asia/Kuala_Lumpur).</p>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-800 mb-1">Default Base Currency</label>
+              <label class="block text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Default Base Currency</label>
               <select
                 v-model="prefForm.currency"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+                class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 text-xs font-bold focus:outline-none"
               >
                 <option value="MYR">MYR - Malaysian Ringgit (RM)</option>
                 <option value="USD">USD - United States Dollar ($)</option>
@@ -103,7 +102,7 @@
               <button
                 type="submit"
                 :disabled="prefForm.processing"
-                class="minimal-btn-primary px-6 py-2.5 text-xs font-bold shadow-md disabled:opacity-50"
+                class="px-6 py-2.5 rounded-2xl bg-slate-950 text-amber-300 font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] disabled:opacity-50"
               >
                 Save Preferences
               </button>
@@ -113,16 +112,16 @@
       </div>
 
       <!-- SECTION 1: Device Security Tab -->
-      <div v-if="activeTab === 'security'" class="space-y-6 animate-fade-in">
-        <!-- Security Status Card with High Contrast Black/Dark Text -->
-        <div class="minimal-card p-6 bg-slate-50 border border-slate-200 space-y-2">
+      <div v-if="activeTab === 'security'" class="space-y-6">
+        <!-- Security Status Banner -->
+        <div class="p-6 rounded-3xl bg-amber-300 border-3 border-slate-950 shadow-[6px_6px_0px_#0f172a] space-y-2 text-slate-950">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0 border border-emerald-300">
-              <LockIcon class="w-5 h-5 text-emerald-800" />
+            <div class="w-10 h-10 rounded-2xl bg-slate-950 text-amber-300 flex items-center justify-center font-black shrink-0 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
+              <LockIcon class="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <h3 class="font-extrabold text-base text-slate-900">Database Session Security Active</h3>
-              <p class="text-xs text-slate-700 font-medium">
+              <h3 class="font-black text-base text-slate-950">Database Session Security Active</h3>
+              <p class="text-xs text-slate-900 font-bold">
                 All logged-in sessions are strictly bound to unique session tokens, user agents, and IP addresses.
               </p>
             </div>
@@ -130,54 +129,54 @@
         </div>
 
         <!-- Passkeys & Biometrics Section -->
-        <div class="minimal-card p-6 space-y-4">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <ShieldCheckIcon class="w-5 h-5 text-indigo-600 shrink-0" />
+              <h3 class="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2">
+                <ShieldCheckIcon class="w-5 h-5 text-slate-950 shrink-0" />
                 <span>Google Passkeys & Biometric Security</span>
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Use your fingerprint, Face ID, or Google Password Manager passkeys for fast, passwordless login.</p>
+              <p class="text-xs text-slate-600 mt-0.5 font-bold">Use your fingerprint, Face ID, or Google Password Manager passkeys for fast, passwordless login.</p>
             </div>
 
             <button
               @click="addPasskey"
               :disabled="passkeyRegistering"
-              class="minimal-btn-primary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+              class="px-4 py-2.5 rounded-2xl bg-slate-950 text-amber-300 font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 shrink-0 hover:bg-slate-900"
             >
-              <PlusIcon class="w-4 h-4" />
+              <PlusIcon class="w-4 h-4 text-amber-400" />
               <span>{{ passkeyRegistering ? 'Prompting Device...' : 'Add Google Passkey' }}</span>
             </button>
           </div>
 
-          <div v-if="passkeyError" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+          <div v-if="passkeyError" class="p-3.5 rounded-2xl bg-rose-300 border-2 border-slate-950 text-slate-950 text-xs font-black">
             {{ passkeyError }}
           </div>
 
           <!-- Registered Passkeys List -->
-          <div v-if="passkeys.length === 0" class="p-5 text-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-            <p class="text-xs text-slate-400 font-medium">No passkeys registered yet. Click "Add Google Passkey" above to enable biometric login.</p>
+          <div v-if="passkeys.length === 0" class="p-5 text-center border-2 border-dashed border-slate-950 rounded-2xl bg-slate-50">
+            <p class="text-xs text-slate-600 font-bold">No passkeys registered yet. Click "Add Google Passkey" above to enable biometric login.</p>
           </div>
 
           <div v-else class="space-y-2.5">
             <div
               v-for="p in passkeys"
               :key="p.id"
-              class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between"
+              class="p-3.5 rounded-2xl border-2 border-slate-950 bg-slate-50 shadow-[2px_2px_0px_#0f172a] flex items-center justify-between"
             >
               <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                <div class="w-9 h-9 rounded-xl bg-amber-300 text-slate-950 border border-slate-950 flex items-center justify-center font-bold">
                   <FingerprintIcon class="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 class="font-extrabold text-xs sm:text-sm text-slate-900">{{ p.name }}</h4>
-                  <span class="text-[10px] text-slate-400 font-medium block">Added {{ p.created_at_human }}</span>
+                  <h4 class="font-black text-xs sm:text-sm text-slate-950">{{ p.name }}</h4>
+                  <span class="text-[10px] text-slate-600 font-bold block">Added {{ p.created_at_human }}</span>
                 </div>
               </div>
 
               <button
                 @click="deletePasskey(p)"
-                class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                class="w-8 h-8 rounded-xl bg-rose-500 border border-slate-950 text-white flex items-center justify-center font-bold hover:bg-rose-600 transition-colors"
                 title="Remove Passkey"
               >
                 <Trash2Icon class="w-4 h-4" />
@@ -187,31 +186,31 @@
         </div>
 
         <!-- Data Backup & Recovery Section -->
-        <div class="minimal-card p-6 space-y-4">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <DatabaseIcon class="w-5 h-5 text-slate-800 shrink-0" />
+              <h3 class="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2">
+                <DatabaseIcon class="w-5 h-5 text-slate-950 shrink-0" />
                 <span>Data Backup & Disaster Recovery</span>
               </h3>
-              <p class="text-xs text-slate-500 mt-0.5">Export a full JSON copy of your accounts, transactions, receipts, and subscriptions, or restore from a previous backup file.</p>
+              <p class="text-xs text-slate-600 mt-0.5 font-bold">Export a full JSON copy of your accounts, transactions, receipts, and subscriptions, or restore from a previous backup file.</p>
             </div>
 
             <div class="flex items-center gap-2">
               <button
                 @click="exportBackup"
-                class="minimal-btn-secondary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+                class="px-4 py-2.5 rounded-2xl bg-white text-slate-950 border-2 border-slate-950 font-black text-xs shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 shrink-0 hover:bg-slate-100"
               >
-                <DownloadIcon class="w-4 h-4 text-slate-700" />
+                <DownloadIcon class="w-4 h-4 text-slate-950" />
                 <span>Export Backup (.json)</span>
               </button>
 
               <button
                 @click="triggerRestoreFile"
                 :disabled="backupUploading"
-                class="minimal-btn-primary px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 rounded-xl shrink-0"
+                class="px-4 py-2.5 rounded-2xl bg-slate-950 text-amber-300 border-2 border-slate-950 font-black text-xs shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 shrink-0 hover:bg-slate-900"
               >
-                <UploadIcon class="w-4 h-4 text-white" />
+                <UploadIcon class="w-4 h-4 text-amber-400" />
                 <span>{{ backupUploading ? 'Restoring Data...' : 'Restore Backup' }}</span>
               </button>
 
@@ -225,37 +224,37 @@
             </div>
           </div>
 
-          <div v-if="backupError" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+          <div v-if="backupError" class="p-3.5 rounded-2xl bg-rose-300 border-2 border-slate-950 text-slate-950 text-xs font-black">
             {{ backupError }}
           </div>
 
-          <div class="flex items-center gap-4 text-xs font-medium text-slate-600 pt-1">
-            <span>Restore Mode:</span>
-            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-800 font-bold">
-              <input type="radio" v-model="restoreMode" value="replace" class="text-slate-900 focus:ring-slate-900" />
+          <div class="flex items-center gap-4 text-xs font-bold text-slate-800 pt-1">
+            <span class="uppercase font-black text-slate-950">Restore Mode:</span>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-950 font-black">
+              <input type="radio" v-model="restoreMode" value="replace" class="text-slate-950 focus:ring-amber-400" />
               <span>Replace Existing Data</span>
             </label>
-            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-800 font-bold">
-              <input type="radio" v-model="restoreMode" value="merge" class="text-slate-900 focus:ring-slate-900" />
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-slate-950 font-black">
+              <input type="radio" v-model="restoreMode" value="merge" class="text-slate-950 focus:ring-amber-400" />
               <span>Merge with Existing Data</span>
             </label>
           </div>
         </div>
 
         <!-- Active Sessions List -->
-        <div class="minimal-card p-6 space-y-4">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <LaptopIcon class="w-5 h-5 text-slate-800" />
+            <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+              <LaptopIcon class="w-5 h-5 text-slate-950" />
               <span>Active Logged-In Sessions ({{ sessions.length }})</span>
             </h3>
 
             <button
               v-if="otherSessionsCount > 0"
               @click="logoutOtherDevices"
-              class="minimal-btn-secondary text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 rounded-full"
+              class="px-3.5 py-1.5 rounded-2xl bg-rose-500 text-white font-black text-xs border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] hover:bg-rose-600 flex items-center gap-1.5"
             >
-              <LogOutIcon class="w-3.5 h-3.5 text-rose-600" />
+              <LogOutIcon class="w-3.5 h-3.5 text-white" />
               <span>Log Out Other Devices ({{ otherSessionsCount }})</span>
             </button>
           </div>
@@ -265,15 +264,15 @@
               v-for="s in sessions"
               :key="s.id"
               :class="[
-                s.is_current_device ? 'bg-indigo-50/70 border-indigo-300 ring-1 ring-indigo-500/20' : 'bg-slate-50 border-slate-200',
-                'p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all'
+                s.is_current_device ? 'bg-amber-300 border-slate-950' : 'bg-slate-50 border-slate-950',
+                'p-4 rounded-2xl border-2 shadow-[3px_3px_0px_#0f172a] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all'
               ]"
             >
               <div class="flex items-start space-x-3.5">
                 <div
                   :class="[
-                    s.is_current_device ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-800',
-                    'w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5'
+                    s.is_current_device ? 'bg-slate-950 text-amber-300' : 'bg-slate-200 text-slate-950',
+                    'w-10 h-10 rounded-2xl border-2 border-slate-950 flex items-center justify-center shrink-0 mt-0.5 shadow-[1px_1px_0px_#0f172a]'
                   ]"
                 >
                   <SmartphoneIcon v-if="s.platform === 'iOS' || s.platform === 'Android'" class="w-5 h-5" />
@@ -282,37 +281,37 @@
 
                 <div class="space-y-1">
                   <div class="flex items-center space-x-2">
-                    <span class="font-extrabold text-sm text-slate-900">
+                    <span class="font-black text-sm text-slate-950">
                       {{ s.device_name }}
                     </span>
                     <span
                       v-if="s.is_current_device"
-                      class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 uppercase tracking-wider"
+                      class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-slate-950 text-white border border-slate-950 uppercase tracking-wider"
                     >
-                      This Device (Current)
+                      This Device
                     </span>
                   </div>
 
-                  <div class="text-xs text-slate-800 font-bold flex flex-wrap items-center gap-2">
-                    <span class="text-slate-900 font-extrabold">{{ s.browser }}</span>
-                    <span class="text-slate-700">• {{ s.platform }}</span>
-                    <span class="text-slate-600">• IP: {{ s.ip_address }}</span>
+                  <div class="text-xs text-slate-950 font-extrabold flex flex-wrap items-center gap-2">
+                    <span class="font-black">{{ s.browser }}</span>
+                    <span>• {{ s.platform }}</span>
+                    <span>• IP: {{ s.ip_address }}</span>
                   </div>
 
-                  <span class="text-[11px] text-slate-600 block font-semibold">
+                  <span class="text-[11px] text-slate-800 block font-bold">
                     Last active {{ s.last_activity_human }} ({{ s.last_activity }})
                   </span>
                 </div>
               </div>
 
               <div class="flex items-center justify-end shrink-0">
-                <span v-if="s.is_current_device" class="text-xs font-extrabold text-slate-600 italic">
+                <span v-if="s.is_current_device" class="text-xs font-black uppercase text-slate-950 tracking-wider">
                   Active Session
                 </span>
                 <button
                   v-else
                   @click="revokeSession(s)"
-                  class="px-3.5 py-1.5 rounded-full bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-300 text-rose-600 font-bold text-xs shadow-xs transition-colors"
+                  class="px-3.5 py-1.5 rounded-2xl bg-white hover:bg-rose-100 border-2 border-slate-950 text-rose-600 font-black text-xs shadow-[2px_2px_0px_#0f172a] transition-colors"
                 >
                   Revoke Access
                 </button>
@@ -323,59 +322,59 @@
       </div>
 
       <!-- SECTION 2: User Management Tab (Superuser Only) -->
-      <div v-if="activeTab === 'users' && user?.is_admin" class="space-y-6 animate-fade-in">
-        <div class="minimal-card p-6 space-y-4">
+      <div v-if="activeTab === 'users' && user?.is_admin" class="space-y-6">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <UsersIcon class="w-5 h-5 text-slate-800" />
+            <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+              <UsersIcon class="w-5 h-5 text-slate-950" />
               <span>Registered System Users ({{ users.length }})</span>
             </h3>
 
             <button
               @click="openUserModal('create')"
-              class="minimal-btn-primary flex items-center justify-center space-x-2 px-4 py-2 text-xs font-bold rounded-full"
+              class="px-4 py-2 rounded-2xl bg-slate-950 text-amber-300 font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center space-x-2"
             >
-              <UserPlusIcon class="w-4 h-4 text-white" />
+              <UserPlusIcon class="w-4 h-4 text-amber-400" />
               <span>Create New User</span>
             </button>
           </div>
 
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto rounded-2xl border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider">
-                  <th class="py-3 px-4">User</th>
-                  <th class="py-3 px-4">Role</th>
-                  <th class="py-3 px-4">Financial Accounts</th>
-                  <th class="py-3 px-4">Transactions</th>
-                  <th class="py-3 px-4">Joined Date</th>
-                  <th class="py-3 px-4 text-right">Actions</th>
+                <tr class="bg-slate-950 text-amber-300 font-black uppercase tracking-wider text-[10px]">
+                  <th class="py-3.5 px-4">User</th>
+                  <th class="py-3.5 px-4">Role</th>
+                  <th class="py-3.5 px-4">Financial Accounts</th>
+                  <th class="py-3.5 px-4">Transactions</th>
+                  <th class="py-3.5 px-4">Joined Date</th>
+                  <th class="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
+              <tbody class="divide-y-2 divide-slate-950/10 bg-white">
                 <tr
                   v-for="u in users"
                   :key="u.id"
-                  class="hover:bg-slate-50/80 transition-colors"
+                  class="hover:bg-slate-50 font-bold"
                 >
                   <td class="py-3.5 px-4">
                     <div class="flex items-center space-x-3">
                       <div
                         :class="[
-                          u.is_admin ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-slate-900 text-white border-slate-900',
-                          'w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-xs border shrink-0'
+                          u.is_admin ? 'bg-amber-300 text-slate-950 border-slate-950' : 'bg-slate-950 text-white border-slate-950',
+                          'w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border-2 shrink-0'
                         ]"
                       >
                         {{ u.name.charAt(0).toUpperCase() }}
                       </div>
                       <div>
-                        <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                        <div class="font-black text-slate-950 text-sm flex items-center gap-1.5">
                           {{ u.name }}
-                          <span v-if="u.id === user?.id" class="text-[9px] bg-slate-900 text-white px-2 py-0.5 rounded-full font-bold">
+                          <span v-if="u.id === user?.id" class="text-[9px] bg-slate-950 text-amber-300 px-2 py-0.5 rounded-full font-black border border-slate-950">
                             You
                           </span>
                         </div>
-                        <div class="text-slate-600 text-xs font-medium">{{ u.email }}</div>
+                        <div class="text-slate-600 text-xs font-bold">{{ u.email }}</div>
                       </div>
                     </div>
                   </td>
@@ -383,7 +382,7 @@
                   <td class="py-3.5 px-4">
                     <span
                       :class="[
-                        u.is_admin ? 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold' : 'bg-slate-100 text-slate-800 border-slate-200 font-bold',
+                        u.is_admin ? 'bg-amber-300 text-slate-950 border-slate-950 font-black' : 'bg-slate-100 text-slate-900 border-slate-950 font-bold',
                         'px-2.5 py-0.5 rounded-full text-[10px] uppercase border tracking-wider'
                       ]"
                     >
@@ -391,15 +390,15 @@
                     </span>
                   </td>
 
-                  <td class="py-3.5 px-4 font-bold text-slate-800">
+                  <td class="py-3.5 px-4 font-black text-slate-950">
                     {{ u.accounts_count }} Accounts
                   </td>
 
-                  <td class="py-3.5 px-4 font-bold text-slate-800">
+                  <td class="py-3.5 px-4 font-black text-slate-950">
                     {{ u.transactions_count }} Logged
                   </td>
 
-                  <td class="py-3.5 px-4 text-slate-600 font-medium">
+                  <td class="py-3.5 px-4 text-slate-700 font-bold">
                     {{ formatDate(u.created_at) }}
                   </td>
 
@@ -407,7 +406,7 @@
                     <button
                       v-if="u.id !== user?.id"
                       @click="switchUserSession(u)"
-                      class="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-[11px] transition-colors"
+                      class="px-3 py-1 rounded-2xl bg-amber-300 border border-slate-950 text-slate-950 font-black text-[11px] shadow-[2px_2px_0px_#0f172a]"
                       title="Switch session to this user"
                     >
                       Switch Session
@@ -415,19 +414,19 @@
 
                     <button
                       @click="openUserModal('edit', u)"
-                      class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                      class="p-1.5 rounded-xl bg-slate-100 border border-slate-950 text-slate-950 hover:bg-amber-300 transition-colors"
                       title="Edit User"
                     >
-                      <PencilIcon class="w-4 h-4" />
+                      <PencilIcon class="w-3.5 h-3.5" />
                     </button>
 
                     <button
                       v-if="u.id !== user?.id"
                       @click="deleteUser(u)"
-                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      class="p-1.5 rounded-xl bg-rose-500 border border-slate-950 text-white hover:bg-rose-600 transition-colors"
                       title="Delete User"
                     >
-                      <Trash2Icon class="w-4 h-4" />
+                      <Trash2Icon class="w-3.5 h-3.5" />
                     </button>
                   </td>
                 </tr>
@@ -439,77 +438,77 @@
     </div>
 
     <!-- Create / Edit User Modal -->
-    <div v-if="showUserModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="minimal-card max-w-md w-full p-6 space-y-4 animate-scale-up">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold text-slate-900">
+    <div v-if="showUserModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl border-3 border-slate-950 shadow-[8px_8px_0px_#0f172a] max-w-md w-full p-6 space-y-4 animate-scale-up text-slate-950">
+        <div class="flex items-center justify-between border-b-2 border-slate-950 pb-3">
+          <h3 class="text-xl font-black text-slate-950">
             {{ userModalMode === 'create' ? 'Create New System User' : 'Edit User Profile' }}
           </h3>
-          <button @click="showUserModal = false" class="text-slate-400 hover:text-slate-600 p-1">
-            <XIcon class="w-5 h-5" />
+          <button @click="showUserModal = false" class="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-950 flex items-center justify-center text-slate-950 font-bold hover:bg-rose-100 transition-colors">
+            <XIcon class="w-4 h-4" />
           </button>
         </div>
 
         <form @submit.prevent="submitUser" class="space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
+            <label class="block text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Full Name</label>
             <input
               v-model="userForm.name"
               type="text"
               required
               placeholder="e.g. John Doe"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-bold text-sm focus:outline-none"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
+            <label class="block text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Email Address</label>
             <input
               v-model="userForm.email"
               type="email"
               required
               placeholder="e.g. john@example.com"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-bold text-sm focus:outline-none"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">
-              {{ userModalMode === 'create' ? 'Password' : 'New Password (Leave blank to keep existing)' }}
+            <label class="block text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
+              {{ userModalMode === 'create' ? 'Password' : 'New Password' }}
             </label>
             <input
               v-model="userForm.password"
               type="password"
               :required="userModalMode === 'create'"
               placeholder="••••••••"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-semibold focus:outline-none focus:border-slate-900"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-bold text-sm focus:outline-none"
             />
           </div>
 
-          <div class="flex items-center space-x-2 pt-1">
+          <div class="flex items-center space-x-2.5 pt-1">
             <input
               v-model="userForm.is_admin"
               type="checkbox"
               id="is_admin_check"
-              class="rounded border-slate-300 text-slate-900 focus:ring-slate-900 w-4 h-4"
+              class="rounded border-2 border-slate-950 text-slate-950 focus:ring-amber-400 w-4 h-4"
             />
-            <label for="is_admin_check" class="text-xs font-bold text-slate-800 cursor-pointer">
+            <label for="is_admin_check" class="text-xs font-black text-slate-950 cursor-pointer">
               Grant Superuser Admin Privileges
             </label>
           </div>
 
-          <div class="flex items-center justify-end space-x-3 pt-3">
+          <div class="flex items-center justify-end space-x-3 pt-3 border-t-2 border-slate-950">
             <button
               type="button"
               @click="showUserModal = false"
-              class="px-4 py-2 rounded-full text-slate-600 hover:text-slate-900 text-xs font-semibold"
+              class="px-4 py-2.5 rounded-2xl text-slate-800 hover:bg-slate-100 text-xs font-bold"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="userForm.processing"
-              class="minimal-btn-primary px-6 py-2.5 text-xs disabled:opacity-50"
+              class="px-6 py-2.5 rounded-2xl bg-slate-950 text-amber-300 font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a]"
             >
               {{ userModalMode === 'create' ? 'Create User' : 'Update User' }}
             </button>
@@ -547,7 +546,6 @@ import {
   X as XIcon,
 } from 'lucide-vue-next';
 
-// Base64URL helpers for WebAuthn
 function base64urlToBuffer(base64url) {
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
@@ -643,7 +641,6 @@ const addPasskey = async () => {
       return;
     }
 
-    // Convert base64url to ArrayBuffers for native WebAuthn API
     const publicKeyOptions = {
       challenge: base64urlToBuffer(options.challenge),
       rp: options.rp,

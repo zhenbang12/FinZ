@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class LedgerService
@@ -15,6 +16,8 @@ class LedgerService
     public function createTransaction(array $data): Transaction
     {
         return DB::transaction(function () use ($data) {
+            $this->validateSufficientBalance($data['type'], $data['account_id'], (float) $data['amount']);
+
             $transaction = Transaction::create($data);
             $this->syncAccountBalancesForTransaction($transaction);
             return $transaction;
@@ -29,6 +32,13 @@ class LedgerService
         return DB::transaction(function () use ($transaction, $data) {
             // Revert original transaction balance impact
             $this->revertAccountBalancesForTransaction($transaction);
+
+            // Fetch fresh state of origin account after revert
+            $targetAccountId = $data['account_id'] ?? $transaction->account_id;
+            $targetType = $data['type'] ?? $transaction->type;
+            $targetAmount = (float) ($data['amount'] ?? $transaction->amount);
+
+            $this->validateSufficientBalance($targetType, $targetAccountId, $targetAmount);
 
             // Update transaction attributes
             $transaction->update($data);
@@ -50,6 +60,25 @@ class LedgerService
             $this->revertAccountBalancesForTransaction($transaction);
             return $transaction->delete();
         });
+    }
+
+    /**
+     * Validate if an account has sufficient balance for expenses or transfers.
+     */
+    public function validateSufficientBalance(string $type, int $accountId, float $amount): void
+    {
+        if (!in_array($type, ['expense', 'transfer'])) {
+            return;
+        }
+
+        $account = Account::findOrFail($accountId);
+        $availableBalance = (float) $account->balance;
+
+        if ($amount > $availableBalance + 0.0001) {
+            throw ValidationException::withMessages([
+                'amount' => "Insufficient account balance in {$account->name}. Available: RM " . number_format($availableBalance, 2) . ", Requested: RM " . number_format($amount, 2),
+            ]);
+        }
     }
 
     /**
