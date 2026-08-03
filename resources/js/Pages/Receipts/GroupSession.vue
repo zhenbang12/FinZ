@@ -1,35 +1,35 @@
 <template>
   <div class="min-h-screen bg-[#f8fafc] text-[#0f172a] font-sans selection:bg-[#0f172a] selection:text-white p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-6">
     <!-- Header Logo & Brand -->
-    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div class="flex items-center justify-between border-b-3 border-slate-950 pb-4">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-full bg-[#0f172a] text-white flex items-center justify-center font-black text-xl shadow-md">
+        <div class="w-12 h-12 rounded-2xl bg-amber-300 border-2 border-slate-950 text-slate-950 flex items-center justify-center font-black text-2xl shadow-[3px_3px_0px_#0f172a]">
           Z
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-slate-900">SmartSplit Group Session</h1>
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Live Interactive Bill Splitting</p>
+          <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-950 font-mono">SmartSplit Group Session</h1>
+          <p class="text-[10px] text-slate-700 font-black uppercase tracking-widest">Live Interactive Bill Splitting</p>
         </div>
       </div>
 
       <div class="flex items-center space-x-2">
-        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5">
-          <UsersIcon class="w-3.5 h-3.5" />
-          Live Guest Session
+        <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-400 text-slate-950 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] flex items-center gap-1.5 uppercase font-mono">
+          <UsersIcon class="w-3.5 h-3.5 text-slate-950" />
+          Live Session
         </span>
       </div>
     </div>
 
     <!-- Flash Message Toast Notification -->
-    <div v-if="flashSuccess" class="minimal-card p-4 rounded-2xl border border-emerald-500/40 shadow-xl flex items-center justify-between text-emerald-800 bg-emerald-50">
-      <div class="flex items-center space-x-3">
-        <CheckCircleIcon class="w-5 h-5 text-emerald-600 shrink-0" />
-        <span class="text-sm font-medium">{{ flashSuccess }}</span>
+    <div v-if="flashSuccess" class="bg-emerald-300 rounded-2xl border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] p-4 flex items-center justify-between text-slate-950">
+      <div class="flex items-center space-x-3 font-black text-xs">
+        <CheckCircleIcon class="w-5 h-5 text-slate-950 shrink-0" />
+        <span>{{ flashSuccess }}</span>
       </div>
     </div>
 
     <!-- Receipt Header & Session Progress Card -->
-    <div class="minimal-card p-6 space-y-5">
+    <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="flex items-center space-x-3.5">
           <button
@@ -41,39 +41,39 @@
           >
             <img
               :src="receipt.image_path"
-              class="w-14 h-14 rounded-2xl object-cover border border-slate-300 group-hover:scale-105 group-hover:border-indigo-500 transition-all shadow-xs"
+              class="w-16 h-16 rounded-2xl object-cover border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] group-hover:scale-105 transition-all"
             />
           </button>
           <div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant / Restaurant</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+            <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider block">Merchant / Restaurant</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-950 mt-0.5">
               {{ receipt.merchant_name || 'Receipt Session' }}
             </h2>
-            <p class="text-xs text-slate-500 mt-1 font-medium">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
+            <p class="text-xs text-slate-600 font-bold mt-1">Host: {{ receipt.user?.name || 'FinZ User' }} • {{ formatDate(receipt.created_at) }}</p>
           </div>
         </div>
 
         <div class="text-right">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Bill</span>
-          <span class="text-3xl font-black text-slate-900 block">{{ formatCurrency(receipt.total_amount) }}</span>
+          <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider block">Total Bill</span>
+          <span class="text-3xl font-black font-mono text-slate-950 block">{{ formatCurrency(receipt.total_amount) }}</span>
         </div>
       </div>
 
       <!-- Live Group Session Progress Bar -->
-      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-        <div class="flex items-center justify-between text-xs font-bold">
-          <span class="text-slate-700 flex items-center gap-1.5">
-            <UsersIcon class="w-4 h-4 text-slate-900" />
-            Group Payment Progress: {{ formatCurrency(totalPaidByGroup) }} of {{ formatCurrency(receipt.total_amount) }} Paid
+      <div class="p-4 rounded-2xl bg-amber-300 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-2 text-slate-950">
+        <div class="flex items-center justify-between text-xs font-black">
+          <span class="text-slate-950 flex items-center gap-1.5 uppercase">
+            <UsersIcon class="w-4 h-4 text-slate-950" />
+            Group Progress: {{ formatCurrency(totalPaidByGroup) }} of {{ formatCurrency(receipt.total_amount) }} Paid
           </span>
-          <span :class="[remainingUnpaid <= 0.05 ? 'text-emerald-600 font-extrabold' : 'text-amber-600', 'text-xs']">
+          <span :class="[remainingUnpaid <= 0.05 ? 'text-slate-950 font-black' : 'text-slate-950', 'text-xs font-mono']">
             {{ remainingUnpaid <= 0.05 ? '✓ Fully Paid!' : formatCurrency(remainingUnpaid) + ' Unpaid' }}
           </span>
         </div>
 
-        <div class="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
+        <div class="w-full h-3 rounded-full bg-white border-2 border-slate-950 overflow-hidden">
           <div
-            class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            class="h-full bg-emerald-400 rounded-full transition-all duration-500"
             :style="{ width: `${Math.min(100, (totalPaidByGroup / (receipt.total_amount || 1)) * 100)}%` }"
           ></div>
         </div>
@@ -83,18 +83,18 @@
     <!-- Main Group Splitting Form -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Left Column: Line Items (2 cols) -->
-      <div class="minimal-card lg:col-span-2 p-6 space-y-5">
+      <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] lg:col-span-2 space-y-5">
         <div class="space-y-1">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <CheckSquareIcon class="w-5 h-5 text-slate-700" />
+          <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+            <CheckSquareIcon class="w-5 h-5 text-slate-950" />
             <span>Select Items You Ate / Consumed</span>
           </h3>
-          <p class="text-xs text-slate-500 font-medium">Tick the items you consumed. Items paid by others are grayed out below with an undo button if there was a mistake.</p>
+          <p class="text-xs text-slate-600 font-bold">Tick the items you consumed. Items paid by others are grayed out below.</p>
         </div>
 
         <!-- Guest Name Input -->
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1 uppercase tracking-wider">
+          <label class="block text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
             Your Name (Guest Participant)
           </label>
           <input
@@ -102,7 +102,7 @@
             type="text"
             required
             placeholder="e.g. Alex, Chloe, Ben"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold text-sm focus:outline-none focus:border-slate-900"
+            class="w-full px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-black text-sm focus:outline-none"
           />
         </div>
 
@@ -114,59 +114,57 @@
             @click="getItemClaimStatus(item) ? null : toggleItemSelection(item.id)"
             :class="[
               getItemClaimStatus(item)
-                ? 'bg-slate-100/90 text-slate-400 border-slate-200 opacity-80 cursor-default'
+                ? 'bg-slate-100 text-slate-500 border-slate-300 opacity-80 cursor-default'
                 : (selectedItemIds.includes(item.id)
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm cursor-pointer'
-                    : 'bg-slate-50 text-slate-900 border-slate-200 hover:border-slate-300 cursor-pointer'),
-              'p-4 rounded-xl border flex items-center justify-between transition-all'
+                    ? 'bg-slate-950 text-white border-slate-950 shadow-[3px_3px_0px_#0f172a] cursor-pointer'
+                    : 'bg-slate-50 text-slate-950 border-slate-950 shadow-[2px_2px_0px_#0f172a] hover:bg-slate-100 cursor-pointer'),
+              'p-4 rounded-2xl border-2 flex items-center justify-between transition-all'
             ]"
           >
             <div class="flex items-center space-x-3.5 min-w-0">
-              <!-- Checkbox Icon -->
               <div
                 v-if="!getItemClaimStatus(item)"
                 :class="[
                   selectedItemIds.includes(item.id)
-                    ? 'bg-white text-slate-900 border-white'
-                    : 'border-slate-300 bg-white text-transparent',
-                  'w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0'
+                    ? 'bg-amber-400 text-slate-950 border-slate-950'
+                    : 'border-slate-950 bg-white text-transparent',
+                  'w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0'
                 ]"
               >
                 <CheckIcon class="w-3.5 h-3.5 stroke-[3]" />
               </div>
 
-              <!-- Paid Lock Icon if claimed -->
-              <div v-else class="w-5 h-5 rounded bg-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+              <div v-else class="w-5 h-5 rounded-lg bg-slate-300 border border-slate-950 text-slate-700 flex items-center justify-center shrink-0">
                 <CheckIcon class="w-3.5 h-3.5 stroke-[3]" />
               </div>
 
               <div class="min-w-0">
                 <div class="flex items-center space-x-2">
-                  <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (selectedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'font-bold text-sm block truncate']">
+                  <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-500' : (selectedItemIds.includes(item.id) ? 'text-white' : 'text-slate-950'), 'font-black text-sm block truncate']">
                     {{ item.name }}
                   </span>
                 </div>
-                <span :class="[selectedItemIds.includes(item.id) ? 'text-slate-300' : 'text-slate-500', 'text-xs block font-medium']">
+                <span :class="[selectedItemIds.includes(item.id) ? 'text-amber-300' : 'text-slate-600', 'text-xs block font-mono font-bold']">
                   Qty: {{ item.quantity }} × {{ formatCurrency(item.unit_price) }}
                 </span>
               </div>
             </div>
 
             <div class="text-right shrink-0 flex flex-col items-end space-y-1">
-              <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-400' : (selectedItemIds.includes(item.id) ? 'text-white' : 'text-slate-900'), 'text-base font-extrabold block']">
+              <span :class="[getItemClaimStatus(item) ? 'line-through text-slate-500' : (selectedItemIds.includes(item.id) ? 'text-amber-300' : 'text-slate-950'), 'text-base font-black font-mono block']">
                 {{ formatCurrency(item.total_price) }}
               </span>
 
               <!-- Participant Paid Name Badge & Undo Button -->
               <div v-if="getItemClaimStatus(item)" class="flex items-center space-x-1.5">
-                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-slate-200 text-slate-900 border border-slate-950 flex items-center gap-1">
                   ✓ Paid by {{ getItemClaimStatus(item).guest_name }} ({{ formatCurrency(getItemClaimStatus(item).amount_paid) }})
                 </span>
                 <button
                   type="button"
                   @click.stop="undoGuestClaim(getItemClaimStatus(item))"
-                  class="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                  title="Undo / Reset this claim if there was a mistake"
+                  class="p-1 rounded-full text-slate-500 hover:text-rose-600 hover:bg-rose-100 transition-colors"
+                  title="Undo claim"
                 >
                   <RotateCcwIcon class="w-3.5 h-3.5" />
                 </button>
@@ -177,53 +175,53 @@
       </div>
 
       <!-- Right Column: Pro-Rata Total & Pay Action (1 col) -->
-      <div class="minimal-card p-6 space-y-6 flex flex-col justify-between">
+      <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-6 flex flex-col justify-between">
         <div class="space-y-4">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <CalculatorIcon class="w-5 h-5 text-slate-700" />
+          <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+            <CalculatorIcon class="w-5 h-5 text-slate-950" />
             <span>Your Calculation</span>
           </h3>
 
-          <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-700 space-y-1">
-            <span class="font-bold block flex items-center gap-1">
-              <InfoIcon class="w-4 h-4 shrink-0 text-slate-900" />
+          <div class="p-3.5 rounded-2xl bg-amber-300 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] text-xs text-slate-950 space-y-1">
+            <span class="font-black block flex items-center gap-1">
+              <InfoIcon class="w-4 h-4 shrink-0 text-slate-950" />
               Pro-Rata Tax & Discount Share:
             </span>
-            <p class="text-[11px] leading-relaxed text-slate-600">
+            <p class="text-[11px] leading-relaxed font-bold">
               SST tax, service fee, and discounts are split proportionally for your selected items ({{ proRataData.pro_rata_percentage }}%).
             </p>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-            <div class="flex justify-between text-xs text-slate-700 font-medium">
+          <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-2.5 text-xs font-bold text-slate-950">
+            <div class="flex justify-between">
               <span>Selected Items Subtotal:</span>
-              <span class="font-bold text-slate-900">{{ formatCurrency(proRataData.claimed_subtotal) }}</span>
+              <span class="font-mono font-black">{{ formatCurrency(proRataData.claimed_subtotal) }}</span>
             </div>
 
-            <div class="flex justify-between text-xs text-slate-500 font-medium">
-              <span>Pro-Rata SST Tax Share:</span>
-              <span class="font-semibold text-slate-700">+ {{ formatCurrency(proRataData.tax_share) }}</span>
+            <div class="flex justify-between text-slate-700">
+              <span>SST Tax Share:</span>
+              <span class="font-mono font-black">+ {{ formatCurrency(proRataData.tax_share) }}</span>
             </div>
 
-            <div class="flex justify-between text-xs text-slate-500 font-medium">
-              <span>Pro-Rata Service Charge:</span>
-              <span class="font-semibold text-slate-700">+ {{ formatCurrency(proRataData.service_charge_share) }}</span>
+            <div class="flex justify-between text-slate-700">
+              <span>Service Charge:</span>
+              <span class="font-mono font-black">+ {{ formatCurrency(proRataData.service_charge_share) }}</span>
             </div>
 
-            <div v-if="proRataData.discount_share > 0" class="flex justify-between text-xs text-emerald-700 font-bold">
-              <span>Pro-Rata Discount Deducted:</span>
-              <span>- {{ formatCurrency(proRataData.discount_share) }}</span>
+            <div v-if="proRataData.discount_share > 0" class="flex justify-between text-emerald-700 font-black">
+              <span>Discount Deducted:</span>
+              <span class="font-mono">- {{ formatCurrency(proRataData.discount_share) }}</span>
             </div>
 
-            <div class="pt-3 border-t border-slate-200 flex justify-between items-center">
-              <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Your Final Total</span>
-              <span class="text-2xl font-black text-emerald-600">{{ formatCurrency(proRataData.final_total) }}</span>
+            <div class="pt-3 border-t-2 border-slate-950 flex justify-between items-center">
+              <span class="text-xs font-black uppercase tracking-wider">Your Final Total</span>
+              <span class="text-2xl font-black font-mono text-emerald-600">{{ formatCurrency(proRataData.final_total) }}</span>
             </div>
           </div>
 
-          <!-- Quick Pay via Banking / eWallet App Shortcuts -->
-          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Quick Open eWallet / Banking App</span>
+          <!-- Quick Pay Shortcuts -->
+          <div class="p-3.5 rounded-2xl bg-slate-100 border-2 border-slate-950 space-y-2">
+            <span class="text-[10px] font-black text-slate-950 uppercase tracking-wider block">Quick Open Banking / eWallet App</span>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <a
                 v-for="(app, key) in appStoreLinks"
@@ -232,7 +230,7 @@
                 target="_blank"
                 :class="[
                   app.color,
-                  'px-2.5 py-2 rounded-xl font-extrabold text-[11px] sm:text-xs flex items-center justify-center gap-1 transition-colors shadow-xs'
+                  'px-2 py-1.5 rounded-xl font-black border border-slate-950 text-[11px] flex items-center justify-center gap-1 shadow-[2px_2px_0px_#0f172a]'
                 ]"
                 :title="`Open ${app.name}`"
               >
@@ -242,13 +240,13 @@
           </div>
         </div>
 
-        <form @submit.prevent="submitGuestClaim" class="space-y-3 pt-4 border-t border-slate-100">
+        <form @submit.prevent="submitGuestClaim" class="space-y-3 pt-4 border-t-2 border-slate-950">
           <button
             type="submit"
             :disabled="!guestName.trim() || selectedItemIds.length === 0 || form.processing"
-            class="minimal-btn-primary w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            class="w-full py-3.5 rounded-2xl bg-slate-950 text-amber-300 font-black text-sm border-2 border-slate-950 shadow-[4px_4px_0px_#0f172a] hover:bg-slate-900 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
           >
-            <CheckCircleIcon class="w-4 h-4 text-white" />
+            <CheckCircleIcon class="w-4 h-4 text-amber-400" />
             <span>Mark {{ formatCurrency(proRataData.final_total) }} as Paid</span>
           </button>
         </form>
@@ -261,18 +259,18 @@
       class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
       @click.self="showReceiptModal = false"
     >
-      <div class="minimal-card max-w-xl w-full p-4 sm:p-5 space-y-3 animate-scale-up">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-          <h4 class="font-bold text-sm text-slate-900 flex items-center gap-2">
-            <ReceiptIcon class="w-4 h-4 text-indigo-600" />
+      <div class="bg-white rounded-3xl border-3 border-slate-950 shadow-[8px_8px_0px_#0f172a] max-w-xl w-full p-5 space-y-3 animate-scale-up text-slate-950">
+        <div class="flex items-center justify-between border-b-2 border-slate-950 pb-2">
+          <h4 class="font-black text-sm text-slate-950 flex items-center gap-2">
+            <ReceiptIcon class="w-4 h-4 text-slate-950" />
             <span>Original Scanned Receipt</span>
           </h4>
-          <button @click="showReceiptModal = false" class="text-slate-400 hover:text-slate-600 p-1">
-            <XIcon class="w-5 h-5" />
+          <button @click="showReceiptModal = false" class="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-950 flex items-center justify-center text-slate-950 font-bold hover:bg-rose-100 transition-colors">
+            <XIcon class="w-4 h-4" />
           </button>
         </div>
-        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center max-h-[75vh]">
-          <img :src="receipt.image_path" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-xs" />
+        <div class="rounded-2xl overflow-hidden border-2 border-slate-950 bg-slate-50 flex items-center justify-center max-h-[75vh]">
+          <img :src="receipt.image_path" class="max-w-full max-h-[75vh] object-contain rounded-xl" />
         </div>
       </div>
     </div>
@@ -291,7 +289,6 @@ import {
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
   RotateCcw as RotateCcwIcon,
-  Image as ImageIcon,
   Receipt as ReceiptIcon,
   X as XIcon,
 } from 'lucide-vue-next';
@@ -306,7 +303,6 @@ const props = defineProps({
 let syncInterval = null;
 
 onMounted(() => {
-  // Real-time live auto sync every 3.5 seconds
   syncInterval = setInterval(() => {
     router.reload({
       only: ['receipt', 'existingClaims'],
@@ -320,7 +316,6 @@ onUnmounted(() => {
   if (syncInterval) clearInterval(syncInterval);
 });
 
-const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const appStoreLinks = {
@@ -328,43 +323,43 @@ const appStoreLinks = {
     name: "Touch 'n Go",
     playStore: 'https://play.google.com/store/apps/details?id=my.com.tngdigital.ewallet',
     appStore: 'https://apps.apple.com/app/touch-n-go-ewallet/id1342373218',
-    color: 'bg-blue-600 hover:bg-blue-700 text-white',
+    color: 'bg-blue-500 text-white',
   },
   mae: {
     name: 'Maybank MAE',
     playStore: 'https://play.google.com/store/apps/details?id=com.maybank2u.life',
     appStore: 'https://apps.apple.com/app/mae-by-maybank2u/id1481028763',
-    color: 'bg-amber-400 hover:bg-amber-500 text-slate-950',
+    color: 'bg-amber-400 text-slate-950',
   },
   cimb: {
     name: 'CIMB OCTO',
     playStore: 'https://play.google.com/store/apps/details?id=com.cimb.cimbocto',
     appStore: 'https://apps.apple.com/app/cimb-octo-my/id1608670830',
-    color: 'bg-rose-600 hover:bg-rose-700 text-white',
+    color: 'bg-rose-500 text-white',
   },
   hlb: {
     name: 'HLB Connect',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.hongleongconnect.mobileconnect',
     appStore: 'https://apps.apple.com/app/hlb-connect-mobile-banking/id1458055610',
-    color: 'bg-blue-700 hover:bg-blue-800 text-white',
+    color: 'bg-blue-600 text-white',
   },
   rhb: {
     name: 'RHB Mobile',
     playStore: 'https://play.google.com/store/apps/details?id=com.rhbgroup.rhbmobilebanking',
     appStore: 'https://apps.apple.com/app/rhb-mobile-banking/id1435773177',
-    color: 'bg-sky-600 hover:bg-sky-700 text-white',
+    color: 'bg-sky-500 text-white',
   },
   mypb: {
     name: 'MyPB',
     playStore: 'https://play.google.com/store/apps/details?id=com.pbb.mypb',
     appStore: 'https://apps.apple.com/app/mypb-by-public-bank/id1661667468',
-    color: 'bg-red-600 hover:bg-red-700 text-white',
+    color: 'bg-red-500 text-white',
   },
   gxbank: {
     name: 'GXBank',
     playStore: 'https://play.google.com/store/apps/details?id=my.com.gxbank.app',
     appStore: 'https://apps.apple.com/app/gxbank/id6449176318',
-    color: 'bg-purple-600 hover:bg-purple-700 text-white',
+    color: 'bg-cyan-400 text-slate-950',
   },
 };
 
@@ -413,7 +408,6 @@ const undoGuestClaim = (claim) => {
   }
 };
 
-// Pro-Rata Math Calculation
 const proRataData = computed(() => {
   const selectedItems = (props.receipt.items || []).filter(i => selectedItemIds.value.includes(i.id));
   const claimedSubtotal = selectedItems.reduce((sum, item) => sum + parseFloat(item.total_price), 0);

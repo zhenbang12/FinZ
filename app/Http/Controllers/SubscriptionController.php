@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -473,7 +474,7 @@ class SubscriptionController extends Controller
         }
 
         $validated = $request->validate([
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', $request->user()->id)],
             'amount' => 'required|numeric|min:0',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string',

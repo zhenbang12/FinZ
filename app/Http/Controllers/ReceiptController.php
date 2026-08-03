@@ -10,6 +10,7 @@ use App\Services\LedgerService;
 use App\Services\ReceiptOcrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -137,7 +138,6 @@ class ReceiptController extends Controller
 
         // Record session claim for each item
         foreach ($itemIds as $itemId) {
-            // Delete any existing claim for this item if guest re-claims it
             ReceiptSessionClaim::where('receipt_item_id', $itemId)->delete();
 
             $itemObj = $receipt->items->firstWhere('id', $itemId);
@@ -218,9 +218,13 @@ class ReceiptController extends Controller
             abort(403);
         }
 
+        if ($receipt->status === 'claimed') {
+            return redirect()->back()->with('error', 'This receipt expense has already been logged to the ledger.');
+        }
+
         $validated = $request->validate([
             'claimed_item_ids' => 'required|array',
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => ['required', Rule::exists('accounts', 'id')->where('user_id', $request->user()->id)],
             'category_id' => 'required|exists:categories,id',
             'notes' => 'nullable|string|max:255',
         ]);

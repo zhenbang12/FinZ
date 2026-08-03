@@ -1,16 +1,16 @@
 <template>
   <AppLayout>
-    <div class="space-y-6">
+    <div class="space-y-6 max-w-5xl mx-auto pb-12">
       <!-- Page Header -->
       <div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          SmartSplit
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 flex items-center gap-2">
+          <span>SmartSplit Receipt Parser</span>
         </h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1 font-normal">Scan or upload receipt images to extract line items and split bills with pro-rata tax math.</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 font-bold">Scan or upload receipt images to extract line items and split bills with pro-rata tax math.</p>
       </div>
 
-      <!-- Dropzone Card -->
-      <div class="minimal-card p-6 sm:p-8 space-y-6">
+      <!-- Neo-Brutalist Dropzone Card -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-amber-300 border-3 border-slate-950 shadow-[6px_6px_0px_#0f172a] space-y-6 text-slate-950">
         <form @submit.prevent="submitUpload" class="space-y-6">
           <div
             @dragover.prevent="isDragging = true"
@@ -18,8 +18,8 @@
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
             :class="[
-              isDragging ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20' : 'border-slate-300 bg-slate-50',
-              'border-2 border-dashed rounded-2xl p-6 sm:p-10 text-center transition-all'
+              isDragging ? 'bg-amber-400 scale-[1.01]' : 'bg-white',
+              'border-3 border-dashed border-slate-950 rounded-2xl p-6 sm:p-10 text-center transition-all shadow-[4px_4px_0px_#0f172a]'
             ]"
           >
             <!-- Camera Direct Input (forces mobile camera) -->
@@ -41,15 +41,15 @@
               @change="handleFileSelected"
             />
 
-            <div class="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto mb-4">
-              <CameraIcon class="w-8 h-8 text-white" />
+            <div class="w-16 h-16 rounded-2xl bg-slate-950 text-amber-300 flex items-center justify-center mx-auto mb-4 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a]">
+              <CameraIcon class="w-8 h-8 text-amber-300" />
             </div>
 
-            <h3 class="text-lg font-bold text-slate-900 mb-1">
+            <h3 class="text-xl font-black text-slate-950 mb-1">
               {{ previewUrl ? 'Image Selected (Replace below)' : 'Scan or Upload Receipt' }}
             </h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto font-medium mb-6">
-              Powered by <span class="text-slate-900 font-bold">Google Gemini</span>. Take a photo directly or choose from gallery.
+            <p class="text-xs text-slate-800 max-w-sm mx-auto font-bold mb-6">
+              Powered by <span class="text-slate-950 font-black">Google Gemini AI</span>. Take a photo directly or choose from gallery.
             </p>
 
             <!-- Dual Action Selection Buttons for Mobile & Desktop -->
@@ -57,24 +57,24 @@
               <button
                 type="button"
                 @click="triggerCamera"
-                class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+                class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5"
               >
-                <CameraIcon class="w-4 h-4 text-white" />
+                <CameraIcon class="w-4 h-4 text-amber-400" />
                 <span>Take Photo (Camera)</span>
               </button>
 
               <button
                 type="button"
                 @click="triggerGallery"
-                class="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+                class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 border-2 border-slate-950 font-black text-xs shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5"
               >
-                <UploadIcon class="w-4 h-4 text-slate-700" />
+                <UploadIcon class="w-4 h-4 text-slate-950" />
                 <span>Upload from Gallery</span>
               </button>
             </div>
 
             <!-- Preview Image if selected -->
-            <div v-if="previewUrl" class="mt-6 max-w-xs mx-auto overflow-hidden rounded-xl border border-slate-300 shadow-md">
+            <div v-if="previewUrl" class="mt-6 max-w-xs mx-auto overflow-hidden rounded-2xl border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a]">
               <img :src="previewUrl" alt="Receipt preview" class="w-full max-h-48 object-cover" />
             </div>
           </div>
@@ -84,9 +84,9 @@
             <button
               type="submit"
               :disabled="!selectedFile || isProcessing"
-              class="minimal-btn-primary w-full sm:w-auto px-8 py-3.5 text-sm shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-slate-950 text-amber-300 font-black text-sm border-2 border-slate-950 shadow-[4px_4px_0px_#0f172a] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-2 active:translate-x-0.5 active:translate-y-0.5 transition-all"
             >
-              <SparklesIcon class="w-4 h-4 text-white animate-spin-slow" />
+              <SparklesIcon class="w-4 h-4 text-amber-400 animate-spin-slow" />
               <span>{{ isProcessing ? 'Google Gemini AI Vision Parsing...' : 'Process Receipt with SmartSplit' }}</span>
             </button>
           </div>
@@ -94,13 +94,13 @@
       </div>
 
       <!-- Scanned Receipts History -->
-      <div class="minimal-card p-6 space-y-4">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <ReceiptIcon class="w-5 h-5 text-slate-700" />
+      <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-4">
+        <h3 class="text-lg font-black text-slate-950 flex items-center gap-2">
+          <ReceiptIcon class="w-5 h-5 text-slate-950" />
           <span>Scanned Receipts History</span>
         </h3>
 
-        <div v-if="receipts.length === 0" class="text-center py-8 text-slate-400 text-sm font-medium">
+        <div v-if="receipts.length === 0" class="text-center py-8 text-slate-500 text-sm font-bold">
           No receipts scanned yet. Use the camera tool above to scan your first receipt.
         </div>
 
@@ -108,46 +108,46 @@
           <div
             v-for="rcpt in receipts"
             :key="rcpt.id"
-            class="minimal-card minimal-card-hover p-5 flex flex-col justify-between space-y-3"
+            class="p-5 rounded-3xl bg-slate-50 border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] flex flex-col justify-between space-y-3 hover:-translate-y-0.5 transition-all"
           >
             <div class="flex items-start justify-between">
               <div>
-                <h4 class="font-bold text-base text-slate-900 truncate max-w-[180px]">
+                <h4 class="font-black text-base text-slate-950 truncate max-w-[180px]">
                   {{ rcpt.merchant_name || 'Receipt #' + rcpt.id }}
                 </h4>
-                <span class="text-xs text-slate-400 block mt-0.5">{{ formatDate(rcpt.created_at) }}</span>
+                <span class="text-xs text-slate-600 font-bold block mt-0.5">{{ formatDate(rcpt.created_at) }}</span>
               </div>
               <span
                 :class="[
-                  rcpt.status === 'claimed' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-800 border-slate-200',
-                  'px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider'
+                  rcpt.status === 'claimed' ? 'bg-emerald-400 text-slate-950 border-slate-950' : 'bg-amber-300 text-slate-950 border-slate-950',
+                  'px-2.5 py-0.5 rounded-full text-[9px] font-black border uppercase tracking-wider'
                 ]"
               >
                 {{ rcpt.status }}
               </span>
             </div>
 
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs text-slate-500 font-medium">
+            <div class="space-y-1 pt-1 border-t-2 border-slate-950/10">
+              <div class="flex justify-between text-xs text-slate-600 font-bold">
                 <span>Total Amount:</span>
-                <span class="font-bold text-slate-900">{{ formatCurrency(rcpt.total_amount) }}</span>
+                <span class="font-black font-mono text-slate-950">{{ formatCurrency(rcpt.total_amount) }}</span>
               </div>
-              <div class="flex justify-between text-xs text-slate-500 font-medium">
+              <div class="flex justify-between text-xs text-slate-600 font-bold">
                 <span>Items extracted:</span>
-                <span class="font-semibold text-slate-700">{{ rcpt.items ? rcpt.items.length : 0 }} items</span>
+                <span class="font-black text-slate-950">{{ rcpt.items ? rcpt.items.length : 0 }} items</span>
               </div>
             </div>
 
             <div class="flex items-center space-x-2 pt-1">
               <Link
                 :href="`/receipts/${rcpt.id}`"
-                class="minimal-btn-secondary flex-1 py-2 font-bold text-xs text-center block transition-all"
+                class="flex-1 py-2 rounded-2xl bg-slate-950 text-amber-300 font-black text-xs text-center border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] hover:bg-slate-900 transition-all block"
               >
-                Split Bill & Claim Items →
+                Split Bill & Claim →
               </Link>
               <button
                 @click="confirmDeleteReceipt(rcpt)"
-                class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 border border-slate-200 transition-colors shrink-0"
+                class="p-2 text-white bg-rose-500 rounded-2xl border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] hover:bg-rose-600 transition-colors shrink-0"
                 title="Delete Receipt"
               >
                 <Trash2Icon class="w-4 h-4" />
@@ -206,7 +206,6 @@ const triggerGallery = () => {
   }
 };
 
-// Client-side Canvas Image Compression (Converts heavy camera/scanner photos to compressed WebP)
 const compressImage = (file, maxWidth = 1200, quality = 0.75) => {
   return new Promise((resolve) => {
     if (!file || !file.type.startsWith('image/') || file.size < 150 * 1024) {

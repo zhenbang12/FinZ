@@ -4,7 +4,7 @@
   --font-sans: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
-/* Minimalist Light Theme System */
+/* Neo-Brutalist Global Styling */
 body {
   background-color: #f8fafc;
   color: #0f172a;
@@ -12,75 +12,122 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Minimalist Cards */
-.minimal-card {
+/* Neo-Brutalist Card Standard */
+.minimal-card,
+.neo-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.minimal-card-hover:hover {
-  transform: translateY(-2px);
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-}
-
-.minimal-card-hero {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 3px solid #0f172a;
   border-radius: 24px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  box-shadow: 4px 4px 0px #0f172a;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Minimalist Primary Buttons */
-.minimal-btn-primary {
-  background: #0f172a;
-  color: #ffffff;
-  font-weight: 600;
-  border-radius: 9999px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-  transition: all 0.2s ease;
+.minimal-card-hover:hover,
+.neo-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px #0f172a;
 }
 
-.minimal-btn-primary:hover {
-  background: #1e293b;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
-}
-
-.minimal-btn-primary:active {
-  transform: scale(0.97);
-}
-
-/* Minimalist Secondary / Tonal Button */
-.minimal-btn-secondary {
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.minimal-btn-secondary:hover {
-  background: #e2e8f0;
+.minimal-card-hero,
+.neo-hero-card {
+  background: #fde047;
+  border: 3px solid #0f172a;
+  border-radius: 24px;
+  box-shadow: 6px 6px 0px #0f172a;
   color: #0f172a;
 }
 
-/* Minimalist Active Nav Item */
-.minimal-nav-active {
+/* Neo-Brutalist Buttons */
+.minimal-btn-primary,
+.neo-btn-primary {
   background: #0f172a;
   color: #ffffff;
+  font-weight: 800;
+  border: 2px solid #0f172a;
+  border-radius: 16px;
+  box-shadow: 3px 3px 0px #0f172a;
+  transition: all 0.15s ease;
+}
+
+.minimal-btn-primary:hover,
+.neo-btn-primary:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0px #0f172a;
+}
+
+.minimal-btn-primary:active,
+.neo-btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #0f172a;
+}
+
+.minimal-btn-secondary,
+.neo-btn-secondary {
+  background: #ffffff;
+  color: #0f172a;
+  border: 2px solid #0f172a;
+  border-radius: 16px;
+  font-weight: 800;
+  box-shadow: 2px 2px 0px #0f172a;
+  transition: all 0.15s ease;
+}
+
+.minimal-btn-secondary:hover,
+.neo-btn-secondary:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0px #0f172a;
+}
+
+.minimal-btn-secondary:active,
+.neo-btn-secondary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #0f172a;
+}
+
+/* Neo-Brutalist Active Nav Item */
+.minimal-nav-active,
+.neo-nav-active {
+  background: #0f172a;
+  color: #ffffff;
+  border: 2px solid #0f172a;
   border-radius: 9999px;
-  font-weight: 600;
+  font-weight: 800;
+  box-shadow: 3px 3px 0px #0f172a;
+}
+
+/* Neo-Brutalist Inputs & Selects */
+.neo-input {
+  background-color: #f8fafc;
+  border: 2px solid #0f172a;
+  border-radius: 16px;
+  padding: 0.625rem 0.875rem;
+  color: #0f172a;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.neo-input:focus {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px #fde047;
+}
+
+/* Neo-Brutalist Badge */
+.neo-badge {
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-family: monospace;
 }
 
 /* Custom Minimalist Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -88,28 +135,24 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #0f172a;
   border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 
 /* Page Transition Animations */
 .page-fade-enter-active,
 .page-fade-leave-active {
-  transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1), transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-fade-enter-from {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(4px);
 }
 
 .page-fade-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translateY(-4px);
 }
 
 /* Skeleton Loading Shimmer */
@@ -123,8 +166,7 @@ body {
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #cbd5e1 37%, #f1f5f9 63%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite ease-in-out;
 }
-
