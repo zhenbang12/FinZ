@@ -492,7 +492,7 @@
                 class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-bold text-sm focus:outline-none"
               >
                 <option value="" disabled>Select category</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                <option v-for="cat in filteredCategories" :key="cat.id" :value="cat.id">
                   {{ cat.name }}
                 </option>
               </select>
@@ -595,6 +595,11 @@ const selectedOriginAccount = computed(() => {
   return props.accounts.find(a => a.id === form.account_id) || null;
 });
 
+const filteredCategories = computed(() => {
+  if (modalType.value === 'transfer') return [];
+  return props.categories.filter(c => c.type === modalType.value || !c.type);
+});
+
 const togglePinAccount = (acc) => {
   router.post(`/accounts/${acc.id}/toggle-pin`, {}, { preserveState: true });
 };
@@ -606,10 +611,13 @@ const setModalType = (type) => {
     if (!form.destination_account_id) {
       form.destination_account_id = props.accounts.find(a => a.id !== form.account_id)?.id || '';
     }
+    form.category_id = '';
   } else {
     form.destination_account_id = '';
-    if (!form.category_id && props.categories.length > 0) {
-      form.category_id = props.categories[0].id;
+    const matchingCats = props.categories.filter(c => c.type === type || !c.type);
+    const currentCatObj = props.categories.find(c => c.id === form.category_id);
+    if (!currentCatObj || currentCatObj.type !== type) {
+      form.category_id = matchingCats[0]?.id || '';
     }
   }
 };

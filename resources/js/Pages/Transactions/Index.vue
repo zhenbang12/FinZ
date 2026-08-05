@@ -331,7 +331,7 @@
                 class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 font-bold text-sm focus:outline-none"
               >
                 <option value="" disabled>Select category</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                <option v-for="cat in filteredCategories" :key="cat.id" :value="cat.id">
                   {{ cat.name }} {{ cat.user_id ? '(Custom)' : '' }}
                 </option>
               </select>
@@ -599,6 +599,11 @@ const form = useForm({
   notes: '',
 });
 
+const filteredCategories = computed(() => {
+  if (modalType.value === 'transfer') return [];
+  return props.categories.filter(c => c.type === modalType.value || !c.type);
+});
+
 const openModal = (type) => {
   editingTransactionId.value = null;
   originalAmount.value = 0;
@@ -606,7 +611,8 @@ const openModal = (type) => {
   form.type = type;
   form.account_id = props.accounts[0]?.id || '';
   form.destination_account_id = type === 'transfer' ? (props.accounts[1]?.id || '') : '';
-  form.category_id = type === 'transfer' ? '' : (props.categories[0]?.id || '');
+  const matchingCats = props.categories.filter(c => c.type === type || !c.type);
+  form.category_id = type === 'transfer' ? '' : (matchingCats[0]?.id || '');
   form.amount = '';
   form.date = todayStr;
   form.notes = '';

@@ -418,10 +418,17 @@ class SubscriptionController extends Controller
             if (!empty($validated['auto_post_income']) && !empty($validated['account_id']) && $validated['status'] === 'paid') {
                 $account = Account::where('user_id', $request->user()->id)->findOrFail($validated['account_id']);
 
-                // Find default Income category or general category
+                Category::ensureSystemCategories();
+
+                // Find Payback & Reimbursements income category first, or general income category
                 $category = Category::where(function ($q) use ($request) {
                     $q->whereNull('user_id')->orWhere('user_id', $request->user()->id);
-                })->where('type', 'income')->first();
+                })->where('type', 'income')
+                  ->where('name', 'like', '%Payback%')
+                  ->first()
+                  ?? Category::where(function ($q) use ($request) {
+                      $q->whereNull('user_id')->orWhere('user_id', $request->user()->id);
+                  })->where('type', 'income')->first();
 
                 $txNotes = "[Shared Sub] {$member->name} - {$member->subscription->name} ({$payment->billing_cycle_label})";
 
