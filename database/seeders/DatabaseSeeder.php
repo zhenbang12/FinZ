@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ensure system categories exist
+        Category::ensureSystemCategories();
+
         // 1. Superuser Account
         $admin = User::firstOrCreate(
             ['email' => 'admin@finz.app'],
@@ -43,26 +46,7 @@ class DatabaseSeeder extends Seeder
 
         $users = [$admin, $user];
 
-        // System Categories
-        $categories = [
-            ['name' => 'Food & Dining', 'type' => 'expense', 'icon' => 'utensils', 'color' => '#F59E0B'],
-            ['name' => 'Groceries', 'type' => 'expense', 'icon' => 'shopping-cart', 'color' => '#10B981'],
-            ['name' => 'Transport & Petrol', 'type' => 'expense', 'icon' => 'car', 'color' => '#3B82F6'],
-            ['name' => 'Utilities & Bills', 'type' => 'expense', 'icon' => 'zap', 'color' => '#8B5CF6'],
-            ['name' => 'Entertainment & Tech', 'type' => 'expense', 'icon' => 'film', 'color' => '#EC4899'],
-            ['name' => 'Shopping', 'type' => 'expense', 'icon' => 'shopping-bag', 'color' => '#6366F1'],
-            ['name' => 'Salary / Income', 'type' => 'income', 'icon' => 'dollar-sign', 'color' => '#22C55E'],
-            ['name' => 'Transfer', 'type' => 'transfer', 'icon' => 'arrow-right-left', 'color' => '#64748B'],
-        ];
-
-        $categoryMap = [];
-        foreach ($categories as $cat) {
-            $created = Category::firstOrCreate(
-                ['name' => $cat['name'], 'user_id' => null],
-                ['type' => $cat['type'], 'icon' => $cat['icon'], 'color' => $cat['color']]
-            );
-            $categoryMap[$cat['name']] = $created->id;
-        }
+        $categoryMap = Category::whereNull('user_id')->pluck('id', 'name')->toArray();
 
         foreach ($users as $u) {
             // Seed 5 Accounts with Custom Hex Accents for each user
@@ -136,6 +120,9 @@ class DatabaseSeeder extends Seeder
             $sampleTransactions = [
                 ['type' => 'income', 'acc' => $maybank, 'cat' => 'Salary / Income', 'amount' => 6800.00, 'notes' => 'Monthly Salary Payment', 'days_ago' => 45],
                 ['type' => 'income', 'acc' => $maybank, 'cat' => 'Salary / Income', 'amount' => 6800.00, 'notes' => 'Monthly Salary Payment', 'days_ago' => 15],
+                ['type' => 'income', 'acc' => $tng, 'cat' => 'Payback & Reimbursements', 'amount' => 35.80, 'notes' => 'Din Tai Fung Lunch Payback from Chloe', 'days_ago' => 6],
+                ['type' => 'income', 'acc' => $maybank, 'cat' => 'Refunds & Cashbacks', 'amount' => 45.00, 'notes' => 'Shopee Order Refund #20268841', 'days_ago' => 5],
+                ['type' => 'income', 'acc' => $gxbank, 'cat' => 'Investment & Interest', 'amount' => 12.50, 'notes' => 'GXBank Daily Interest Credit', 'days_ago' => 2],
                 ['type' => 'transfer', 'acc' => $maybank, 'dest' => $gxbank, 'cat' => 'Transfer', 'amount' => 2000.00, 'notes' => 'Monthly Auto-Savings to GXBank', 'days_ago' => 14],
                 ['type' => 'transfer', 'acc' => $maybank, 'dest' => $tng, 'cat' => 'Transfer', 'amount' => 300.00, 'notes' => 'Topup TnG eWallet', 'days_ago' => 10],
                 ['type' => 'expense', 'acc' => $tng, 'cat' => 'Groceries', 'amount' => 148.50, 'notes' => 'Jaya Grocer @ Mid Valley', 'days_ago' => 8],
@@ -150,12 +137,13 @@ class DatabaseSeeder extends Seeder
             foreach ($sampleTransactions as $tx) {
                 $exists = Transaction::where('user_id', $u->id)->where('notes', $tx['notes'])->exists();
                 if (!$exists) {
+                    $catId = $categoryMap[$tx['cat']] ?? null;
                     Transaction::create([
                         'user_id' => $u->id,
                         'type' => $tx['type'],
                         'account_id' => $tx['acc']->id,
                         'destination_account_id' => isset($tx['dest']) ? $tx['dest']->id : null,
-                        'category_id' => $categoryMap[$tx['cat']],
+                        'category_id' => $catId,
                         'amount' => $tx['amount'],
                         'notes' => $tx['notes'],
                         'date' => Carbon::now()->subDays($tx['days_ago']),

@@ -60,6 +60,7 @@ class TransactionController extends Controller
         $transactions = $query->paginate(15)->withQueryString();
 
         $accounts = Account::where('user_id', $user->id)->get();
+        Category::ensureSystemCategories();
         $categories = Category::where(function ($q) use ($user) {
             $q->whereNull('user_id')->orWhere('user_id', $user->id);
         })->get();

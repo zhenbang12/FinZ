@@ -79,6 +79,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        Category::ensureSystemCategories();
         $categories = Category::where(function ($q) use ($user) {
             $q->whereNull('user_id')->orWhere('user_id', $user->id);
         })->get();
