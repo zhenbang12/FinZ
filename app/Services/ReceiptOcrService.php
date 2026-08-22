@@ -167,10 +167,12 @@ class ReceiptOcrService
     {
         $apiKey = config('services.gemini.key')
             ?: env('GEMINI_API_KEY')
-            ?: getenv('GEMINI_API_KEY');
+            ?: getenv('GEMINI_API_KEY')
+            ?: ($_ENV['GEMINI_API_KEY'] ?? null)
+            ?: ($_SERVER['GEMINI_API_KEY'] ?? null);
 
         if (empty($apiKey)) {
-            throw new RuntimeException("GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your .env file.");
+            throw new RuntimeException("GEMINI_API_KEY is missing. Please configure your GEMINI_API_KEY.");
         }
 
         if (!file_exists($fullPath)) {
@@ -210,34 +212,38 @@ Rules:
 5. Return raw valid JSON only without markdown formatting.
 PROMPT;
 
+        $payload = [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt],
+                        [
+                            'inlineData' => [
+                                'mimeType' => $mimeType,
+                                'data' => $imageData,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         // Supported vision models in priority order
         $models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro'];
         $response = null;
+        $lastResponse = null;
         $lastException = null;
 
         foreach ($models as $model) {
             try {
-                // Pass API key via x-goog-api-key header instead of query param to avoid URL leaking
                 $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
                 $res = Http::withHeaders([
                     'x-goog-api-key' => $apiKey,
                     'Content-Type' => 'application/json',
-                ])->timeout(60)->post($endpoint, [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt],
-                                [
-                                    'inline_data' => [
-                                        'mime_type' => $mimeType,
-                                        'data' => $imageData,
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ]);
+                ])->timeout(60)->post($endpoint, $payload);
+
+                $lastResponse = $res;
 
                 if ($res->successful()) {
                     $response = $res;
@@ -249,8 +255,17 @@ PROMPT;
         }
 
         if (!$response || !$response->successful()) {
-            $errText = $response ? $response->body() : ($lastException ? $lastException->getMessage() : 'Unknown error');
-            // Redact any potential secrets from the error text
+            if ($lastResponse) {
+                $errBody = $lastResponse->json();
+                $msg = $errBody['error']['message'] ?? $lastResponse->body();
+                $errText = "HTTP {$lastResponse->status()} - {$msg}";
+            } elseif ($lastException) {
+                $errText = $lastException->getMessage();
+            } else {
+                $errText = 'No response received from Google Gemini API';
+            }
+
+            // Redact any potential secret tokens from the error text
             $sanitizedErr = preg_replace('/(key=|api_key=|x-goog-api-key[":\s]+)[A-Za-z0-9_\-]+/i', '$1[REDACTED]', $errText);
             Log::error("Google Gemini AI Vision API Call Failed: " . $sanitizedErr);
             throw new RuntimeException("Google Gemini AI Vision API Call Failed: " . $sanitizedErr);
