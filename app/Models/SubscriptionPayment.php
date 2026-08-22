@@ -33,6 +33,31 @@ class SubscriptionPayment extends Model
         'billing_month' => 'integer',
     ];
 
+    public function getProofImagePathAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, '/storage/')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, '/proofs/')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'proofs/')) {
+            return '/storage/' . $value;
+        }
+
+        return '/' . ltrim($value, '/');
+    }
+
     public function member(): BelongsTo
     {
         return $this->belongsTo(SubscriptionMember::class, 'subscription_member_id');

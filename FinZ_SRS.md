@@ -1,5 +1,5 @@
 # Software Requirements Specification (SRS)
-## Financial Tracker & Smart Receipt Parser (SmartSplit)
+## Financial Tracker & Smart Receipt Parser (FinZ)
 **Target Architecture:** Laravel PWA Stack
 
 ## 1. Introduction

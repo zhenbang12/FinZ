@@ -44,8 +44,12 @@ class Receipt extends Model
             return $value;
         }
 
-        if (str_starts_with($value, '/')) {
+        if (str_starts_with($value, '/storage/')) {
             return $value;
+        }
+
+        if (str_starts_with($value, '/receipts/')) {
+            return '/storage' . $value;
         }
 
         if (str_starts_with($value, 'receipts/')) {

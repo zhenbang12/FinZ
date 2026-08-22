@@ -390,8 +390,12 @@ class SubscriptionController extends Controller
         if ($request->hasFile('proof_image')) {
             $file = $request->file('proof_image');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('proofs'), $filename);
-            $proofPath = '/proofs/' . $filename;
+            $destinationPath = storage_path('app/public/proofs');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+            $file->move($destinationPath, $filename);
+            $proofPath = '/storage/proofs/' . $filename;
         }
 
         DB::transaction(function () use ($request, $validated, $member, $proofPath, $shouldRemoveProof) {
