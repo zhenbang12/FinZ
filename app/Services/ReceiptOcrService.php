@@ -177,8 +177,9 @@ class ReceiptOcrService
             throw new RuntimeException("Receipt file not found at: {$fullPath}");
         }
 
-        $imageData = base64_encode(file_get_contents($fullPath));
-        $mimeType = mime_content_type($fullPath) ?: 'image/jpeg';
+        $image = $this->prepareOptimizedImage($fullPath);
+        $imageData = $image['data'];
+        $mimeType = $image['mime_type'];
 
         $prompt = <<<PROMPT
 You are an expert Malaysian receipt OCR engine. Analyze this receipt image and extract data into strict JSON format:
@@ -209,16 +210,20 @@ Rules:
 5. Return raw valid JSON only without markdown formatting.
 PROMPT;
 
-        // Try gemini-2.5-flash then fallback to gemini-flash-latest / gemini-1.5-flash
-        $models = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-1.5-flash'];
+        // Supported vision models in priority order
+        $models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro'];
         $response = null;
         $lastException = null;
 
         foreach ($models as $model) {
             try {
-                $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+                // Pass API key via x-goog-api-key header instead of query param to avoid URL leaking
+                $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
-                $res = Http::timeout(30)->post($endpoint, [
+                $res = Http::withHeaders([
+                    'x-goog-api-key' => $apiKey,
+                    'Content-Type' => 'application/json',
+                ])->timeout(60)->post($endpoint, [
                     'contents' => [
                         [
                             'parts' => [
@@ -245,8 +250,10 @@ PROMPT;
 
         if (!$response || !$response->successful()) {
             $errText = $response ? $response->body() : ($lastException ? $lastException->getMessage() : 'Unknown error');
-            Log::error("Google Gemini AI Vision API Call Failed: " . $errText);
-            throw new RuntimeException("Google Gemini AI Vision API Call Failed: " . $errText);
+            // Redact any potential secrets from the error text
+            $sanitizedErr = preg_replace('/(key=|api_key=|x-goog-api-key[":\s]+)[A-Za-z0-9_\-]+/i', '$1[REDACTED]', $errText);
+            Log::error("Google Gemini AI Vision API Call Failed: " . $sanitizedErr);
+            throw new RuntimeException("Google Gemini AI Vision API Call Failed: " . $sanitizedErr);
         }
 
         $json = $response->json();
@@ -295,5 +302,82 @@ PROMPT;
 
         $data['ocr_engine'] = 'Google Gemini AI Vision';
         return $data;
+    }
+
+    /**
+     * Downscale and compress large receipt photos for fast, reliable AI Vision processing without timeouts.
+     */
+    protected function prepareOptimizedImage(string $fullPath): array
+    {
+        $mimeType = mime_content_type($fullPath) ?: 'image/jpeg';
+
+        // If file is already small (<= 500KB) and webp/jpeg/png, return as is
+        if (filesize($fullPath) <= 500 * 1024) {
+            return [
+                'data' => base64_encode(file_get_contents($fullPath)),
+                'mime_type' => $mimeType,
+            ];
+        }
+
+        // Otherwise downscale to max 1600px dimension and 85% JPEG quality
+        if (extension_loaded('gd')) {
+            try {
+                $imageInfo = @getimagesize($fullPath);
+                if ($imageInfo) {
+                    $width = $imageInfo[0];
+                    $height = $imageInfo[1];
+                    $type = $imageInfo[2];
+
+                    $src = match ($type) {
+                        IMAGETYPE_JPEG => @imagecreatefromjpeg($fullPath),
+                        IMAGETYPE_PNG => @imagecreatefrompng($fullPath),
+                        IMAGETYPE_WEBP => @imagecreatefromwebp($fullPath),
+                        default => null,
+                    };
+
+                    if ($src) {
+                        $maxDim = 1600;
+                        $newWidth = $width;
+                        $newHeight = $height;
+
+                        if ($width > $maxDim || $height > $maxDim) {
+                            if ($width > $height) {
+                                $newWidth = $maxDim;
+                                $newHeight = (int) round(($height / $width) * $maxDim);
+                            } else {
+                                $newHeight = $maxDim;
+                                $newWidth = (int) round(($width / $height) * $maxDim);
+                            }
+                        }
+
+                        $dst = imagecreatetruecolor($newWidth, $newHeight);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+                        ob_start();
+                        imagejpeg($dst, null, 85);
+                        $compressedData = ob_get_clean();
+
+                        imagedestroy($src);
+                        imagedestroy($dst);
+
+                        if ($compressedData) {
+                            return [
+                                'data' => base64_encode($compressedData),
+                                'mime_type' => 'image/jpeg',
+                            ];
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fallback to original image
+            }
+        }
+
+        return [
+            'data' => base64_encode(file_get_contents($fullPath)),
+            'mime_type' => $mimeType,
+        ];
     }
 }
