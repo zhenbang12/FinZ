@@ -52,9 +52,13 @@ class ReceiptController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
         ]);
 
-        $receipt = $this->ocrService->parseReceipt($request->file('image'), $request->user()->id);
-
-        return redirect()->route('receipts.show', $receipt->id)->with('success', 'Receipt scanned and parsed successfully.');
+        try {
+            $receipt = $this->ocrService->parseReceipt($request->file('image'), $request->user()->id);
+            return redirect()->route('receipts.show', $receipt->id)->with('success', 'Receipt scanned and parsed successfully.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Receipt OCR parsing failed: " . $e->getMessage());
+            return back()->with('error', 'Receipt scan failed: ' . $e->getMessage());
+        }
     }
 
     public function show(Request $request, Receipt $receipt): Response
