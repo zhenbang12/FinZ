@@ -16,7 +16,7 @@ class ReceiptOcrService
      */
     public function parseReceipt(UploadedFile $file, int $userId): Receipt
     {
-        $destinationPath = public_path('receipts');
+        $destinationPath = storage_path('app/public/receipts');
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true);
         }
@@ -25,8 +25,8 @@ class ReceiptOcrService
         $filename = time() . '_' . uniqid() . '.' . $ext;
         $file->move($destinationPath, $filename);
 
-        $imagePath = '/receipts/' . $filename;
-        $fullPath = public_path("receipts/{$filename}");
+        $imagePath = '/storage/receipts/' . $filename;
+        $fullPath = storage_path("app/public/receipts/{$filename}");
 
         $ocrData = $this->parseStrictlyWithGoogleGemini($fullPath);
 
