@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\RestrictDemoMode::class,
+        ]);
+
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'demo.restrict' => \App\Http\Middleware\RestrictDemoMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

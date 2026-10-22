@@ -3,6 +3,9 @@
     <!-- Global Navigation Progress Indicator Bar -->
     <div v-if="isNavigating" class="fixed top-0 left-0 right-0 z-50 h-1.5 skeleton-shimmer bg-amber-400"></div>
 
+    <!-- Global Demo Sandbox Banner -->
+    <DemoBanner v-if="isDemo" />
+
     <!-- Desktop Neo-Brutalist Sidebar Navigation -->
     <aside class="hidden md:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r-3 border-slate-950 z-30 p-6 justify-between">
       <div class="space-y-8">
@@ -47,7 +50,12 @@
 
       <!-- User Badge & Logout -->
       <div class="space-y-4 pt-6 border-t-2 border-slate-950">
-        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-amber-300 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a]">
+        <div
+          :class="[
+            isDemo ? 'bg-amber-300' : (user?.is_admin ? 'bg-amber-300' : 'bg-slate-100'),
+            'flex items-center justify-between p-2.5 rounded-2xl border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a]'
+          ]"
+        >
           <div class="flex items-center space-x-3 min-w-0">
             <div
               :class="[
@@ -59,8 +67,8 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-black text-slate-950 truncate">{{ user?.name || 'FinZ User' }}</p>
-              <p :class="[user?.is_admin ? 'text-slate-950 font-black' : 'text-slate-800 font-bold', 'text-[10px] uppercase truncate tracking-wider']">
-                {{ user?.is_admin ? 'Superuser' : 'Regular User' }}
+              <p :class="[user?.is_admin || isDemo ? 'text-slate-950 font-black' : 'text-slate-800 font-bold', 'text-[10px] uppercase truncate tracking-wider']">
+                {{ isDemo ? 'Demo Mode (Read-Only)' : (user?.is_admin ? 'Superuser' : 'Regular User') }}
               </p>
             </div>
           </div>
@@ -68,7 +76,7 @@
           <button
             @click="logout"
             class="p-1.5 rounded-xl bg-slate-950 text-white hover:bg-rose-600 transition-colors shrink-0 border border-slate-950"
-            title="Log Out of FinZ"
+            :title="isDemo ? 'Exit Demo Session' : 'Log Out of FinZ'"
           >
             <LogOutIcon class="w-4 h-4" />
           </button>
@@ -88,11 +96,11 @@
       <div class="flex items-center space-x-2">
         <span
           :class="[
-            user?.is_admin ? 'bg-amber-300 text-slate-950 border-2 border-slate-950' : 'bg-slate-100 text-slate-900 border-2 border-slate-950',
+            isDemo ? 'bg-amber-300 text-slate-950 border-2 border-slate-950' : (user?.is_admin ? 'bg-amber-300 text-slate-950 border-2 border-slate-950' : 'bg-slate-100 text-slate-900 border-2 border-slate-950'),
             'px-2.5 py-1 text-[10px] font-black rounded-xl uppercase tracking-wider shadow-[2px_2px_0px_#0f172a]'
           ]"
         >
-          {{ user?.is_admin ? 'Superuser' : 'MYR Ledger' }}
+          {{ isDemo ? 'Demo Sandbox' : (user?.is_admin ? 'Superuser' : 'MYR Ledger') }}
         </span>
 
         <Link
@@ -106,12 +114,13 @@
         <button
           @click="logout"
           class="p-1.5 rounded-xl bg-rose-500 border-2 border-slate-950 text-white transition-colors"
-          title="Log Out"
+          :title="isDemo ? 'Exit Demo' : 'Log Out'"
         >
           <LogOutIcon class="w-4 h-4" />
         </button>
       </div>
     </header>
+
 
     <!-- Flash Message Toast Notification -->
     <div v-if="flashSuccess" class="fixed top-4 right-4 z-50 max-w-md w-full px-4 animate-bounce-short">
@@ -198,6 +207,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
+import DemoBanner from '@/Components/DemoBanner.vue';
 import {
   LayoutDashboard as HomeIcon,
   ReceiptText as ReceiptTextIcon,
@@ -214,6 +224,7 @@ import {
 
 const page = usePage();
 
+const isDemo = computed(() => Boolean(page.props.is_demo || page.props.auth?.user?.is_demo));
 const user = computed(() => page.props.auth?.user);
 const userInitial = computed(() => (user.value?.name ? user.value.name.charAt(0).toUpperCase() : 'F'));
 const flashSuccess = computed(() => page.props.flash?.success);

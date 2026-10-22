@@ -1,118 +1,91 @@
 <?php
 
-// FinZ Web Routes - Release 1.0.3 (No More Data Wipes)
+// FinZ Web Routes - Release 1.1.0 (Demo Mode & Security Hardening)
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DemoController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/debug-recovery', function () {
-    $output = "=== DEEP DATABASE RECOVERY SEARCH ===\n";
-    $searchDirs = ['/app/database', '/app/storage', '/tmp', '/var/tmp', '/app'];
-    $foundFiles = [];
-    foreach ($searchDirs as $dir) {
-        if (is_dir($dir)) {
-            try {
-                $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
-                foreach ($rii as $file) {
-                    if ($file->isDir()) continue;
-                    $path = $file->getPathname();
-                    if (preg_match('/\.(sqlite|db|bak|sql)/i', $path)) {
-                        $size = filesize($path);
-                        $foundFiles[] = "$path ($size bytes)";
-                        try {
-                            $pdo = new \PDO("sqlite:" . $path);
-                            $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(\PDO::FETCH_COLUMN);
-                            $foundFiles[] = "   -> Tables: " . implode(', ', $tables);
-                            if (in_array('transactions', $tables)) {
-                                $txCount = $pdo->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
-                                $foundFiles[] = "   -> Transactions Count: " . $txCount;
-                            }
-                        } catch (\Throwable $t) {}
-                    }
-                }
-            } catch (\Throwable $e) {}
+// Local-only protected debug utilities
+if (app()->environment('local') && config('app.debug')) {
+    Route::get('/debug-recovery', function (Request $request) {
+        $secret = env('DEBUG_SECRET_KEY', 'local-secret');
+        if ($request->input('secret') !== $secret) {
+            abort(404);
         }
-    }
-    $output .= implode("\n", array_unique($foundFiles)) . "\n";
-    return response($output, 200)->header('Content-Type', 'text/plain');
-})->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Cookie\Middleware\EncryptCookies::class,
-    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-    \App\Http\Middleware\HandleInertiaRequests::class,
-]);
 
-Route::get('/debug-migrate', function () {
-    try {
-        $output = '';
-        
-        // 0. Deep Recovery Search for previous SQLite/database files
-        $output .= "=== DEEP DATABASE RECOVERY SEARCH ===\n";
+        $output = "=== DEEP DATABASE RECOVERY SEARCH ===\n";
         $searchDirs = ['/app/database', '/app/storage', '/tmp', '/var/tmp', '/app'];
         $foundFiles = [];
         foreach ($searchDirs as $dir) {
             if (is_dir($dir)) {
-                $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
-                foreach ($rii as $file) {
-                    if ($file->isDir()) continue;
-                    $path = $file->getPathname();
-                    if (preg_match('/\.(sqlite|db|bak|sql)/i', $path)) {
-                        $size = filesize($path);
-                        $foundFiles[] = "$path ($size bytes)";
-                        // Try querying sqlite table counts
-                        try {
-                            $pdo = new \PDO("sqlite:" . $path);
-                            $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(\PDO::FETCH_COLUMN);
-                            $foundFiles[] = "   -> Tables: " . implode(', ', $tables);
-                            if (in_array('transactions', $tables)) {
-                                $txCount = $pdo->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
-                                $foundFiles[] = "   -> Transactions Count: " . $txCount;
-                            }
-                        } catch (\Throwable $t) {}
+                try {
+                    $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+                    foreach ($rii as $file) {
+                        if ($file->isDir()) continue;
+                        $path = $file->getPathname();
+                        if (preg_match('/\.(sqlite|db|bak|sql)/i', $path)) {
+                            $size = filesize($path);
+                            $foundFiles[] = "$path ($size bytes)";
+                            try {
+                                $pdo = new \PDO("sqlite:" . $path);
+                                $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(\PDO::FETCH_COLUMN);
+                                $foundFiles[] = "   -> Tables: " . implode(', ', $tables);
+                                if (in_array('transactions', $tables)) {
+                                    $txCount = $pdo->query("SELECT COUNT(*) FROM transactions")->fetchColumn();
+                                    $foundFiles[] = "   -> Transactions Count: " . $txCount;
+                                }
+                            } catch (\Throwable $t) {}
+                        }
                     }
-                }
+                } catch (\Throwable $e) {}
             }
         }
-        $output .= implode("\n", array_unique($foundFiles)) . "\n\n";
-
-        // 1. Run status
-        \Illuminate\Support\Facades\Artisan::call('migrate:status');
-        $output .= "=== MIGRATION STATUS ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-        
-        // 2. Run migrate & seed
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        $output .= "=== MIGRATION RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-        
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-        $output .= "=== DB SEED RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
-
-        // 3. User & Record Counts
-        $output .= "=== TABLE COUNTS ===\n";
-        $output .= "Users: " . \App\Models\User::count() . "\n";
-        $output .= "Accounts: " . \App\Models\Account::count() . "\n";
-        $output .= "Transactions: " . \App\Models\Transaction::count() . "\n";
-        $output .= "Receipts: " . \App\Models\Receipt::count() . "\n";
-        
+        $output .= implode("\n", array_unique($foundFiles)) . "\n";
         return response($output, 200)->header('Content-Type', 'text/plain');
-    } catch (\Throwable $e) {
-        return response("Error: " . $e->getMessage() . "\n\nStack:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
-    }
-})->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Cookie\Middleware\EncryptCookies::class,
-    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-    \App\Http\Middleware\HandleInertiaRequests::class,
-]);
+    })->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        \App\Http\Middleware\HandleInertiaRequests::class,
+    ]);
+
+    Route::get('/debug-migrate', function (Request $request) {
+        $secret = env('DEBUG_SECRET_KEY', 'local-secret');
+        if ($request->input('secret') !== $secret) {
+            abort(404);
+        }
+
+        try {
+            $output = '';
+            \Illuminate\Support\Facades\Artisan::call('migrate:status');
+            $output .= "=== MIGRATION STATUS ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output .= "=== MIGRATION RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            $output .= "=== DB SEED RUN ===\n" . \Illuminate\Support\Facades\Artisan::output() . "\n";
+            return response($output, 200)->header('Content-Type', 'text/plain');
+        } catch (\Throwable $e) {
+            return response("Error: " . $e->getMessage(), 500)->header('Content-Type', 'text/plain');
+        }
+    })->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \App\Http\Middleware\HandleInertiaRequests::class,
+    ]);
+}
 
 Route::middleware(['web'])->group(function () {
     // Auth Routes
@@ -120,6 +93,10 @@ Route::middleware(['web'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/passkeys/login/options', [\App\Http\Controllers\PasskeyController::class, 'loginOptions']);
     Route::post('/passkeys/login', [\App\Http\Controllers\PasskeyController::class, 'login']);
+
+    // Private Link-Only Interactive Demo Routes (strictly limited and protected)
+    Route::get('/demo/{token?}', [DemoController::class, 'access'])->name('demo.access')->middleware(['throttle:30,1']);
+    Route::match(['get', 'post'], '/demo/exit', [DemoController::class, 'exit'])->name('demo.exit');
 
     // Public SmartSplit Live Group Session Routes (No Login Required)
     Route::get('/receipts/session/{token}', [ReceiptController::class, 'showGroupSession'])->name('receipts.session.show');
@@ -187,11 +164,13 @@ Route::middleware(['web'])->group(function () {
         Route::get('/settings/backup/export', [App\Http\Controllers\SettingsController::class, 'exportBackup'])->name('settings.backup.export');
         Route::post('/settings/backup/restore', [App\Http\Controllers\SettingsController::class, 'restoreBackup'])->name('settings.backup.restore');
 
-        // Superuser Account Management
-        Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/admin/users', [UserController::class, 'store'])->name('users.store');
-        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-        Route::post('/admin/users/{user}/switch', [UserController::class, 'switchUser'])->name('users.switch');
+        // Superuser Account Management (Strictly Protected by admin middleware)
+        Route::middleware(['admin'])->group(function () {
+            Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
+            Route::post('/admin/users', [UserController::class, 'store'])->name('users.store');
+            Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('users.update');
+            Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+            Route::post('/admin/users/{user}/switch', [UserController::class, 'switchUser'])->name('users.switch');
+        });
     });
 });

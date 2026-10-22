@@ -47,6 +47,18 @@
             <UsersIcon class="w-3.5 h-3.5" />
             <span>Users</span>
           </button>
+
+          <button
+            v-if="user?.is_admin"
+            @click="activeTab = 'demo'"
+            :class="[
+              activeTab === 'demo' ? 'bg-slate-950 text-amber-300 font-black shadow-[2px_2px_0px_#0f172a]' : 'text-slate-950 font-bold',
+              'px-3 sm:px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 border border-transparent'
+            ]"
+          >
+            <SparklesIcon class="w-3.5 h-3.5" />
+            <span>Demo Link</span>
+          </button>
         </div>
       </div>
 
@@ -435,6 +447,105 @@
           </div>
         </div>
       </div>
+
+      <!-- SECTION: Demo Link Management (Superuser Only) -->
+      <div v-if="activeTab === 'demo'" class="space-y-6 max-w-2xl">
+        <div class="p-6 rounded-3xl bg-white border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a] space-y-6">
+          <div class="flex items-center space-x-3 pb-4 border-b-2 border-slate-950/10">
+            <div class="w-12 h-12 rounded-2xl bg-amber-300 text-slate-950 flex items-center justify-center font-black border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
+              <SparklesIcon class="w-6 h-6 text-slate-950" />
+            </div>
+            <div>
+              <h3 class="font-black text-lg text-slate-950">Private Demo Access Link</h3>
+              <p class="text-xs text-slate-600 font-bold">Share this secure link with reviewers or stakeholders to test FinZ.</p>
+            </div>
+          </div>
+
+          <!-- Share Link Box -->
+          <div class="space-y-2">
+            <label class="block text-xs font-black text-slate-950 uppercase tracking-wider">Demo Access URL (Token Protected)</label>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input
+                type="text"
+                readonly
+                :value="demoAccessUrl"
+                class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-950 text-slate-950 text-xs font-mono font-bold select-all focus:outline-none"
+              />
+              <button
+                @click="copyDemoLink"
+                type="button"
+                class="px-4 py-3 rounded-2xl bg-slate-950 text-amber-300 hover:bg-slate-900 font-black text-xs border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <CheckIcon v-if="copiedDemoLink" class="w-4 h-4 text-emerald-400" />
+                <CopyIcon v-else class="w-4 h-4" />
+                <span>{{ copiedDemoLink ? 'Copied Link!' : 'Copy Link' }}</span>
+              </button>
+            </div>
+            <p class="text-[11px] font-bold text-slate-500">
+              Anyone with this link can access the full interactive FinZ application directly without needing an account or password.
+            </p>
+          </div>
+
+          <!-- Security Badges -->
+          <div class="space-y-3 pt-2">
+            <h4 class="text-xs font-black uppercase text-slate-950 tracking-wider">Security & Sandbox Protections</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-1">
+                <div class="flex items-center space-x-1.5 text-xs font-black text-slate-950">
+                  <ShieldCheckIcon class="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Strictly Read-Only</span>
+                </div>
+                <p class="text-[11px] font-bold text-slate-600">
+                  All create, update, and delete actions are blocked by middleware to protect demo data.
+                </p>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-1">
+                <div class="flex items-center space-x-1.5 text-xs font-black text-slate-950">
+                  <LockIcon class="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Link-Only Access</span>
+                </div>
+                <p class="text-[11px] font-bold text-slate-600">
+                  Hidden from the public login screen. Only accessible via this tokenized URL.
+                </p>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-1">
+                <div class="flex items-center space-x-1.5 text-xs font-black text-slate-950">
+                  <UsersIcon class="w-4 h-4 text-sky-600 shrink-0" />
+                  <span>Admin Shield</span>
+                </div>
+                <p class="text-[11px] font-bold text-slate-600">
+                  Superuser account switching, backups, and user management routes are strictly inaccessible.
+                </p>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] space-y-1">
+                <div class="flex items-center space-x-1.5 text-xs font-black text-slate-950">
+                  <DatabaseIcon class="w-4 h-4 text-fuchsia-600 shrink-0" />
+                  <span>Pre-Seeded Data</span>
+                </div>
+                <p class="text-[11px] font-bold text-slate-600">
+                  Pre-configured with 5 accounts, 16+ transactions, SmartSplit receipts, and subscriptions.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Test Link -->
+          <div class="pt-2 flex items-center justify-between border-t-2 border-slate-950">
+            <span class="text-xs font-black text-slate-700">Open demo in separate window</span>
+            <a
+              :href="demoAccessUrl"
+              target="_blank"
+              class="px-4 py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-950 font-black text-xs border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] flex items-center gap-1.5"
+            >
+              <ExternalLinkIcon class="w-3.5 h-3.5" />
+              <span>Launch Demo Preview</span>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Create / Edit User Modal -->
@@ -544,6 +655,10 @@ import {
   Download as DownloadIcon,
   Upload as UploadIcon,
   X as XIcon,
+  Sparkles as SparklesIcon,
+  Check as CheckIcon,
+  Copy as CopyIcon,
+  ExternalLink as ExternalLinkIcon,
 } from 'lucide-vue-next';
 
 function base64urlToBuffer(base64url) {
@@ -576,6 +691,29 @@ const activeTab = ref('preferences');
 const showUserModal = ref(false);
 const userModalMode = ref('create');
 const selectedUserId = ref(null);
+
+const demoAccessUrl = computed(() => {
+  if (page.props.demo_access_url) return page.props.demo_access_url;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}/demo?token=finz-preview-access`;
+});
+const copiedDemoLink = ref(false);
+
+const copyDemoLink = async () => {
+  try {
+    await navigator.clipboard.writeText(demoAccessUrl.value);
+    copiedDemoLink.value = true;
+    setTimeout(() => {
+      copiedDemoLink.value = false;
+    }, 2500);
+  } catch (e) {
+    // fallback for environments without clipboard API
+    copiedDemoLink.value = true;
+    setTimeout(() => {
+      copiedDemoLink.value = false;
+    }, 2500);
+  }
+};
 
 const passkeyRegistering = ref(false);
 const passkeyError = ref(null);

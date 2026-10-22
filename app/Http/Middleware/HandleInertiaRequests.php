@@ -35,11 +35,24 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $isDemo = (bool) (
+            $request->session()->get('is_demo_session') ||
+            ($request->user() && $request->user()->email === config('demo.user_email', 'demo@finz.app'))
+        );
+
+        $demoToken = config('demo.token', env('DEMO_ACCESS_TOKEN', 'finz-preview-access'));
+        $demoAccessUrl = url('/demo' . (!empty($demoToken) ? '?token=' . $demoToken : ''));
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    ...$request->user()->toArray(),
+                    'is_demo' => $isDemo,
+                ] : null,
             ],
+            'is_demo' => $isDemo,
+            'demo_access_url' => $demoAccessUrl,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

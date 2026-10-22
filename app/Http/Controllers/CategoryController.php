@@ -31,8 +31,8 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        if ($category->user_id !== null && $category->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized category action.');
+        if ($category->user_id === null || $category->user_id !== $request->user()->id) {
+            abort(403, 'System default categories cannot be modified.');
         }
 
         $validated = $request->validate([
@@ -49,8 +49,8 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category)
     {
-        if ($category->user_id !== null && $category->user_id !== $request->user()->id) {
-            abort(403, 'System categories cannot be deleted.');
+        if ($category->user_id === null || $category->user_id !== $request->user()->id) {
+            abort(403, 'System default categories cannot be deleted.');
         }
 
         $category->delete();
