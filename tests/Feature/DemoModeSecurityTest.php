@@ -39,6 +39,16 @@ class DemoModeSecurityTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_demo_access_straight_without_token_when_token_is_not_configured(): void
+    {
+        config(['demo.token' => null]);
+        $response = $this->get('/demo');
+        $response->assertRedirect('/');
+        $response->assertSessionHas('is_demo_session', true);
+        $this->assertAuthenticated();
+        $this->assertEquals('demo@finz.app', auth()->user()->email);
+    }
+
     public function test_demo_link_authenticates_demo_user_with_valid_token(): void
     {
         $response = $this->get('/demo?token=finz-preview-access');

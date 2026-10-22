@@ -27,8 +27,7 @@ class DemoController extends Controller
             abort(404, 'Demo mode is currently disabled.');
         }
 
-        // 2. Strict Link-Only Token Authentication
-        $expectedToken = config('demo.token', env('DEMO_ACCESS_TOKEN', 'finz-preview-access'));
+        $expectedToken = config('demo.token');
         $providedToken = $token ?: $request->query('token');
 
         if (!empty($expectedToken)) {

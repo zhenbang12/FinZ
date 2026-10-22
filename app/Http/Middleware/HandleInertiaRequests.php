@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
             ($request->user() && $request->user()->email === config('demo.user_email', 'demo@finz.app'))
         );
 
-        $demoToken = config('demo.token', env('DEMO_ACCESS_TOKEN', 'finz-preview-access'));
+        $demoToken = config('demo.token');
         $demoAccessUrl = url('/demo' . (!empty($demoToken) ? '?token=' . $demoToken : ''));
 
         return [

@@ -17,10 +17,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | When set, users must provide this token via query parameter or URL path
-    | (e.g. /demo?token=finz-preview-access) to access the demo.
+    | (e.g. /demo?token=your-token). If set to null or empty, /demo can be
+    | accessed directly without a token.
     |
     */
-    'token' => env('DEMO_ACCESS_TOKEN', 'finz-preview-access'),
+    'token' => env('DEMO_ACCESS_TOKEN', null),
 
     /*
     |--------------------------------------------------------------------------
